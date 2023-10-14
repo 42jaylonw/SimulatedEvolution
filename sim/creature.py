@@ -5,9 +5,12 @@ from sim.sim_space import SimSpace
 CONFIG = toml.load("./config/simulation.toml")
 
 
-class Producer:
-    rgb = CONFIG['Producer']['rgb']
+# todo： [
+#  abstract position,
+#  vision
+#  ]
 
+class Creature:
     def __init__(self, sim: SimSpace):
         self.sim = sim
         self.position = np.random.randint(sim.ground_size - 1)
@@ -16,7 +19,14 @@ class Producer:
         pass
 
 
-class Consumer(Producer):
+class Producer(Creature):
+    rgb = CONFIG['Producer']['rgb']
+
+    def step(self):
+        pass
+
+
+class Consumer(Creature):
     rgb = CONFIG['Consumer']['rgb']
 
     def __init__(self, sim: SimSpace):
@@ -24,6 +34,7 @@ class Consumer(Producer):
         self.speed = CONFIG['Consumer']['init_speed']
 
     def step(self):
+        other_creatures = self.sim.creatures
         d_x = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
         d_y = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
         self.position[0] = np.clip(self.position[0] + d_x, 0, self.sim.ground_size[0] - 1)
