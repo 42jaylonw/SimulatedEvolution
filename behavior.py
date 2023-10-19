@@ -190,6 +190,7 @@ def if_neuron_triggers(properties, input_sensors):
 
 
 # create_active_map takes in a creature's genome and active sensors to create an adjacency map of network
+# the key is the input sensor and the value is a list of pairs, with format (output index, connection strength)
 def create_active_map(genome, active_sensors):
     num_inputs = 16
     num_outputs = 12
@@ -202,7 +203,13 @@ def create_active_map(genome, active_sensors):
     for k in genome:
         # define genome connection in adjacency map
         input_node = hex_to_int(extract_hex_sub(k, 0, 2))
-        ret[input_node] = [hex_to_int(extract_hex_sub(k, 2, 4))]
+        conn_str = byte_to_float(extract_hex_sub(k, 4, 6))
+        if input_node not in ret:
+            ret[input_node] = []
+        # to_add is pair with format (output index, connection strength)
+        to_add = [hex_to_int(extract_hex_sub(k, 2, 4)), conn_str]
+        print(to_add)
+        ret[input_node].append(to_add)
 
     # filter internal connections with no output
     # TODO: create function to filter internal connections with no meaningful output
@@ -210,20 +217,18 @@ def create_active_map(genome, active_sensors):
     return ret
 
 
-
-
 # creature_behavior_output takes in a creature and returns an array of output probabilities
 def creature_behavior_output(properties, genome):
     # change numbers as program expands
     num_inputs = 16
-    num_outputs = 12
+    num_outputs = 9
     num_internal_neurons = 3
 
     # create temp variables
     active_sensors = []
 
-    output_sensors = [0.0] * num_outputs
-    internal_neurons = [0.0] * num_internal_neurons
+    output_sensors = [0.0] * (num_outputs + 1)
+    internal_neurons = [0.0] * (num_internal_neurons + 1)
 
     # this loop lists all sensory signals
     for j in range(len(genome)):
@@ -241,26 +246,26 @@ def creature_behavior_output(properties, genome):
     # active_map is a key-value data structure where the key is the input sensor
     # the value is the list of adjacent output nodes (can include input sensor)
     active_map = create_active_map(genome, input_sensors)
-
+    print(active_map)
     # sort so internal neurons are processed last
 
     # use active_map and input_sensors to calculate sensory input in neural network
-    for key, value in sorted(active_map.items()):
-        for k in value:     # for each output attached to the input
+    for input_index, output_list in sorted(active_map.items()):
+        for key, conn_str in output_list:     # for each output attached to the input
             # split based on internal or output
-            if k < num_internal_neurons:        # output is internal
-                if key < num_inputs:
-                    internal_neurons[k - 1] += input_sensors[key - 1]   # add signal to internal
+            if key <= num_internal_neurons:        # output is internal
+                if input_index < num_inputs:
+                    internal_neurons[key - 1] += (input_sensors[input_index] * conn_str)  # add signal to internal
                 else:
-                    internal_neurons[k - 1] += internal_neurons[key - num_inputs - 1]
+                    internal_neurons[key - 1] += (internal_neurons[input_index - num_inputs - 1] * conn_str)
             else:                               # output is action
-                if key < num_inputs:
-                    output_sensors[k - num_internal_neurons] += input_sensors[key - 1]
+                if input_index < num_inputs:
+                    output_sensors[key - num_internal_neurons] += (input_sensors[input_index] * conn_str)
                 else:
-                    output_sensors[k - num_internal_neurons] += internal_neurons[key - num_inputs - 1]
+                    output_sensors[key - num_internal_neurons] += (internal_neurons[input_index - num_inputs] * conn_str)
 
     # calculate outputs
-    return output_sensors
+    return numpy.tanh(output_sensors)
 
     # get weight of connection by extracting byte from genome
         #conn_str = byte_to_float(extract_hex_sub(genome[j], 4, 8))
@@ -269,21 +274,23 @@ def creature_behavior_output(properties, genome):
         #output = hex_to_int(extract_hex_sub(genome[j], 2, 3))
 
 
-
-
-
-
-
 creature_genome = []
 
 # x coord, y coord, last moved direction (0 is north, 1 is east, 2 is south, 3 is west)
 # blocked forwards, back, left, right (boolean), population count in sensory range (integer),
 # TODO: when merge with main branch, use the grid size in simulation.toml instead of hard coded
-creature_properties = [12, 34, 0, 0, 0, 0, 0, 1]
+creature_properties = [22, 24, 2, 0, 1, 0, 1, 1]
 
-creature_genome = ['060cd9ad', '1201e473', '090c5454', '0c09ecb4']
+creature_genome = []
+for i in range(4):
+    creature_genome.append(generate_genome())
 
 print(creature_genome)
 
-print(creature_behavior_output(creature_properties, creature_genome))
+output_names = ['move to food', 'move forward', 'move random', 'move backwards', 'move left', 'move right',
+                'move north', 'move east', 'move south', 'move west']
 
+output_vec = creature_behavior_output(creature_properties, creature_genome)
+
+for f in range(len(output_vec)):
+    print(output_names[f], ": ", output_vec[f])
