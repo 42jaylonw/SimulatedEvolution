@@ -25,6 +25,7 @@ class SimSpace:
         self.grid_size = np.array(CONFIG['SimSpace']['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
 
+
     def reset(self, creatures):
         self.creatures = creatures
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
@@ -46,6 +47,7 @@ class SimSpace:
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
+        
         cv2.imshow(str(self.__class__.__name__),
                    cv2.cvtColor(np.uint8(cv2.resize(render_img, CONFIG['SimSpace']['visual_size'],
                                                     interpolation=cv2.INTER_NEAREST) * 255),
@@ -53,6 +55,26 @@ class SimSpace:
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
         time.sleep(CONFIG['SimSpace']['time_step'])
+    
+    # return the starting position of all organism
+    def get_creature_positions(self):
+        return [(creature.grid_pos, creature.rgb) for creature in self.creatures]   
+    
+    # Update the state of the simulation grid  
+    def update_simulator(self):
+        # gather the data of all organisms
+        positionData = []
+        for creature in self.creatures:
+            # current position of organism
+            oldPos = creature.grid_pos
+            # update movement
+            creature.step()
+            # new position of organism
+            newPos = creature.grid_pos
+            self.layers[LAYER_DICT[type(creature)], newPos[0], newPos[1]] = 1.
+            positionData.append((oldPos, newPos, creature.rgb))
+        return positionData
+
 
     def get_near_info(self, center, length):
         """

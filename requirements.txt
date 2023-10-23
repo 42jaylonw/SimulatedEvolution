@@ -2,3 +2,4 @@ toml
 numpy
 opencv-python
 nicegui
+flask
