@@ -1,0 +1,25 @@
+{% extends "base.html" %} 
+<!-- Tab name -->
+{% block title %}Simulated Evolution Home{% endblock %}
+
+{% block content %}
+
+<!-- Simulator controls -->
+<button type="button" onclick="runSimulation()">Simulate</button>
+<button type="button" onclick="pauseSimulation()">Pause Simulation</button>
+<!-- Simulation Area-->
+<div class="square-container">
+    <div class="sim-container">
+    </div>
+</div>
+
+{% endblock %}
+
+<!-- Scripts -->
+{% block script %}
+<!-- Grid functions -->
+<script
+type = "text/javascript"
+src = "{{ url_for('static', filename='grid.js') }}"
+></script>
+{% endblock script %}

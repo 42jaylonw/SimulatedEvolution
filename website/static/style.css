@@ -1,0 +1,35 @@
+/* background color for webpage */
+body{
+    background-color: salmon;
+}
+
+/* Style for upper menu buttons */
+.nav-item{
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Style for simulation */
+.square-container{
+  display: flex;
+  justify-content: center;
+  background-color: gray;
+  max-width: 800px;
+  max-height: 800px;
+  margin: 0 auto;
+
+}
+  
+.sim-container {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  justify-content: center;
+  grid-template-columns: repeat(50, 1fr);
+  background-color: black;
+}
+.grid-item {
+  border: 0;
+  min-width: 16px;
+  min-height: 16px;
+}
