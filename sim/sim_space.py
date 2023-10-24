@@ -56,26 +56,6 @@ class SimSpace:
             exit()
         time.sleep(CONFIG['SimSpace']['time_step'])
     
-    # return the starting position of all organism
-    def get_creature_positions(self):
-        return [(creature.grid_pos, creature.rgb) for creature in self.creatures]   
-    
-    # Update the state of the simulation grid  
-    def update_simulator(self):
-        # gather the data of all organisms
-        positionData = []
-        for creature in self.creatures:
-            # current position of organism
-            oldPos = creature.grid_pos
-            # update movement
-            creature.step()
-            # new position of organism
-            newPos = creature.grid_pos
-            self.layers[LAYER_DICT[type(creature)], newPos[0], newPos[1]] = 1.
-            positionData.append((oldPos, newPos, creature.rgb))
-        return positionData
-
-
     def get_near_info(self, center, length):
         """
         :param:
@@ -112,3 +92,68 @@ class SimSpace:
             output[layer_id, out_x_start:out_x_end, out_y_start:out_y_end
             ] = layer_info[x_start:x_end, y_start:y_end]
         return output
+
+    
+    def is_pos_layer_empty(self, layer, pos):
+        """
+            :param:
+                layer: which layer should be checked - specifically, the object type will be checked to determine the layer
+                    example: if a Consumer object is passed in, check layer id (LAYER_DICT=Consumer)
+                pos: (x, y) position on the grid to check if empty/occupied
+            :return:
+                    True: there is no object on specified layer at pos
+                    False: there is an object on specified layer at pos
+        """
+        assert not self.is_pos_out_of_bounds(pos), "pos must be within bounds of sim space grid"
+
+        # Debug: Print CONSUMER layer grid -----------------
+        #np.set_printoptions(threshold=np.inf)
+        #np.set_printoptions(linewidth=150)
+        #print(self.layers[LAYER_DICT[type(layer)]])
+        #print("Checking pos" + str(pos) + ": " + str(self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]]))
+        # --------------------------------------------------
+
+        if self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]] == 0:
+            return True
+        else:
+            return False
+    
+    def update_pos_layer(self, layer, pos, val=0):
+        """
+            :param:
+                layer: which layer should be updated
+                pos: (x, y) position on the grid layer to update the value of
+                val: value that the layer at pos is updated to. default value sets it to empty (0)
+        """
+        assert val == 0 or val == 1, "val must be 0 or 1!"
+        if not self.is_pos_out_of_bounds(pos):
+            self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]] = val
+
+    def is_pos_out_of_bounds(self, pos):
+        """
+            :param:
+                pos: (x, y) position that is checked to see if outside of bounds
+            :return:
+                True: pos is outside of bounds of sim space
+                False: pos is within bounds of sim space
+        """
+        return pos[0] < 0 or pos[0] > self.grid_size[0] - 1 or pos[1] < 0 or pos[1] > self.grid_size[1] - 1
+    
+    # return the starting position of all organism
+    def get_creature_positions(self):
+        return [(creature.grid_pos, creature.rgb) for creature in self.creatures]   
+    
+    # Update the state of the simulation grid  
+    def update_simulator(self):
+        # gather the data of all organisms
+        positionData = []
+        for creature in self.creatures:
+            # current position of organism
+            oldPos = creature.grid_pos
+            # update movement
+            creature.step()
+            # new position of organism
+            newPos = creature.grid_pos
+            self.layers[LAYER_DICT[type(creature)], newPos[0], newPos[1]] = 1.
+            positionData.append((oldPos, newPos, creature.rgb))
+        return positionData
