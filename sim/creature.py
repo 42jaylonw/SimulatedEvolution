@@ -1,8 +1,6 @@
 import toml
 import numpy as np
 
-CONFIG = toml.load("./config/simulation.toml")
-
 
 # todo： [
 #  abstract position,
@@ -12,6 +10,7 @@ CONFIG = toml.load("./config/simulation.toml")
 class Creature:
     def __init__(self, sim):
         self.sim = sim
+        self.rgb = sim.cfg[self.__class__.__name__]['rgb']
         self.position = np.random.randint(sim.grid_size)
 
     def step(self):
@@ -24,18 +23,16 @@ class Creature:
 
 
 class Producer(Creature):
-    rgb = CONFIG['Producer']['rgb']
 
     def step(self):
         pass
 
 
 class Consumer(Creature):
-    rgb = CONFIG['Consumer']['rgb']
 
     def __init__(self, sim):
         super().__init__(sim)
-        self.speed = CONFIG['Consumer']['init_speed']
+        self.speed = sim.cfg['Consumer']['init_speed']
 
     def step(self):
         other_creatures = self.sim.creatures
