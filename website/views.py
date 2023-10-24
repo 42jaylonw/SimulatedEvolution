@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, jsonify, request
-import random_moving
-import numpy as np
+import games.sprint_0_random.random_moving as random_moving
 views = Blueprint('views', __name__)
 
 # simulator for user session
