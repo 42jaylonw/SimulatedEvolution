@@ -6,7 +6,8 @@
     ```
 3. run sim
    ```commandline
-   python random_moving.py
+   python -m games.sprint_0_random.random_moving
+   python -m games.sprint_1_prototype.go_right
    ```
    press `q` to quit the simulation
 

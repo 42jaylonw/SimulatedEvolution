@@ -1,12 +1,9 @@
 import time
 
-import toml
 import cv2
 import numpy as np
 
 from sim.creature import Producer, Consumer
-
-CONFIG = toml.load("./config/simulation.toml")
 
 LAYER_DICT = {
     # grid : 0
@@ -17,12 +14,14 @@ NUM_LAYERS = len(LAYER_DICT) + 1
 
 
 class SimSpace:
+    cfg: dict
     layers: np.ndarray
     grid: np.ndarray
 
-    def __init__(self):
+    def __init__(self, cfg):
+        self.cfg = cfg
         self.creatures = None
-        self.grid_size = np.array(CONFIG['SimSpace']['grid_size'])
+        self.grid_size = np.array(self.cfg['SimSpace']['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
 
 
@@ -35,8 +34,11 @@ class SimSpace:
         # make a priority
         for creature in self.creatures:
             creature.step()
-        self.refresh_state()
+        #self.refresh_state()
+        #print(self.layers)
 
+    # NOTE TO OTHERS: I had to move the handling of the layer values to the creatures themselves as they move
+    # Instead of calling this function, the creatures call update_pos_layer() instead on their position + layer
     def refresh_state(self):
         for creature in self.creatures:
             # if isinstance(creature, Producer):
@@ -49,13 +51,13 @@ class SimSpace:
             render_img[creature.grid_pos] = creature.rgb
         
         cv2.imshow(str(self.__class__.__name__),
-                   cv2.cvtColor(np.uint8(cv2.resize(render_img, CONFIG['SimSpace']['visual_size'],
+                   cv2.cvtColor(np.uint8(cv2.resize(render_img, self.cfg['SimSpace']['visual_size'],
                                                     interpolation=cv2.INTER_NEAREST) * 255),
                                 cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
-        time.sleep(CONFIG['SimSpace']['time_step'])
-    
+        time.sleep(self.cfg['SimSpace']['time_step'])
+
     def get_near_info(self, center, length):
         """
         :param:
@@ -93,7 +95,6 @@ class SimSpace:
             ] = layer_info[x_start:x_end, y_start:y_end]
         return output
 
-    
     def is_pos_layer_empty(self, layer, pos):
         """
             :param:
@@ -117,7 +118,6 @@ class SimSpace:
             return True
         else:
             return False
-    
     def update_pos_layer(self, layer, pos, val=0):
         """
             :param:

@@ -1,11 +1,21 @@
+import toml
 from sim.sim_space import SimSpace
 from sim.creature import Producer, Consumer
 
+<<<<<<< HEAD:random_moving.py
 # Create a simulation space with a specified number of consumers and producers
 def generate_sim(num_producers=1, num_consumers=1):
     # create simulation space
     sim = SimSpace()
     # create list of producers and consumers
+=======
+
+def run_random_moving():
+    num_producers = 1000
+    num_consumers = 1
+    config = toml.load("games/sprint_0_random/config.toml")
+    sim = SimSpace(config)
+>>>>>>> 20093e6cba8cab2c13e75f822d538838249a2e5f:games/sprint_0_random/random_moving.py
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
     # add organisms to simulation space
