@@ -246,11 +246,12 @@ def creature_behavior_output(properties, genome):
     # active_map is a key-value data structure where the key is the input sensor
     # the value is the list of adjacent output nodes (can include input sensor)
     active_map = create_active_map(genome, input_sensors)
+    active_map = sorted(active_map.items())
     print(active_map)
     # sort so internal neurons are processed last
 
     # use active_map and input_sensors to calculate sensory input in neural network
-    for input_index, output_list in sorted(active_map.items()):
+    for input_index, output_list in active_map:
         for key, conn_str in output_list:     # for each output attached to the input
             # split based on internal or output
             if key <= num_internal_neurons:        # output is internal
@@ -267,11 +268,54 @@ def creature_behavior_output(properties, genome):
     # calculate outputs
     return numpy.tanh(output_sensors)
 
-    # get weight of connection by extracting byte from genome
-        #conn_str = byte_to_float(extract_hex_sub(genome[j], 4, 8))
 
-        # find output sensor from genome
-        #output = hex_to_int(extract_hex_sub(genome[j], 2, 3))
+# movement_output takes in the list of output_sensors and properties of the organism
+# the output is an array of size 4 with each coordinating for N E S W
+def movement_output(output_sensors, properties):
+    output_index = numpy.array(output_sensors).argmax()
+    output_array = [0, 0, 0, 0]
+    match output_index:
+        # move forward
+        case 1:
+            output_array[properties[2]] = 1
+            return output_array
+        # move random
+        case 2:
+            random_index = random.randint(0, 3)
+            output_array[random_index] = 1
+            return output_array
+        # move backwards
+        case 3:
+            output_array[(properties[2] + 2) % 4] = 1
+            return output_array
+        # move left
+        case 4:
+            output_array[(properties[2] + 3) % 4] = 1
+            return output_array
+        # move right
+        case 5:
+            output_array[(properties[2] + 1) % 4] = 1
+            return output_array
+        # move north
+        case 6:
+            output_array[0] = 1
+            return output_array
+        # move east
+        case 7:
+            output_array[1] = 1
+            return output_array
+        # move south
+        case 8:
+            output_array[2] = 1
+            return output_array
+        # move west
+        case 9:
+            output_array[3] = 1
+            return output_array
+        # default case (move forward)
+        case _:
+            output_array[properties[2]] = 1
+            return output_array
 
 
 creature_genome = []
@@ -294,3 +338,6 @@ output_vec = creature_behavior_output(creature_properties, creature_genome)
 
 for f in range(len(output_vec)):
     print(output_names[f], ": ", output_vec[f])
+
+print(movement_output(output_vec, creature_properties))
+
