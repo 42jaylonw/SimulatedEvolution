@@ -1,14 +1,14 @@
+import toml
 from sim.sim_space import SimSpace
 from sim.creature import Producer, Consumer
 
 
 def run_random_moving():
-    num_producers = 1000
-    num_consumers = 1
-    sim = SimSpace()
-    producers = [Producer(sim) for _ in range(num_producers)]
+    num_consumers = 30
+    config = toml.load("games/sprint_1_prototype/config.toml")
+    sim = SimSpace(config)
     consumers = [Consumer(sim) for _ in range(num_consumers)]
-    sim.reset(producers + consumers)
+    sim.reset(consumers)
 
     for _ in range(1000):
         # render the simulation image
