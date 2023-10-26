@@ -6,12 +6,21 @@ import numpy as np
 #  abstract position,
 #  vision
 #  ]
+class Coorps:
+    pass
+
 
 class Creature:
+    position: np.ndarray
+    energy: float
+    mass: float
+    metabolism: float
+
     def __init__(self, sim):
         self.sim = sim
         self.rgb = sim.cfg[self.__class__.__name__]['rgb']
         self.position = np.random.randint(sim.grid_size)
+        self.energy = 0.
 
     def step(self):
         pass
@@ -19,7 +28,7 @@ class Creature:
     @property
     def grid_pos(self):
         assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
-        return int(self.position[1]), int(self.sim.grid_size[1] - self.position[0] - 1)
+        return int(self.sim.grid_size[1] - self.position[1]), int(self.position[0] - 1)
 
 
 class Producer(Creature):
@@ -43,11 +52,11 @@ class Consumer(Creature):
         move_dir = np.random.randint(0, 4)
         move_dirs = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         self.action_move(move_dirs[move_dir])
-        #d_x = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
-        #d_y = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
-        #self.position[0] = np.clip(self.position[0] + d_x, 0, self.sim.grid_size[0] - 1)
-        #self.position[1] = np.clip(self.position[1] + d_y, 0, self.sim.grid_size[1] - 1)
-    
+        # d_x = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
+        # d_y = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
+        # self.position[0] = np.clip(self.position[0] + d_x, 0, self.sim.grid_size[0] - 1)
+        # self.position[1] = np.clip(self.position[1] + d_y, 0, self.sim.grid_size[1] - 1)
+
     def action_move(self, direction):
         """
             :Desc: Moves the creature by 1 space in the direction specified by the direction parameter.
@@ -61,10 +70,10 @@ class Consumer(Creature):
             d_y = 1
         elif direction[1]:
             # Right
-            d_x = 1 
+            d_x = 1
         elif direction[2]:
             # Down
-            d_y = -1 
+            d_y = -1
         elif direction[3]:
             # Left
             d_x = -1

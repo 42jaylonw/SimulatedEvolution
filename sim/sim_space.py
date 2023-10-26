@@ -24,7 +24,6 @@ class SimSpace:
         self.grid_size = np.array(self.cfg['SimSpace']['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
 
-
     def reset(self, creatures):
         self.creatures = creatures
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
@@ -34,8 +33,8 @@ class SimSpace:
         # make a priority
         for creature in self.creatures:
             creature.step()
-        #self.refresh_state()
-        #print(self.layers)
+        # self.refresh_state()
+        # print(self.layers)
 
     # NOTE TO OTHERS: I had to move the handling of the layer values to the creatures themselves as they move
     # Instead of calling this function, the creatures call update_pos_layer() instead on their position + layer
@@ -49,7 +48,7 @@ class SimSpace:
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
-        
+
         cv2.imshow(str(self.__class__.__name__),
                    cv2.cvtColor(np.uint8(cv2.resize(render_img, self.cfg['SimSpace']['visual_size'],
                                                     interpolation=cv2.INTER_NEAREST) * 255),
@@ -108,16 +107,17 @@ class SimSpace:
         assert not self.is_pos_out_of_bounds(pos), "pos must be within bounds of sim space grid"
 
         # Debug: Print CONSUMER layer grid -----------------
-        #np.set_printoptions(threshold=np.inf)
-        #np.set_printoptions(linewidth=150)
-        #print(self.layers[LAYER_DICT[type(layer)]])
-        #print("Checking pos" + str(pos) + ": " + str(self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]]))
+        # np.set_printoptions(threshold=np.inf)
+        # np.set_printoptions(linewidth=150)
+        # print(self.layers[LAYER_DICT[type(layer)]])
+        # print("Checking pos" + str(pos) + ": " + str(self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]]))
         # --------------------------------------------------
 
         if self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]] == 0:
             return True
         else:
             return False
+
     def update_pos_layer(self, layer, pos, val=0):
         """
             :param:
@@ -138,12 +138,13 @@ class SimSpace:
                 False: pos is within bounds of sim space
         """
         return pos[0] < 0 or pos[0] > self.grid_size[0] - 1 or pos[1] < 0 or pos[1] > self.grid_size[1] - 1
-    
+
     # return the starting position of all organism
     def get_creature_positions(self):
-        return [(creature.grid_pos, creature.rgb) for creature in self.creatures]   
-    
-    # Update the state of the simulation grid  
+        return [(creature.grid_pos, creature.rgb) for creature in self.creatures]
+
+        # Update the state of the simulation grid
+
     def update_simulator(self):
         # gather the data of all organisms
         positionData = []
