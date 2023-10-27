@@ -9,4 +9,4 @@ rgb = [0.5, 0.96, 0.0]
 [Consumer]
 rgb = [0.96, 0.5, 0.0]
 init_speed = 1
-
+sensory_range = 5
