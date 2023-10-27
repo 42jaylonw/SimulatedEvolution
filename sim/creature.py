@@ -36,8 +36,6 @@ class Producer(Creature):
     def step(self):
         pass
 
-    def sense
-
 
 class Consumer(Creature):
 
@@ -73,14 +71,16 @@ class Consumer(Creature):
         curr_pos = self.grid_pos
 
         if prev_move[0]:
-			next_move[0] = curr_pos[0]
+            next_move[0] = curr_pos[0]
             next_move[1] = curr_pos[1] + 1
         elif prev_move[1]:
             next_move[0] = curr_pos[0] + 1
             next_move[1] = curr_pos[1]
+
         elif prev_move[2]:
             next_move[0] = curr_pos[0]
             next_move[1] = curr_pos[1] - 1
+
         elif prev_move[3]:
             next_move[0] = curr_pos[0] - 1
             next_move[1] = curr_pos[1]
@@ -88,11 +88,10 @@ class Consumer(Creature):
             return False
         return True
 
-    
     def blockedBack(self, layer, prev_move):
-        """ 
+        """
         Returns if the creature's backward direction is blocked. Returns 0 if free.
-        Orientation based on last moved direction. 
+        Orientation based on last moved direction.
 
         Checks on the layer specified.
         """
@@ -115,9 +114,9 @@ class Consumer(Creature):
         return True
 
     def blockedLeft(self, layer, prev_move):
-        """ 
+        """
         Returns if the creature's relative left direction is blocked. Returns 0 if free.
-        Orientation based on last moved direction. 
+        Orientation based on last moved direction.
 
         Checks on the layer specified.
         """
@@ -141,13 +140,13 @@ class Consumer(Creature):
         return True
 
     def blockedRight(self, prev_move):
-        """ 
+        """
         Returns if the creature's relative right direction is blocked. Returns 0 if free.
-        Orientation based on last moved direction. 
+        Orientation based on last moved direction.
 
         Checks on the layer specified.
         """
-        
+
         curr_pos = self.grid_pos
 
         if prev_move[0]:
@@ -160,13 +159,13 @@ class Consumer(Creature):
             next_move[0] = curr_pos[0] - 1
             next_move[1] = curr_pos[1]
         elif prev_move[3]:
-            next_move[0] = curr_pos[0] 
+            next_move[0] = curr_pos[0]
             next_move[1] = curr_pos[1] + 1
         if self.sim.is_pos_layer_empty(layer, next_move):
             return False
         return True
-    
-    def senseNearest():
+
+    def senseNearest(self):
         move_dir = np.random.randint(0, 4)
         move_dirs = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         self.action_move(move_dirs[move_dir])
