@@ -2,11 +2,7 @@ import toml
 import numpy as np
 
 
-# todo： [
-#  abstract position,
-#  vision
-#  ]
-class Coorps:
+class Corpse:
     pass
 
 

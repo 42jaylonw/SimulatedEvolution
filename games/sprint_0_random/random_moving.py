@@ -2,6 +2,7 @@ import toml
 from sim.sim_space import SimSpace
 from sim.creature import Producer, Consumer
 
+
 # Create a simulation space with a specified number of consumers and producers
 def generate_sim(num_producers=1, num_consumers=1):
     # create list of producers and consumers
@@ -13,13 +14,16 @@ def generate_sim(num_producers=1, num_consumers=1):
     sim.reset(producers + consumers)
     return sim
 
+
 # Get the initial positions of all active creatures in a specified sim space
 def get_initial_positions(sim):
     return sim.get_creature_positions()
 
+
 # Allow all creatures to move, then return their new positions
 def get_updated_positions(sim):
     return sim.update_simulator()
+
 
 def run_random_moving():
     num_producers = 2
@@ -43,8 +47,6 @@ def run_random_moving():
         # print("grid_info: \n", grid_info)
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
-
-
 
 
 if __name__ == '__main__':
