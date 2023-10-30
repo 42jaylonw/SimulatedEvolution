@@ -28,7 +28,7 @@ function createGrid(total)
 //Create an outline for each cell that the mouse hovers over
 function showCellBorder(cell)
 {
-    cell.style.border = "1px solid black";
+    cell.style.border = "3px solid black";
     console.log("Entering " + cell.id);
 }
 
