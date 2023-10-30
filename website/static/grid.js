@@ -19,9 +19,25 @@ function createGrid(total)
         //Add style classification for cell
         cell.classList.add('grid-item');
         cell.style.backgroundColor = "white";
+        //Add event listeners to each cell
+        cell.onmouseenter = function() {showCellBorder(this)};
+        cell.onmouseleave = function() {hideCellBorder(this)};
     }
 }
 
+//Create an outline for each cell that the mouse hovers over
+function showCellBorder(cell)
+{
+    cell.style.border = "1px solid black";
+    console.log("Entering " + cell.id);
+}
+
+//Remove outline when mouse leaves cell
+function hideCellBorder(cell)
+{
+    cell.style.border = "none";
+    console.log("Leaving " + cell.id);
+}
 //Edit a specified cell
 function editCell(cellId, color)
 {

@@ -14,9 +14,10 @@ body{
   display: flex;
   justify-content: center;
   background-color: gray;
-  max-width: 800px;
-  max-height: 800px;
+  max-width: 900vw;
+  max-height: 900vh;
   margin: 0 auto;
+  margin-top: 1vw;
 
 }
   

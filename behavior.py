@@ -238,16 +238,16 @@ def creature_behavior_output(properties, genome):
             # sensory neuron can trigger a connection, add to list
             active_sensors += [temp]
 
-    print(active_sensors)
+    print("active sensors: ", active_sensors)
     # handle all active sensors
     input_sensors = if_neuron_triggers(properties, active_sensors)
 
-    print(input_sensors)
+    print("input sensors: ", input_sensors)
     # active_map is a key-value data structure where the key is the input sensor
     # the value is the list of adjacent output nodes (can include input sensor)
     active_map = create_active_map(genome, input_sensors)
     active_map = sorted(active_map.items())
-    print(active_map)
+    print("active map: ", active_map)
     # sort so internal neurons are processed last
 
     # use active_map and input_sensors to calculate sensory input in neural network

@@ -4,15 +4,21 @@
 
 {% block content %}
 
-<!-- Simulator controls -->
-<button type="button" onclick="runSimulation()">Simulate</button>
-<button type="button" onclick="pauseSimulation()">Pause Simulation</button>
-<!-- Simulation Area-->
-<div class="square-container">
-    <div class="sim-container">
+
+<div class="row">
+    <!-- Simulator controls -->
+    <div class="col-sm-4">
+        <button type="button" onclick="runSimulation()">Simulate</button>
+        <button type="button" onclick="pauseSimulation()">Pause Simulation</button>
+    </div>
+    <!-- Simulation Area-->
+    <div class="col-sm-4">
+        <div class="square-container">
+            <div class="sim-container">
+            </div>
+        </div>
     </div>
 </div>
-
 {% endblock %}
 
 <!-- Scripts -->
