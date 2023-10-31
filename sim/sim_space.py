@@ -13,16 +13,6 @@ LAYER_DICT = {
 NUM_LAYERS = len(LAYER_DICT) + 1
 
 
-def show_layer(layer):
-    cv2.imshow(str('debug layer'),
-               cv2.cvtColor(np.uint8(cv2.resize(layer.reshape(50,50,1) * np.array([1,1,1]).reshape(1,1,3), (500, 500),
-                                                interpolation=cv2.INTER_NEAREST) * 255),
-                            cv2.COLOR_RGB2BGR))
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        exit()
-
-
-
 class SimSpace:
     cfg: dict
     layers: np.ndarray
@@ -99,7 +89,7 @@ class SimSpace:
 
         # Place the slice into the output array
         # todo: make it not reverse
-        output = np.ones((NUM_LAYERS, *output_size)) * np.array([1] + [0]*(NUM_LAYERS-1)).reshape(NUM_LAYERS, 1, 1)
+        output = np.ones((NUM_LAYERS, *output_size)) * np.array([1] + [0] * (NUM_LAYERS - 1)).reshape(NUM_LAYERS, 1, 1)
         for layer_id in range(NUM_LAYERS):
             layer_info = self.layers[layer_id]
             output[layer_id, out_x_start:out_x_end, out_y_start:out_y_end
@@ -169,3 +159,13 @@ class SimSpace:
             newPos = creature.grid_pos
             positionData.append((oldPos, newPos, creature.rgb))
         return positionData
+
+    def show_layer(self, layer_id):
+        cv2.imshow(str(f'Layer ID {layer_id}'),
+                   cv2.cvtColor(np.uint8(cv2.resize(self.layers[layer_id].reshape(
+                       *self.grid_size, 1) * np.array([1, 1, 1]).reshape(1, 1, 3),
+                                                    self.cfg['SimSpace']['visual_size'],
+                                                    interpolation=cv2.INTER_NEAREST) * 255),
+                                cv2.COLOR_RGB2BGR))
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            exit()

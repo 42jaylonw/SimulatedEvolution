@@ -3,9 +3,8 @@ import cv2
 import time
 import numpy as np
 
-from sim.sim_space import SimSpace, show_layer
+from sim.sim_space import SimSpace
 from sim.creature import Creature, Producer, Consumer
-
 
 SAVE_ZONE_RGB = [0.5647, 0.9333, 0.5647]
 PASS_CONDITION = 0.5
@@ -65,7 +64,7 @@ def run_random_moving():
         # print("consumers_info: \n", consumers_info)
         survivors = sim.get_survivors()
         print(f'pass rate: {len(survivors) / len(sim.creatures)}')
-        show_layer(sim.layers[2])
+        sim.show_layer(2)
 
 
 if __name__ == '__main__':
