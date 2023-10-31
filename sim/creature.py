@@ -41,10 +41,9 @@ class Consumer(Creature):
 
     def step(self):
         other_creatures = self.sim.creatures
-        d_x = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
-        d_y = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
-        self.position[0] = np.clip(self.position[0] + d_x, 0, self.sim.grid_size[0] - 1)
-        self.position[1] = np.clip(self.position[1] + d_y, 0, self.sim.grid_size[1] - 1)
+        move_dir = np.random.randint(0, 4)
+        move_dirs = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+        self.action_move(move_dirs[move_dir])
 
     def sensePopulation(self):
         """ Obtains population count (of consumers) within sensory range. """
@@ -198,14 +197,8 @@ class Consumer(Creature):
             d_x, d_y = 0, 0
             target_pos = self.position
 
-        # Update the creature's old position to be empty at this layer
-        # (POTENTIAL FUTURE BUG - THIS MIGHT CAUSE ISSUES IF OTHER CREATURE MOVES IN IMMEDIATELY AFTER)
-        self.sim.update_pos_layer(self, self.position, 0)
-
         # Update the creature's position to the target position
         # The clipping shouldn't be necessary, but just in case - clip the new position to be within bounds of sim space
         self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
         self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
 
-        # Update the sim space's grid to be "occupied" at the layer/pos moved to by this creature
-        self.sim.update_pos_layer(self, self.position, 1)

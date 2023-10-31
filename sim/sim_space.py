@@ -13,6 +13,16 @@ LAYER_DICT = {
 NUM_LAYERS = len(LAYER_DICT) + 1
 
 
+def show_layer(layer):
+    cv2.imshow(str('debug layer'),
+               cv2.cvtColor(np.uint8(cv2.resize(layer.reshape(50,50,1) * np.array([1,1,1]).reshape(1,1,3), (500, 500),
+                                                interpolation=cv2.INTER_NEAREST) * 255),
+                            cv2.COLOR_RGB2BGR))
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        exit()
+
+
+
 class SimSpace:
     cfg: dict
     layers: np.ndarray
@@ -33,14 +43,16 @@ class SimSpace:
         # make a priority
         for creature in self.creatures:
             creature.step()
-        # self.refresh_state()
+        self.refresh_state()
         # print(self.layers)
 
     # NOTE TO OTHERS: I had to move the handling of the layer values to the creatures themselves as they move
     # Instead of calling this function, the creatures call update_pos_layer() instead on their position + layer
     def refresh_state(self):
+        self.layers[:] = 0.
         for creature in self.creatures:
             # if isinstance(creature, Producer):
+            # clear all
             creature_pos = creature.grid_pos
             self.layers[LAYER_DICT[type(creature)], creature_pos[0], creature_pos[1]] = 1.
 
@@ -87,7 +99,7 @@ class SimSpace:
 
         # Place the slice into the output array
         # todo: make it not reverse
-        output = np.ones((NUM_LAYERS, *output_size)) * np.array([1, 0, 0]).reshape(3, 1, 1)
+        output = np.ones((NUM_LAYERS, *output_size)) * np.array([1] + [0]*(NUM_LAYERS-1)).reshape(NUM_LAYERS, 1, 1)
         for layer_id in range(NUM_LAYERS):
             layer_info = self.layers[layer_id]
             output[layer_id, out_x_start:out_x_end, out_y_start:out_y_end
@@ -155,6 +167,5 @@ class SimSpace:
             creature.step()
             # new position of organism
             newPos = creature.grid_pos
-            self.layers[LAYER_DICT[type(creature)], newPos[0], newPos[1]] = 1.
             positionData.append((oldPos, newPos, creature.rgb))
         return positionData

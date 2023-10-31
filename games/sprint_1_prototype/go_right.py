@@ -3,8 +3,9 @@ import cv2
 import time
 import numpy as np
 
-from sim.sim_space import SimSpace
+from sim.sim_space import SimSpace, show_layer
 from sim.creature import Creature, Producer, Consumer
+
 
 SAVE_ZONE_RGB = [0.5647, 0.9333, 0.5647]
 PASS_CONDITION = 0.5
@@ -45,7 +46,7 @@ class GoRightSim(SimSpace):
 
 
 def run_random_moving():
-    num_consumers = 300
+    num_consumers = 3
     config = toml.load("games/sprint_1_prototype/config.toml")
     sim = GoRightSim(config)
     consumers = [Consumer(sim) for _ in range(num_consumers)]
@@ -64,6 +65,7 @@ def run_random_moving():
         # print("consumers_info: \n", consumers_info)
         survivors = sim.get_survivors()
         print(f'pass rate: {len(survivors) / len(sim.creatures)}')
+        show_layer(sim.layers[2])
 
 
 if __name__ == '__main__':
