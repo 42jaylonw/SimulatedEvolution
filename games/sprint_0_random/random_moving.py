@@ -2,6 +2,7 @@ import toml
 from sim.sim_space import SimSpace
 from sim.creature import Producer, Consumer
 from sim.wall import Wall
+from sim.emitter import LightSource, HeatSource
 
 # Create a simulation space with a specified number of consumers and producers
 def generate_sim(num_producers=1, num_consumers=1):
@@ -35,8 +36,10 @@ def run_random_moving():
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
     walls = [Wall(sim, [i,i]) for i in range(sim.grid_size[0])]
-    # add organisms to simulation space
-    sim.reset(producers + consumers, walls)
+    walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 10, 2), LightSource(sim, [(sim.grid_size[0] // 2) - 5, (sim.grid_size[1] // 2) + 5], 25, 1)]
+    # add organisms, walls, emitters to simulation space
+    sim.reset(producers + consumers, walls, emitters)
 
     for _ in range(1000):
         # render the simulation image
@@ -50,7 +53,8 @@ def run_random_moving():
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
         #sim.show_layer(1)
-        sim.show_layer(3)
+        sim.show_layer(5)
+        sim.show_layer(6)
         #sim.show_layer(3)
         #sim.print_layer("Wall")
 

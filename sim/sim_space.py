@@ -4,18 +4,8 @@ import cv2
 import numpy as np
 
 from sim.creature import Producer, Consumer
-
-LAYER_DICT = {
-    # grid : 0
-    "Producer": 1,
-    "Consumer": 2,
-    "Wall": 3,
-    "Elevation": 4,
-    "Light": 5,
-    "Temperature": 6
-}
-NUM_LAYERS = len(LAYER_DICT) + 1
-
+from sim.emitter import LightSource, HeatSource
+from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
 
 class SimSpace:
     cfg: dict
@@ -26,17 +16,27 @@ class SimSpace:
         self.cfg = cfg
         self.creatures = None
         self.walls = None
+        self.emitters = None
         self.grid_size = np.array(self.cfg['SimSpace']['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
 
-    def reset(self, creatures, walls):
+    def reset(self, creatures, walls, emitters):
         self.creatures = creatures
         self.walls = walls
+        self.emitters = emitters
         #self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
 
     def step(self):
         assert self.creatures is not None, "Reset first!"
+
+        # Refresh emitters
+        self.layers[LAYER_DICT["Light"]] = 0.
+        self.layers[LAYER_DICT["Temperature"]] = 0.
+        for emitter in self.emitters:
+            emitter.step()
+            #emitter.move_to_pos(emitter.position + [0, -1])
+
         # make a priority
         for creature in self.creatures:
             creature.step()
@@ -148,7 +148,7 @@ class SimSpace:
     def is_pos_out_of_bounds(self, pos):
         """
             :param:
-                pos: (x, y) position that is checked to see if outside of bounds
+                pos: [x, y] position that is checked to see if outside of bounds
             :return:
                 True: pos is outside of bounds of sim space
                 False: pos is within bounds of sim space
