@@ -208,7 +208,6 @@ def create_active_map(genome, active_sensors):
             ret[input_node] = []
         # to_add is pair with format (output index, connection strength)
         to_add = [hex_to_int(extract_hex_sub(k, 2, 4)), conn_str]
-        print(to_add)
         ret[input_node].append(to_add)
 
     # filter internal connections with no output
@@ -231,23 +230,23 @@ def creature_behavior_output(properties, genome):
     internal_neurons = [0.0] * (num_internal_neurons + 1)
 
     # this loop lists all sensory signals
-    for j in range(len(genome)):
+    for gene in genome:
         # get input sensor from genome
-        temp = hex_to_int(extract_hex_sub(genome[j], 0, 2))
+        temp = hex_to_int(extract_hex_sub(gene, 0, 2))
         if temp <= num_inputs:      # if temp is sensory
             # sensory neuron can trigger a connection, add to list
             active_sensors += [temp]
 
-    print("active sensors: ", active_sensors)
+    # print(active_sensors)
     # handle all active sensors
     input_sensors = if_neuron_triggers(properties, active_sensors)
 
-    print("input sensors: ", input_sensors)
+    # print(input_sensors)
     # active_map is a key-value data structure where the key is the input sensor
     # the value is the list of adjacent output nodes (can include input sensor)
     active_map = create_active_map(genome, input_sensors)
     active_map = sorted(active_map.items())
-    print("active map: ", active_map)
+    print(active_map)
     # sort so internal neurons are processed last
 
     # use active_map and input_sensors to calculate sensory input in neural network
@@ -318,6 +317,92 @@ def movement_output(output_sensors, properties):
             return output_array
 
 
+# clean_genome takes in a genome string and ensures all values are within allotted ranges
+def clean_genome(genome):
+    # change numbers as program expands
+    num_inputs = 16
+    num_outputs = 9
+    num_internal_neurons = 3
+
+    ret = []
+    for gene in genome:
+        new_gene = ""
+        # first byte (input)
+        to_add = extract_hex_sub(gene, 0, 2)
+        to_add = hex_to_int(to_add) % (num_inputs + num_internal_neurons)
+        # this is a temporary fix, since 00 is reserved for food detected
+        if to_add == 0:
+            to_add = 1
+        new_gene += int_to_hex(to_add)
+        # second byte
+        to_add = extract_hex_sub(gene, 2, 4)
+        to_add = hex_to_int(to_add) % (num_outputs + num_internal_neurons)
+        # this is a temporary fix, since 00 is reserved for move to food
+        if to_add == 0:
+            to_add = 1
+        new_gene += int_to_hex(to_add)
+        # third and fourth byte (these values are converted and do not need to be modulo'd)
+        new_gene += extract_hex_sub(gene, 4, 8)
+        ret.append(new_gene)
+
+    return ret
+
+
+# mutate_genome takes in a genome string and a float mutation probability
+# if the probability succeeds, that particular string in the genome will mutate a random bit
+def mutate_genome(genome, mutation_chance):
+    for g in range(len(genome)):
+        # gene mutates
+        if random.randint(0, 100) / 100.0 <= mutation_chance:
+            mutate_index = random.randint(0, len(genome[g]) - 1)
+            mutate_char = int_to_hex(random.randint(0, 15))
+            temp = list(genome[g])
+    return genome
+
+
+# reproduce_genome takes in two genome strings and an integer to declare which mode we are using
+# 0 is full string genome, 1 is segmented genome, 2 is random genome
+# the function returns a new genome that is a descendant of the two given as parameters
+def reproduce_genome(parent1, parent2, mode):
+    assert len(parent1) == len(parent2)
+    new_gen = []
+    if mode == 0:       # full string genome
+        for gene in range(len(parent1)):
+            # parent 1
+            if gene % 2 == 0:
+                new_gen.append(parent1[gene])
+            # parent 2
+            else:
+                new_gen.append(parent2[gene])
+        return new_gen
+    elif mode == 1:     # segmented string genome
+        parent_ind = 0;     # parent_ind keeps track of which parent the segment is being taken from
+        parent_list = [parent1, parent2]
+        for gene in range(len(parent1)):    # for each gene in the genome
+            to_add = ""
+            start_ind = 0;
+            end_ind = 2;
+            for seg in range(4):    # for each segment in the gene
+                to_add += (extract_hex_sub(parent_list[parent_ind][gene], start_ind, end_ind))
+                # increment vars
+                parent_ind = (parent_ind + 1) % 2
+                start_ind += 2
+                end_ind += 2
+            new_gen.append(to_add)
+        return new_gen
+    elif mode == 2:     # random string genome
+        for gene in range(len(parent1)):
+            to_add = ""
+            for char in range(len(parent1[0])):
+                parent_index = random.randint(1, 8) % 2
+                if parent_index == 0:
+                    to_add += (extract_hex_sub(parent1[gene], char, char + 1))
+                elif parent_index == 1:
+                    to_add += (extract_hex_sub(parent2[gene], char, char + 1))
+            new_gen.append(to_add)
+        return new_gen
+
+
 creature_genome = []
 
 # x coord, y coord, last moved direction (0 is north, 1 is east, 2 is south, 3 is west)
@@ -325,11 +410,8 @@ creature_genome = []
 # TODO: when merge with main branch, use the grid size in simulation.toml instead of hard coded
 creature_properties = [22, 24, 2, 0, 1, 0, 1, 1]
 
-creature_genome = []
 for i in range(4):
     creature_genome.append(generate_genome())
-
-print(creature_genome)
 
 output_names = ['move to food', 'move forward', 'move random', 'move backwards', 'move left', 'move right',
                 'move north', 'move east', 'move south', 'move west']
@@ -340,4 +422,3 @@ for f in range(len(output_vec)):
     print(output_names[f], ": ", output_vec[f])
 
 print(movement_output(output_vec, creature_properties))
-
