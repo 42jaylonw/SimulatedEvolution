@@ -16,6 +16,7 @@ class Creature:
         self.sim = sim
         self.rgb = sim.cfg[self.__class__.__name__]['rgb']
         self.position = np.random.randint(sim.grid_size)
+        self.sim.increment_pos_layer(self.__class__.__name__, self.position, 1)
         self.energy = 0.
 
     def step(self):
@@ -30,6 +31,8 @@ class Creature:
 class Producer(Creature):
 
     def step(self):
+        if self.sim.is_pos_layer_empty("Producer", self.position):
+            self.sim.increment_pos_layer("Producer", self.position, 1)
         pass
 
 
@@ -192,13 +195,19 @@ class Consumer(Creature):
 
         target_pos = self.position + (d_x, d_y)
 
-        if self.sim.is_pos_out_of_bounds(target_pos) or not self.sim.is_pos_layer_empty(self, target_pos):
+        if self.sim.is_pos_out_of_bounds(target_pos) or not self.sim.is_pos_layer_empty("Producer", target_pos):
             # Space is occupied: no change in position can be made in this direction
+            if not self.sim.is_pos_out_of_bounds(target_pos) and not self.sim.is_pos_layer_empty("Wall", target_pos):
+                print("PRODUCER blocking movement")
             d_x, d_y = 0, 0
             target_pos = self.position
+
+        self.sim.increment_pos_layer("Consumer", self.position, -1) # WIP - DELETE THIS IF REFRESH IN SIMSPACE USED INSTEAD
 
         # Update the creature's position to the target position
         # The clipping shouldn't be necessary, but just in case - clip the new position to be within bounds of sim space
         self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
         self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
+
+        self.sim.increment_pos_layer("Consumer", self.position, 1) # WIP DELETE THIS IF REFRESH IN SIMSPACE USED INSTEAD
 

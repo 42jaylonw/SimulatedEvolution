@@ -7,8 +7,12 @@ from sim.creature import Producer, Consumer
 
 LAYER_DICT = {
     # grid : 0
-    Producer: 1,
-    Consumer: 2
+    "Producer": 1,
+    "Consumer": 2,
+    "Wall": 3,
+    "Elevation": 4,
+    "Light": 5,
+    "Temperature": 6
 }
 NUM_LAYERS = len(LAYER_DICT) + 1
 
@@ -23,28 +27,30 @@ class SimSpace:
         self.creatures = None
         self.grid_size = np.array(self.cfg['SimSpace']['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
+        self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
 
     def reset(self, creatures):
         self.creatures = creatures
-        self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
+        #self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
 
     def step(self):
         assert self.creatures is not None, "Reset first!"
         # make a priority
         for creature in self.creatures:
             creature.step()
-        self.refresh_state()
+        #self.refresh_state() # WIP- ADD THIS BACK IF WE KEEP THIS APPROACH
         # print(self.layers)
 
-    # NOTE TO OTHERS: I had to move the handling of the layer values to the creatures themselves as they move
-    # Instead of calling this function, the creatures call update_pos_layer() instead on their position + layer
+
     def refresh_state(self):
         self.layers[:] = 0.
         for creature in self.creatures:
             # if isinstance(creature, Producer):
             # clear all
             creature_pos = creature.grid_pos
-            self.layers[LAYER_DICT[type(creature)], creature_pos[0], creature_pos[1]] = 1.
+            #self.layers[LAYER_DICT[type(creature)], creature_pos[0], creature_pos[1]] = 1.
+            self.layers[LAYER_DICT["Producer"], creature_pos[0], creature_pos[1]] += 1.
+            self.layers[LAYER_DICT["Consumer"], creature_pos[0], creature_pos[1]] += 1.
 
     def render(self):
         render_img = np.copy(self.grid_rgb)
@@ -99,7 +105,7 @@ class SimSpace:
     def is_pos_layer_empty(self, layer, pos):
         """
             :param:
-                layer: which layer should be checked - specifically, the object type will be checked to determine the layer
+                layer: the name of which layer should be checked
                     example: if a Consumer object is passed in, check layer id (LAYER_DICT=Consumer)
                 pos: (x, y) position on the grid to check if empty/occupied
             :return:
@@ -108,28 +114,32 @@ class SimSpace:
         """
         assert not self.is_pos_out_of_bounds(pos), "pos must be within bounds of sim space grid"
 
-        # Debug: Print CONSUMER layer grid -----------------
-        # np.set_printoptions(threshold=np.inf)
-        # np.set_printoptions(linewidth=150)
-        # print(self.layers[LAYER_DICT[type(layer)]])
-        # print("Checking pos" + str(pos) + ": " + str(self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]]))
-        # --------------------------------------------------
-
-        if self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]] == 0:
+        if self.layers[LAYER_DICT[layer], pos[0], pos[1]] == 0:
             return True
         else:
             return False
 
-    def update_pos_layer(self, layer, pos, val=0):
+    def set_pos_layer(self, layer, pos, val=0):
         """
             :param:
                 layer: which layer should be updated
                 pos: (x, y) position on the grid layer to update the value of
-                val: value that the layer at pos is updated to. default value sets it to empty (0)
+                val: value that the layer at pos is set to. default value sets it to empty (0)
         """
-        assert val == 0 or val == 1, "val must be 0 or 1!"
+        #assert val == 0 or val == 1, "val must be 0 or 1!"
         if not self.is_pos_out_of_bounds(pos):
-            self.layers[LAYER_DICT[type(layer)], pos[0], pos[1]] = val
+            self.layers[LAYER_DICT[layer], pos[0], pos[1]] = val
+
+    def increment_pos_layer(self, layer, pos, val=0):
+        """
+            :param:
+                layer: which layer should be incremented
+                pos: (x, y) position on the grid layer to update the value of
+                val: value to change the int/float at the layer position. can be negative
+        """
+        #assert val == 0 or val == 1, "val must be 0 or 1!"
+        if not self.is_pos_out_of_bounds(pos):
+            self.layers[LAYER_DICT[layer], pos[0], pos[1]] += val
 
     def is_pos_out_of_bounds(self, pos):
         """
@@ -169,3 +179,10 @@ class SimSpace:
                                 cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
+
+    def print_layer(self, layer_id):
+        # Debug: Print CONSUMER layer grid -----------------
+        np.set_printoptions(threshold=np.inf)
+        np.set_printoptions(linewidth=150)
+        print(self.layers[LAYER_DICT[layer_id]])
+        # --------------------------------------------------

@@ -45,7 +45,7 @@ class GoRightSim(SimSpace):
 
 
 def run_random_moving():
-    num_consumers = 3
+    num_consumers = 500
     config = toml.load("games/sprint_1_prototype/config.toml")
     sim = GoRightSim(config)
     consumers = [Consumer(sim) for _ in range(num_consumers)]

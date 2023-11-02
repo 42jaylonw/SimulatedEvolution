@@ -26,17 +26,18 @@ def get_updated_positions(sim):
 
 
 def run_random_moving():
-    num_producers = 2
-    num_consumers = 3
+    num_producers = 1000
+    num_consumers = 50
     # create simulation space
-    sim = SimSpace()
+    config = toml.load("games/sprint_0_random/config.toml")
+    sim = SimSpace(config)
     # create list of producers and consumers
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
     # add organisms to simulation space
     sim.reset(producers + consumers)
 
-    for _ in range(10):
+    for _ in range(1000):
         # render the simulation image
         sim.step()
         sim.render()
@@ -47,6 +48,11 @@ def run_random_moving():
         # print("grid_info: \n", grid_info)
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
+        #sim.show_layer(1)
+        sim.show_layer(1)
+        #sim.show_layer(3)
+        #sim.print_layer("Consumer")
+
 
 
 if __name__ == '__main__':
