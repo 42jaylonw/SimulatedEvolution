@@ -25,12 +25,14 @@ class SimSpace:
     def __init__(self, cfg):
         self.cfg = cfg
         self.creatures = None
+        self.walls = None
         self.grid_size = np.array(self.cfg['SimSpace']['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
 
-    def reset(self, creatures):
+    def reset(self, creatures, walls):
         self.creatures = creatures
+        self.walls = walls
         #self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
 
     def step(self):
@@ -38,10 +40,10 @@ class SimSpace:
         # make a priority
         for creature in self.creatures:
             creature.step()
-        #self.refresh_state() # WIP- ADD THIS BACK IF WE KEEP THIS APPROACH
+        #self.refresh_state()
         # print(self.layers)
 
-
+    # Unused as of the new layer rework
     def refresh_state(self):
         self.layers[:] = 0.
         for creature in self.creatures:
@@ -56,6 +58,8 @@ class SimSpace:
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
+        for wall in self.walls:
+            render_img[wall.grid_pos] = wall.rgb
 
         cv2.imshow(str(self.__class__.__name__),
                    cv2.cvtColor(np.uint8(cv2.resize(render_img, self.cfg['SimSpace']['visual_size'],
