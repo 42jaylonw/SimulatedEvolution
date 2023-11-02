@@ -3,7 +3,8 @@ import time
 import cv2
 import numpy as np
 
-from sim.creature import Producer, Consumer
+# from sim.creatures.comsumer import Consumer
+# from sim.creatures.producer import Producer
 
 LAYER_DICT = {
     # grid : 0
@@ -23,24 +24,34 @@ class SimSpace:
     grid: np.ndarray
 
     def __init__(self, cfg):
-        self.cfg = cfg
+        self.cfg = cfg[self.__class__.__name__]
         self.creatures = None
-        self.grid_size = np.array(self.cfg['SimSpace']['grid_size'])
+        self.grid_size = np.array(self.cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
+        self.num_generations = self.cfg['num_generation']
+        self.max_steps = self.cfg['max_steps']
 
     def reset(self, creatures):
+        self.time_steps = 0
+        self.layers[:] = 0
         self.creatures = creatures
-        #self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
+        for creature in self.creatures:
+            creature.reset()
 
     def step(self):
         assert self.creatures is not None, "Reset first!"
         # make a priority
         for creature in self.creatures:
             creature.step()
-        #self.refresh_state() # WIP- ADD THIS BACK IF WE KEEP THIS APPROACH
+        # self.refresh_state() # WIP- ADD THIS BACK IF WE KEEP THIS APPROACH
         # print(self.layers)
+        self.time_steps += 1
+        if self.time_steps >= self.max_steps:
+            self.end_generation()
 
+    def end_generation(self):
+        pass
 
     def refresh_state(self):
         self.layers[:] = 0.
@@ -48,7 +59,7 @@ class SimSpace:
             # if isinstance(creature, Producer):
             # clear all
             creature_pos = creature.grid_pos
-            #self.layers[LAYER_DICT[type(creature)], creature_pos[0], creature_pos[1]] = 1.
+            # self.layers[LAYER_DICT[type(creature)], creature_pos[0], creature_pos[1]] = 1.
             self.layers[LAYER_DICT["Producer"], creature_pos[0], creature_pos[1]] += 1.
             self.layers[LAYER_DICT["Consumer"], creature_pos[0], creature_pos[1]] += 1.
 
@@ -58,12 +69,12 @@ class SimSpace:
             render_img[creature.grid_pos] = creature.rgb
 
         cv2.imshow(str(self.__class__.__name__),
-                   cv2.cvtColor(np.uint8(cv2.resize(render_img, self.cfg['SimSpace']['visual_size'],
+                   cv2.cvtColor(np.uint8(cv2.resize(render_img, self.cfg['visual_size'],
                                                     interpolation=cv2.INTER_NEAREST) * 255),
                                 cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
-        time.sleep(self.cfg['SimSpace']['time_step'])
+        time.sleep(self.cfg['time_step'])
 
     def get_near_info(self, center, length):
         """
@@ -126,7 +137,7 @@ class SimSpace:
                 pos: (x, y) position on the grid layer to update the value of
                 val: value that the layer at pos is set to. default value sets it to empty (0)
         """
-        #assert val == 0 or val == 1, "val must be 0 or 1!"
+        # assert val == 0 or val == 1, "val must be 0 or 1!"
         if not self.is_pos_out_of_bounds(pos):
             self.layers[LAYER_DICT[layer], pos[0], pos[1]] = val
 
@@ -137,7 +148,7 @@ class SimSpace:
                 pos: (x, y) position on the grid layer to update the value of
                 val: value to change the int/float at the layer position. can be negative
         """
-        #assert val == 0 or val == 1, "val must be 0 or 1!"
+        # assert val == 0 or val == 1, "val must be 0 or 1!"
         if not self.is_pos_out_of_bounds(pos):
             self.layers[LAYER_DICT[layer], pos[0], pos[1]] += val
 
@@ -174,7 +185,7 @@ class SimSpace:
         cv2.imshow(str(f'Layer ID {layer_id}'),
                    cv2.cvtColor(np.uint8(cv2.resize(self.layers[layer_id].reshape(
                        *self.grid_size, 1) * np.array([1, 1, 1]).reshape(1, 1, 3),
-                                                    self.cfg['SimSpace']['visual_size'],
+                                                    self.cfg['visual_size'],
                                                     interpolation=cv2.INTER_NEAREST) * 255),
                                 cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord('q'):

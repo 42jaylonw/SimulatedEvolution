@@ -349,27 +349,28 @@ def reproduce_genome(parent1, parent2, mode):
 
 
 class GeneticAlgorithm:
+    genome: list
+
     def __init__(self,
                  num_observations,
                  num_actions,
-                 genome=-1,
+                 genome=None,
+                 num_genomes=4,
                  num_neurons=4,
                  reproduce_mode=1,
                  mutation_rate=0.2):
         self.num_observations = num_observations
         self.num_actions = num_actions
+        self.num_genomes = num_genomes
         self.num_neurons = num_neurons
         self.reproduce_mode = reproduce_mode
         self.mutation_rate = mutation_rate
 
         self.neurons = np.zeros(self.num_neurons + 1)
-        if genome == -1:
-            self.genome = [generate_genome() for _ in range(4)]
+        if genome is None:
+            self.genome = [generate_genome() for _ in range(self.num_genomes)]
         else:
             self.genome = genome
-
-    def update_state(self, state):
-        self.state = state
 
     def predict(self, obs):
         active_sensors = []
@@ -405,7 +406,7 @@ class GeneticAlgorithm:
                                 self.neurons[input_index - self.num_observations] * conn_str)
 
         out_vec = np.tanh(out_vec)
-        action = np.array(movement_output(out_vec, self.state))
+        action = np.array(movement_output(out_vec, obs))
         return action
 
     def reproduce_genome(self, other):

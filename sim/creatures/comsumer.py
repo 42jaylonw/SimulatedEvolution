@@ -1,20 +1,20 @@
 import numpy as np
 from . import Creature
 
+MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+
 
 class Consumer(Creature):
-
-    def __init__(self, sim):
-        super().__init__(sim)
+    def __init__(self, sim, genome=None):
+        super().__init__(sim, genome)
         self.speed = sim.cfg['Consumer']['init_speed']
         self.curr_action = [0, 0]
         self.last_action = [0, 0]
 
     def step(self):
-        other_creatures = self.sim.creatures
-        move_dir = np.random.randint(0, 4)
-        move_dirs = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-        self.action_move(move_dirs[move_dir])
+        obs = self.get_observation()
+        action = self.behavior_system.predict(obs)
+        self.action_move(MOVE_DICT[action])
 
     def get_observation(self):
         observation = np.zeros(self.cfg['num_observations'])
@@ -43,6 +43,8 @@ class Consumer(Creature):
         observation[14] = ...
         # current location west
         observation[15] = ...
+
+        return observation
 
     def sensePopulation(self):
         """ Obtains population count (of consumers) within sensory range. """

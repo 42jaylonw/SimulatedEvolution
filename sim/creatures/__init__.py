@@ -14,14 +14,14 @@ class Creature:
     size: float
     metabolism: float
 
-    def __init__(self, sim):
+    def __init__(self, sim, genome=None):
         self.cfg = sim.cfg[self.__class__.__name__]
         self.sim = sim
 
         self.behavior_system = GeneticAlgorithm(
             num_observations=self.cfg['num_observations'],
             num_actions=self.cfg['num_actions'],
-            genome=self.cfg['genome'],
+            genome=genome,
             num_neurons=self.cfg['num_neurons'],
             reproduce_mode=self.cfg['reproduce_mode'],
             mutation_rate=self.cfg['mutation_rate'])
@@ -33,6 +33,9 @@ class Creature:
         self.sim.increment_pos_layer(self.__class__.__name__, self.position, 1)
         self.position = np.random.randint(self.sim.grid_size)
         self.energy = 0.
+
+    def reset(self):
+        self._init_properties()
 
     def step(self):
         pass

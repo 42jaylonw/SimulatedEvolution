@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 from sim.sim_space import SimSpace
-from sim.creature import Creature, Producer, Consumer
+from sim.creatures.comsumer import Consumer
 
 SAVE_ZONE_RGB = [0.5647, 0.9333, 0.5647]
 PASS_CONDITION = 0.5
@@ -16,6 +16,13 @@ class GoRightSim(SimSpace):
 
         # set save zone to green
         self.grid_rgb[:, int(self.grid_size[0] * PASS_CONDITION):, :] = SAVE_ZONE_RGB
+        self.population = self.cfg['population']
+        self.reset([Consumer(self) for _ in range(self.population)])
+
+    def end_generation(self):
+        survivors = self.get_survivors()
+
+        self.reset()
 
     def get_survivors(self):
         survivors = []
@@ -23,6 +30,17 @@ class GoRightSim(SimSpace):
             if creatures.position[0] >= int(self.grid_size[0] * PASS_CONDITION):
                 survivors.append(creatures)
         return survivors
+
+    def generate_offsprings(self, parent_pool):
+        offsprings = []
+        for i in range(self.population):
+            p0_id = np.random.randint(len(parent_pool))
+            p1_id = np.random.choice([p_id for p_id in range(len(parent_pool))
+                                   if p_id != p0_id])
+            p0 = parent_pool[p0_id]
+            p1 = parent_pool[p1_id]
+            child_genome = p0.behavior_system.reproduce_genome(p1.genome)
+            offsprings.append(Consumer(self, child_genome))
 
     def render(self):
         render_img = np.copy(self.grid_rgb)
@@ -45,11 +63,9 @@ class GoRightSim(SimSpace):
 
 
 def run_random_moving():
-    num_consumers = 500
     config = toml.load("games/sprint_1_prototype/config.toml")
+    population = config['SimSpace']['population']
     sim = GoRightSim(config)
-    consumers = [Consumer(sim) for _ in range(num_consumers)]
-    sim.reset(consumers)
 
     for _ in range(1000):
         # render the simulation image
