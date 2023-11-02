@@ -191,10 +191,7 @@ def if_neuron_triggers(properties, input_sensors):
 
 # create_active_map takes in a creature's genome and active sensors to create an adjacency map of network
 # the key is the input sensor and the value is a list of pairs, with format (output index, connection strength)
-def create_active_map(genome, active_sensors):
-    num_inputs = 16
-    num_outputs = 12
-    num_internal_neurons = 3
+def create_active_map(genome):
 
     # create dict to be returned
     ret = {}
@@ -302,6 +299,8 @@ def mutate_genome(genome, mutation_chance):
             mutate_index = random.randint(0, len(genome[g]) - 1)
             mutate_char = int_to_hex(random.randint(0, 15))
             temp = list(genome[g])
+            temp[mutate_index] = mutate_char
+            genome[g] = str(temp)
     return genome
 
 
