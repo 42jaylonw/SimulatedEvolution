@@ -163,12 +163,12 @@ def sensor_switch_handler(properties, sensor):
             grid_height = 50
             dist_west = properties[0]
             return (dist_west / grid_height) * (dist_west / grid_height)
-        # border distance south
+        # current location south
         case 15:
             grid_height = 50
             dist_north = properties[1]
             return (dist_north / grid_height) * (dist_north / grid_height)
-        # border distance west
+        # current location west
         case 16:
             grid_height = 50
             dist_west = grid_height - properties[0]

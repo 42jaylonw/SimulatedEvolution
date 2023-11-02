@@ -263,18 +263,107 @@ def movement_output(output_sensors, properties):
             return output_array
 
 
+def clean_genome(genome):
+    # change numbers as program expands
+    num_inputs = 16
+    num_outputs = 9
+    num_internal_neurons = 3
+
+    ret = []
+    for gene in genome:
+        new_gene = ""
+        # first byte (input)
+        to_add = extract_hex_sub(gene, 0, 2)
+        to_add = hex_to_int(to_add) % (num_inputs + num_internal_neurons)
+        # this is a temporary fix, since 00 is reserved for food detected
+        if to_add == 0:
+            to_add = 1
+        new_gene += int_to_hex(to_add)
+        # second byte
+        to_add = extract_hex_sub(gene, 2, 4)
+        to_add = hex_to_int(to_add) % (num_outputs + num_internal_neurons)
+        # this is a temporary fix, since 00 is reserved for move to food
+        if to_add == 0:
+            to_add = 1
+        new_gene += int_to_hex(to_add)
+        # third and fourth byte (these values are converted and do not need to be modulo'd)
+        new_gene += extract_hex_sub(gene, 4, 8)
+        ret.append(new_gene)
+
+    return ret
+
+
+# mutate_genome takes in a genome string and a float mutation probability
+# if the probability succeeds, that particular string in the genome will mutate a random bit
+def mutate_genome(genome, mutation_chance):
+    for g in range(len(genome)):
+        # gene mutates
+        if random.randint(0, 100) / 100.0 <= mutation_chance:
+            mutate_index = random.randint(0, len(genome[g]) - 1)
+            mutate_char = int_to_hex(random.randint(0, 15))
+            temp = list(genome[g])
+    return genome
+
+
+# reproduce_genome takes in two genome strings and an integer to declare which mode we are using
+# 0 is full string genome, 1 is segmented genome, 2 is random genome
+# the function returns a new genome that is a descendant of the two given as parameters
+def reproduce_genome(parent1, parent2, mode):
+    assert len(parent1) == len(parent2)
+    new_gen = []
+    if mode == 0:  # full string genome
+        for gene in range(len(parent1)):
+            # parent 1
+            if gene % 2 == 0:
+                new_gen.append(parent1[gene])
+            # parent 2
+            else:
+                new_gen.append(parent2[gene])
+        return new_gen
+    elif mode == 1:  # segmented string genome
+        parent_ind = 0;  # parent_ind keeps track of which parent the segment is being taken from
+        parent_list = [parent1, parent2]
+        for gene in range(len(parent1)):  # for each gene in the genome
+            to_add = ""
+            start_ind = 0;
+            end_ind = 2;
+            for seg in range(4):  # for each segment in the gene
+                to_add += (extract_hex_sub(parent_list[parent_ind][gene], start_ind, end_ind))
+                # increment vars
+                parent_ind = (parent_ind + 1) % 2
+                start_ind += 2
+                end_ind += 2
+            new_gen.append(to_add)
+        return new_gen
+    elif mode == 2:  # random string genome
+        for gene in range(len(parent1)):
+            to_add = ""
+            for char in range(len(parent1[0])):
+                parent_index = random.randint(1, 8) % 2
+                if parent_index == 0:
+                    to_add += (extract_hex_sub(parent1[gene], char, char + 1))
+                elif parent_index == 1:
+                    to_add += (extract_hex_sub(parent2[gene], char, char + 1))
+            new_gen.append(to_add)
+        return new_gen
+
+
 class GeneticAlgorithm:
     def __init__(self,
                  num_observations,
                  num_actions,
-                 genome=None,
-                 num_neurons=3):
+                 genome=-1,
+                 num_neurons=4,
+                 reproduce_mode=1,
+                 mutation_rate=0.2):
         self.num_observations = num_observations
         self.num_actions = num_actions
         self.num_neurons = num_neurons
+        self.reproduce_mode = reproduce_mode
+        self.mutation_rate = mutation_rate
 
         self.neurons = np.zeros(self.num_neurons + 1)
-        if genome is None:
+        if genome == -1:
             self.genome = [generate_genome() for _ in range(4)]
         else:
             self.genome = genome
@@ -318,6 +407,13 @@ class GeneticAlgorithm:
         out_vec = np.tanh(out_vec)
         action = np.array(movement_output(out_vec, self.state))
         return action
+
+    def reproduce_genome(self, other):
+        assert isinstance(other, self.__class__)
+        assert len(self.genome) == len(other.genome), "parents must have the same length of genome"
+        child_genome = reproduce_genome(self.genome, other.genome, self.reproduce_mode)
+        child_genome = clean_genome(mutate_genome(child_genome, self.mutation_rate))
+        return child_genome
 
 
 if __name__ == '__main__':
