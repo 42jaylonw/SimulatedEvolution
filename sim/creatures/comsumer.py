@@ -5,18 +5,22 @@ MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
 
 class Consumer(Creature):
+    name = 'Consumer'
+
     def __init__(self, sim, genome=None):
         super().__init__(sim, genome)
         self.speed = sim.cfg['Consumer']['init_speed']
+        self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]
         self.last_action = [0, 0]
 
     def step(self):
         obs = self.get_observation()
         action = self.behavior_system.predict(obs)
-        self.action_move(MOVE_DICT[action])
+        self.action_move(action)
 
     def get_observation(self):
+
         observation = np.zeros(self.cfg['num_observations'])
         # block here
         observation[0] = self.blockedFwd()
@@ -45,6 +49,7 @@ class Consumer(Creature):
         observation[15] = self.currLocWest()
 
         return observation
+
     def distBorderNorth(self):
         curr_pos = self.position
         grid_y = self.sim.grid_size[1]
@@ -104,20 +109,20 @@ class Consumer(Creature):
 
     def senseNearest(self):
         move_dir = np.random.randint(0, 4)
-        move_dirs = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-        self.action_move(move_dirs[move_dir])
+        self.action_move(move_dir)
         # d_x = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
         # d_y = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
         # self.position[0] = np.clip(self.position[0] + d_x, 0, self.sim.grid_size[0] - 1)
         # self.position[1] = np.clip(self.position[1] + d_y, 0, self.sim.grid_size[1] - 1)
 
-    def action_move(self, direction):
+    def action_move(self, action: int):
         """
             :Desc: Moves the creature by 1 space in the direction specified by the direction parameter.
                    Checks for collisions/out-of-bounds before moving and updates layer pos on the sim space grid
             :param:
                 direction: list of 4 bools - each one corresponds to a direction. NOTE: Only one value can be set to 1!
         """
+        direction = MOVE_DICT[action]
         self.last_action = self.curr_action
         d_x, d_y = 0, 0
         if direction[0]:
@@ -164,7 +169,9 @@ class Consumer(Creature):
         target_pos = self.position
         target_pos[0] += last_act[0]
         target_pos[1] += last_act[1]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
+                                                                                           target_pos) and self.sim.is_pos_layer_empty(
+                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
             return 0
         return 1
 
@@ -177,11 +184,12 @@ class Consumer(Creature):
         target_pos = self.position
         target_pos[0] -= last_act[0]
         target_pos[1] -= last_act[1]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
+                                                                                           target_pos) and self.sim.is_pos_layer_empty(
+                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
             return 0
         return 1
 
-    
     def blockedLeft(self, layer, prev_move):
         """
         Returns if the creature's relative left direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
@@ -191,20 +199,24 @@ class Consumer(Creature):
         target_pos = self.posiion
         target_pos[0] -= last_act[1]
         target_pos[1] += last_act[0]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
+                                                                                           target_pos) and self.sim.is_pos_layer_empty(
+                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
             return 0
         return 1
-    
+
     def blockedRight(self, prev_move):
         """
         Returns if the creature's relative right direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
         Orientation based on last moved direction.
         """
-    
+
         last_act = self.last_action
         target_pos = self.position
         target_pos[0] += last_act[1]
         target_pos[1] -= last_act[0]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
+                                                                                           target_pos) and self.sim.is_pos_layer_empty(
+                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
             return 0
         return 1

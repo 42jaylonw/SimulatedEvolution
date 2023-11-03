@@ -13,7 +13,7 @@ PASS_CONDITION = 0.5
 class GoRightSim(SimSpace):
     def __init__(self, cfg):
         super().__init__(cfg)
-
+        self.num_generations = self.cfg['num_generation']
         # set save zone to green
         self.grid_rgb[:, int(self.grid_size[0] * PASS_CONDITION):, :] = SAVE_ZONE_RGB
         self.population = self.cfg['population']
@@ -21,8 +21,8 @@ class GoRightSim(SimSpace):
 
     def end_generation(self):
         survivors = self.get_survivors()
-
-        self.reset()
+        offsprings = self.generate_offsprings(survivors)
+        self.reset(offsprings)
 
     def get_survivors(self):
         survivors = []
@@ -41,6 +41,7 @@ class GoRightSim(SimSpace):
             p1 = parent_pool[p1_id]
             child_genome = p0.behavior_system.reproduce_genome(p1.genome)
             offsprings.append(Consumer(self, child_genome))
+        return offsprings
 
     def render(self):
         render_img = np.copy(self.grid_rgb)
@@ -55,7 +56,7 @@ class GoRightSim(SimSpace):
         cv2.putText(render_img, render_text, (int(visual_size[0] / 9), int(visual_size[0] / 8)),
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 5)
 
-        cv2.imshow(str(self.__class__.__name__),
+        cv2.imshow(str(self.name),
                    cv2.cvtColor(np.uint8(render_img * 255), cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()

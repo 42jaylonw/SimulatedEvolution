@@ -18,6 +18,7 @@ mutation_rate=0.2
 [Consumer]
 rgb = [0.96, 0.5, 0.0]
 init_speed = 1
+sensory_range = 3
 num_observations = 16
 num_actions = 9
 genome = -1
@@ -25,4 +26,3 @@ num_genomes = 4
 num_neurons = 3
 reproduce_mode = 1
 mutation_rate=0.2
-

@@ -382,7 +382,7 @@ class GeneticAlgorithm:
                 active_sensors.append(temp)
 
         input_sensors = if_neuron_triggers(obs, active_sensors)
-        active_map = create_active_map(self.genome, input_sensors)
+        active_map = create_active_map(self.genome)
         active_map = sorted(active_map.items())
 
         # sort so internal neurons are processed last
