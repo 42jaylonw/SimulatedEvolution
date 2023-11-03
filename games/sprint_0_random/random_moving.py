@@ -27,14 +27,15 @@ def get_updated_positions(sim):
 
 
 def run_random_moving():
-    num_producers = 1000
-    num_consumers = 50
+    num_producers = 200
+    num_consumers = 3
     # create simulation space
     config = toml.load("games/sprint_0_random/config.toml")
     sim = SimSpace(config)
     # create list of producers and consumers
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
+    walls = None
     walls = [Wall(sim, [i,i]) for i in range(sim.grid_size[0])]
     walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
     emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 10, 2), LightSource(sim, [(sim.grid_size[0] // 2) - 5, (sim.grid_size[1] // 2) + 5], 25, 1)]
@@ -52,11 +53,8 @@ def run_random_moving():
         # print("grid_info: \n", grid_info)
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
-        #sim.show_layer(1)
         sim.show_layer(5)
-        sim.show_layer(6)
-        #sim.show_layer(3)
-        #sim.print_layer("Wall")
+        #sim.print_layer(5)
 
 
 

@@ -35,14 +35,24 @@ class Emitter():
     Note: Walls obstruct emitters
     """
     def step(self):
-        for angle in range(0, 360, 5):
+        for angle in range(0, 360, 1):
+            cur_val = self.emit_val
+
             for r in range(0, self.emit_range, 1):
+                if r == 0:
+                    self.sim.increment_pos_layer(self.layer, self.position, self.emit_val)
+                    pass
+
                 x = int(round(r * math.sin(math.radians(angle)) + self.position[0]))
                 y = int(round(r * math.cos(math.radians(angle)) + self.position[1]))
+
+                #if not self.sim.is_pos_out_of_bounds([x, y]) and not self.sim.is_pos_layer_empty("Producer", [x, y]):
+                #    break
+
                 if self.sim.is_pos_out_of_bounds([x, y]) or not self.sim.is_pos_layer_empty("Wall", [x, y]):
                     break
                 else:
-                    self.sim.increment_pos_layer(self.layer, [x, y], self.emit_val)
+                    self.sim.increment_pos_layer(self.layer, [x, y], cur_val)
         pass
 
     @property
@@ -50,7 +60,7 @@ class Emitter():
         assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
         return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
 
-# Light Layer (layer 5)
+# Light Layer
 class LightSource(Emitter):
     brightness: float # unused for now
 
@@ -58,10 +68,19 @@ class LightSource(Emitter):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Light"
 
-# Temperature Layer (layer 6)
+# Temperature Layer
 class HeatSource(Emitter):
     max_heat: float # unused for now
 
     def __init__(self, sim, pos, e_range, e_val):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Temperature"
+
+# Elevation Layer (Experimental)
+# "Mountains" / "Hills" / "Valleys" (negative e_vals)
+class HillEmitter(Emitter):
+    max_elevation: float
+
+    def __init__(self, sim, pos, e_range, e_val):
+        super().__init__(sim, pos, e_range, e_val)
+        self.layer = "Elevation"

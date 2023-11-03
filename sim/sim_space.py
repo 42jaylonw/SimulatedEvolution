@@ -33,15 +33,13 @@ class SimSpace:
         # Refresh emitters
         self.layers[LAYER_DICT["Light"]] = 0.
         self.layers[LAYER_DICT["Temperature"]] = 0.
+        self.layers[LAYER_DICT["Elevation"]] = 0.
         for emitter in self.emitters:
             emitter.step()
-            #emitter.move_to_pos(emitter.position + [0, -1])
 
         # make a priority
         for creature in self.creatures:
             creature.step()
-        #self.refresh_state()
-        # print(self.layers)
 
     # Unused as of the new layer rework
     def refresh_state(self):
@@ -58,8 +56,9 @@ class SimSpace:
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
-        for wall in self.walls:
-            render_img[wall.grid_pos] = wall.rgb
+        if self.walls is not None:
+            for wall in self.walls:
+                render_img[wall.grid_pos] = wall.rgb
 
         cv2.imshow(str(self.__class__.__name__),
                    cv2.cvtColor(np.uint8(cv2.resize(render_img, self.cfg['SimSpace']['visual_size'],
@@ -184,9 +183,9 @@ class SimSpace:
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
 
-    def print_layer(self, layer_id):
+    def print_layer(self, layer):
         # Debug: Print CONSUMER layer grid -----------------
         np.set_printoptions(threshold=np.inf)
         np.set_printoptions(linewidth=150)
-        print(self.layers[LAYER_DICT[layer_id]])
+        print(self.layers[layer])
         # --------------------------------------------------
