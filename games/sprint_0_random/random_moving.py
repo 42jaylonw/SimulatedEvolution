@@ -1,6 +1,7 @@
 import toml
 from sim.sim_space import SimSpace
-from sim.creature import Producer, Consumer
+from sim.creatures.comsumer import Consumer
+from sim.creatures.producer import Producer
 
 
 # Create a simulation space with a specified number of consumers and producers
