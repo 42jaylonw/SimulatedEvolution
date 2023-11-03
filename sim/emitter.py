@@ -11,10 +11,10 @@ class Emitter():
     def step(self):
         pass
 
-    @property
-    def grid_pos(self):
-        assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
-        return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
+    # @property
+    # def grid_pos(self):
+    #     assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
+    #     return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
 
 # Light Layer (layer 5)
 class LightSource(Emitter):

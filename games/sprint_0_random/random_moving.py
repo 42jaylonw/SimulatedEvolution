@@ -1,6 +1,8 @@
 import toml
+import numpy as np
 from sim.sim_space import SimSpace
-from sim.creature import Producer, Consumer
+from sim.creatures.producer import Producer
+from sim.creatures.comsumer import Consumer
 
 
 # Create a simulation space with a specified number of consumers and producers
@@ -25,15 +27,20 @@ def get_updated_positions(sim):
     return sim.update_simulator()
 
 
+class RandMoveConsumer(Consumer):
+    def step(self):
+        self.action_move(np.random.randint(0, 4))
+
+
 def run_random_moving():
-    num_producers = 1000
-    num_consumers = 50
+    num_producers = 100
+    num_consumers = 3
     # create simulation space
     config = toml.load("games/sprint_0_random/config.toml")
     sim = SimSpace(config)
     # create list of producers and consumers
     producers = [Producer(sim) for _ in range(num_producers)]
-    consumers = [Consumer(sim) for _ in range(num_consumers)]
+    consumers = [RandMoveConsumer(sim) for _ in range(num_consumers)]
     # add organisms to simulation space
     sim.reset(producers + consumers)
 
@@ -48,11 +55,10 @@ def run_random_moving():
         # print("grid_info: \n", grid_info)
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
-        #sim.show_layer(1)
-        sim.show_layer(1)
-        #sim.show_layer(3)
-        #sim.print_layer("Consumer")
-
+        # sim.show_layer(1)
+        sim.show_layer(2)
+        # sim.show_layer(3)
+        # sim.print_layer("Consumer")
 
 
 if __name__ == '__main__':

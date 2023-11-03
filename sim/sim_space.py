@@ -19,18 +19,19 @@ NUM_LAYERS = len(LAYER_DICT) + 1
 
 
 class SimSpace:
+    name = 'SimSpace'
     cfg: dict
     layers: np.ndarray
     grid: np.ndarray
 
     def __init__(self, cfg):
-        self.cfg = cfg[self.__class__.__name__]
+        self.cfg = cfg
+        self._cfg = cfg[self.name]
         self.creatures = None
-        self.grid_size = np.array(self.cfg['grid_size'])
+        self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
-        self.num_generations = self.cfg['num_generation']
-        self.max_steps = self.cfg['max_steps']
+        self.max_steps = self._cfg['max_steps']
 
     def reset(self, creatures):
         self.time_steps = 0
@@ -68,13 +69,16 @@ class SimSpace:
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
 
-        cv2.imshow(str(self.__class__.__name__),
-                   cv2.cvtColor(np.uint8(cv2.resize(render_img, self.cfg['visual_size'],
-                                                    interpolation=cv2.INTER_NEAREST) * 255),
-                                cv2.COLOR_RGB2BGR))
+        # cv2.imshow(str(self.name),
+        #            cv2.cvtColor(np.uint8(cv2.resize(render_img, self._cfg['visual_size'],
+        #                                             interpolation=cv2.INTER_NEAREST) * 255),
+        #                         cv2.COLOR_RGB2BGR))
+        render_img = self.get_render_image(render_img)
+        cv2.imshow(str(self.name),
+                   cv2.cvtColor(render_img, cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
-        time.sleep(self.cfg['time_step'])
+        time.sleep(self._cfg['time_step'])
 
     def get_near_info(self, center, length):
         """
@@ -182,14 +186,17 @@ class SimSpace:
         return positionData
 
     def show_layer(self, layer_id):
+        render_img = self.get_render_image(self.layers[layer_id].reshape(
+            *self.grid_size, 1) * np.array([1, 1, 1]).reshape(1, 1, 3))
         cv2.imshow(str(f'Layer ID {layer_id}'),
-                   cv2.cvtColor(np.uint8(cv2.resize(self.layers[layer_id].reshape(
-                       *self.grid_size, 1) * np.array([1, 1, 1]).reshape(1, 1, 3),
-                                                    self.cfg['visual_size'],
-                                                    interpolation=cv2.INTER_NEAREST) * 255),
-                                cv2.COLOR_RGB2BGR))
+                   cv2.cvtColor(render_img, cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
+
+    def get_render_image(self, img):
+        img = np.uint8(cv2.resize(
+            np.transpose(img, (0, 1, 2)), self._cfg['visual_size'], interpolation=cv2.INTER_NEAREST) * 255)
+        return img
 
     def print_layer(self, layer_id):
         # Debug: Print CONSUMER layer grid -----------------

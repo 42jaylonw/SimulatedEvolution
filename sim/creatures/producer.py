@@ -2,6 +2,7 @@ from . import Creature
 
 
 class Producer(Creature):
+    name = 'Producer'
 
     def step(self):
         if self.sim.is_pos_layer_empty("Producer", self.position):
