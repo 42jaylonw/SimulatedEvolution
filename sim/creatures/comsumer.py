@@ -19,10 +19,10 @@ class Consumer(Creature):
     def get_observation(self):
         observation = np.zeros(self.cfg['num_observations'])
         # block here
-        observation[0] = ...
-        observation[1] = ...
-        observation[2] = ...
-        observation[3] = ...
+        observation[0] = self.blockedFwd()
+        observation[1] = self.blockedBack()
+        observation[2] = self.blockedLeft()
+        observation[3] = self.blockedRight()
         observation[4] = self.sensePopulation()
         observation[5:7] = self.last_action
         # border distance north: formula is (dist from north border / grid height)^2
@@ -110,106 +110,56 @@ class Consumer(Creature):
         self.sim.increment_pos_layer("Consumer", self.position,
                                      1)  # WIP DELETE THIS IF REFRESH IN SIMSPACE USED INSTEAD
 
-    # def blockedFwd(self, layer, prev_move):
-    #     """
-    #     Returns 1 if the creature's forward direction is blocked. Returns 0 if free.
-    #     Orientation based on last moved direction.
-    #
-    #     Checks on the layer specified.
-    #     """
-    #     curr_pos = self.grid_pos
-    #
-    #     if prev_move[0]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[1] = curr_pos[1] + 1
-    #     elif prev_move[1]:
-    #         next_move[0] = curr_pos[0] + 1
-    #         next_move[1] = curr_pos[1]
-    #
-    #     elif prev_move[2]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[1] = curr_pos[1] - 1
-    #
-    #     elif prev_move[3]:
-    #         next_move[0] = curr_pos[0] - 1
-    #         next_move[1] = curr_pos[1]
-    #     if self.sim.is_pos_layer_empty(layer, next_move):
-    #         return False
-    #     return True
-    #
-    # def blockedBack(self, layer, prev_move):
-    #     """
-    #     Returns if the creature's backward direction is blocked. Returns 0 if free.
-    #     Orientation based on last moved direction.
-    #
-    #     Checks on the layer specified.
-    #     """
-    #     curr_pos = self.grid_pos
-    #
-    #     if prev_move[0]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[0] = curr_pos[1] - 1
-    #     elif prev_move[1]:
-    #         next_move[0] = curr_pos[0] - 1
-    #         next_move[1] = curr_pos[1]
-    #     elif prev_move[2]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[1] = curr_pos[1] + 1
-    #     elif prev_move[3]:
-    #         next_move[0] = curr_pos[0] + 1
-    #         next_move[1] = curr_pos[1]
-    #     if self.sim.is_pos_layer_empty(layer, next_move):
-    #         return False
-    #     return True
-    #
-    # def blockedLeft(self, layer, prev_move):
-    #     """
-    #     Returns if the creature's relative left direction is blocked. Returns 0 if free.
-    #     Orientation based on last moved direction.
-    #
-    #     Checks on the layer specified.
-    #     """
-    #
-    #     curr_pos = self.grid_pos
-    #
-    #     if prev_move[0]:
-    #         next_move[0] = curr_pos[0] - 1
-    #         next_move[0] = curr_pos[1]
-    #     elif prev_move[1]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[1] = curr_pos[1] + 1
-    #     elif prev_move[2]:
-    #         next_move[0] = curr_pos[0] + 1
-    #         next_move[1] = curr_pos[1]
-    #     elif prev_move[3]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[1] = curr_pos[1] - 1
-    #     if self.sim.is_pos_layer_empty(layer, next_move):
-    #         return False
-    #     return True
-    #
-    # def blockedRight(self, prev_move):
-    #     """
-    #     Returns if the creature's relative right direction is blocked. Returns 0 if free.
-    #     Orientation based on last moved direction.
-    #
-    #     Checks on the layer specified.
-    #     """
-    #
-    #     curr_pos = self.grid_pos
-    #
-    #     if prev_move[0]:
-    #         next_move[0] = curr_pos[0] + 1
-    #         next_move[1] = curr_pos[1]
-    #     elif prev_move[1]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[1] = curr_pos[1] - 1
-    #     elif prev_move[2]:
-    #         next_move[0] = curr_pos[0] - 1
-    #         next_move[1] = curr_pos[1]
-    #     elif prev_move[3]:
-    #         next_move[0] = curr_pos[0]
-    #         next_move[1] = curr_pos[1] + 1
-    #     if self.sim.is_pos_layer_empty(layer, next_move):
-    #         return False
-    #     return True
+    def blockedFwd(self):
+        """
+        Returns 1 if the creature's forward direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
+        Orientation based on last moved direction.
+        """
+        last_act = self.last_action
+        target_pos = self.grid_pos
+        target_pos[0] += last_act[0]
+        target_pos[1] += last_act[1]
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+            return 0
+        return 1
+
+    def blockedBack(self, layer, prev_move):
+        """
+        Returns if the creature's backward direction is blocked by any creature of a wall or is out of bounds. Returns 0 if free.
+        Orientation based on last moved direction.
+        """
+        last_act = self.last_action
+        target_pos = self.grid_pos
+        target_pos[0] -= last_act[0]
+        target_pos[1] -= last_act[1]
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+            return 0
+        return 1
+
+    
+    def blockedLeft(self, layer, prev_move):
+        """
+        Returns if the creature's relative left direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
+        Orientation based on last moved direction.
+        """
+        last_act = self.last_action
+        target_pos = self.grid_pos
+        target_pos[0] -= last_act[1]
+        target_pos[1] += last_act[0]
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+            return 0
+        return 1
+    
+    def blockedRight(self, prev_move):
+        """
+        Returns if the creature's relative right direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
+        Orientation based on last moved direction.
+        """
+    
+        last_act = self.last_action
+        target_pos = self.grid_pos
+        target_pos[0] += last_act[1]
+        target_pos[1] -= last_act[0]
+        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
+            return 0
+        return 1
