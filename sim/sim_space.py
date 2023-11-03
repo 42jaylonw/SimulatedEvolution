@@ -24,8 +24,9 @@ class SimSpace:
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
         self.max_steps = self._cfg['max_steps']
+        self.max_generations = self._cfg['max_generations']
 
-    def reset(self, creatures, walls, emitters):
+    def reset(self, creatures, walls=(), emitters=()):
         self.time_steps = 0
         self.layers[:] = 0
         self.creatures = creatures
@@ -62,6 +63,9 @@ class SimSpace:
     def end_generation(self):
         pass
 
+    def termination(self):
+        pass
+
     # Unused as of the new layer rework
     def refresh_state(self):
         self.layers[:] = 0.
@@ -81,10 +85,6 @@ class SimSpace:
             for wall in self.walls:
                 render_img[wall.grid_pos] = wall.rgb
 
-        # cv2.imshow(str(self.name),
-        #            cv2.cvtColor(np.uint8(cv2.resize(render_img, self._cfg['visual_size'],
-        #                                             interpolation=cv2.INTER_NEAREST) * 255),
-        #                         cv2.COLOR_RGB2BGR))
         render_img = self.get_render_image(render_img)
         cv2.imshow(str(self.name),
                    cv2.cvtColor(render_img, cv2.COLOR_RGB2BGR))
@@ -139,7 +139,9 @@ class SimSpace:
                     True: there is no object on specified layer at pos
                     False: there is an object on specified layer at pos
         """
-        assert not self.is_pos_out_of_bounds(pos), "pos must be within bounds of sim space grid"
+        # assert not self.is_pos_out_of_bounds(pos), "pos must be within bounds of sim space grid"
+        if self.is_pos_out_of_bounds(pos):
+            return False
 
         if self.layers[LAYER_DICT[layer], pos[0], pos[1]] == 0:
             return True
@@ -207,7 +209,7 @@ class SimSpace:
 
     def get_render_image(self, img):
         img = np.uint8(cv2.resize(
-            np.transpose(img, (0, 1, 2)), self._cfg['visual_size'], interpolation=cv2.INTER_NEAREST) * 255)
+            np.transpose(img, (1, 0, 2)), self._cfg['visual_size'], interpolation=cv2.INTER_NEAREST) * 255)
         return img
 
     def print_layer(self, layer):

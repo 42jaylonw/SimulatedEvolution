@@ -300,7 +300,7 @@ def mutate_genome(genome, mutation_chance):
             mutate_char = int_to_hex(random.randint(0, 15))
             temp = list(genome[g])
             temp[mutate_index] = mutate_char
-            genome[g] = str(temp)
+            genome[g] = "".join(temp)
     return genome
 
 
@@ -405,7 +405,7 @@ class GeneticAlgorithm:
                                 self.neurons[input_index - self.num_observations] * conn_str)
 
         out_vec = np.tanh(out_vec)
-        action = np.array(movement_output(out_vec, obs))
+        action = np.array(movement_output(out_vec, np.int64(obs)))
         return action
 
     def reproduce_genome(self, other):

@@ -1,3 +1,5 @@
+# Evolution Simulator
+
 ## Quickstart
 1. Install python tutorial [here](https://kinsta.com/knowledgebase/install-python/).
 2. Install python dependencies

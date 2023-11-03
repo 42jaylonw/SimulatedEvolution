@@ -16,12 +16,12 @@ class Consumer(Creature):
 
     def step(self):
         obs = self.get_observation()
-        action = self.behavior_system.predict(obs)
+        action = np.argmax(self.behavior_system.predict(obs))
         self.action_move(action)
 
     def get_observation(self):
 
-        observation = np.zeros(self.cfg['num_observations'])
+        observation = np.zeros(self._cfg['num_observations'])
         # block here
         observation[0] = self.blockedFwd()
         observation[1] = self.blockedBack()
@@ -169,13 +169,9 @@ class Consumer(Creature):
         target_pos = self.position
         target_pos[0] += last_act[0]
         target_pos[1] += last_act[1]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
-                                                                                           target_pos) and self.sim.is_pos_layer_empty(
-                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
-            return 0
-        return 1
+        return self.check_empty(target_pos)
 
-    def blockedBack(self, layer, prev_move):
+    def blockedBack(self):
         """
         Returns if the creature's backward direction is blocked by any creature of a wall or is out of bounds. Returns 0 if free.
         Orientation based on last moved direction.
@@ -184,28 +180,20 @@ class Consumer(Creature):
         target_pos = self.position
         target_pos[0] -= last_act[0]
         target_pos[1] -= last_act[1]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
-                                                                                           target_pos) and self.sim.is_pos_layer_empty(
-                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
-            return 0
-        return 1
+        return self.check_empty(target_pos)
 
-    def blockedLeft(self, layer, prev_move):
+    def blockedLeft(self):
         """
         Returns if the creature's relative left direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
         Orientation based on last moved direction.
         """
         last_act = self.last_action
-        target_pos = self.posiion
+        target_pos = self.position
         target_pos[0] -= last_act[1]
         target_pos[1] += last_act[0]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
-                                                                                           target_pos) and self.sim.is_pos_layer_empty(
-                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
-            return 0
-        return 1
+        return self.check_empty(target_pos)
 
-    def blockedRight(self, prev_move):
+    def blockedRight(self):
         """
         Returns if the creature's relative right direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
         Orientation based on last moved direction.
@@ -215,8 +203,8 @@ class Consumer(Creature):
         target_pos = self.position
         target_pos[0] += last_act[1]
         target_pos[1] -= last_act[0]
-        if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer",
-                                                                                           target_pos) and self.sim.is_pos_layer_empty(
-                "Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
-            return 0
-        return 1
+        return self.check_empty(target_pos)
+
+    def check_empty(self, target_pos):
+        return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
+                            for layer in ["Wall", "Producer", "Consumer"]]))
