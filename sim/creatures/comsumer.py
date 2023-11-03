@@ -26,25 +26,70 @@ class Consumer(Creature):
         observation[4] = self.sensePopulation()
         observation[5:7] = self.last_action
         # border distance north: formula is (dist from north border / grid height)^2
-        observation[7] = ...
+        observation[7] = self.distBorderNorth()
         # border distance east
-        observation[8] = ...
+        observation[8] = self.distBorderEast()
         # border distance south
-        observation[9] = ...
+        observation[9] = self.distBorderSouth()
         # border distance west
-        observation[10] = ...
+        observation[10] = self.distBorderWest()
         # nearest border distance
-        observation[11] = ...
+        observation[11] = self.nearestBorderDist()
         # current location north: formula is (dist from south border / grid height)^2
-        observation[12] = ...
+        observation[12] = self.currLocNorth()
         # current location east
-        observation[13] = ...
+        observation[13] = self.currLocEast()
         # current location south
-        observation[14] = ...
+        observation[14] = self.currLocSouth()
         # current location west
-        observation[15] = ...
+        observation[15] = self.currLocWest()
 
         return observation
+    def distBorderNorth(self):
+        curr_pos = self.position
+        grid_y = self.sim.grid_size[1]
+        return pow((curr_pos[1] / grid_y), 2)
+
+    def distBorderSouth(self):
+        curr_pos = self.position
+        grid_y = self.sim.grid_size[1]
+        return pow(((grid_y - curr_pos[1]) / grid_y), 2)
+
+    def distBorderEast(self):
+        curr_pos = self.position
+        grid_x = self.sim.grid_size[0]
+        return pow(((grid_x - curr_pos[0]) / grid_x), 2)
+
+    def distBorderWest(self):
+        curr_pos = self.position
+        grid_x = self.sim.grid_size[0]
+        return pow((curr_pos[0] / grid_x), 2)
+
+    def nearestBorderDist(self):
+        curr_pos = self.position
+        grid_x = self.sim.grid_size[0]
+        grid_y = self.sim.grid_size[1]
+        return max(curr_pos[1], grid_y - curr_pos[1], curr_pos[0], grid_x - curr_pos[0])
+
+    def currLocNorth(self):
+        curr_pos = self.position
+        grid_y = self.sim.grid_size[1]
+        return pow(((grid_y - curr_pos[1]) / grid_y), 2)
+
+    def currLocSouth(self):
+        curr_pos = self.position
+        grid_y = self.sim.grid_size[1]
+        return pow((curr_pos[1] / grid_y), 2)
+
+    def currLocEast(self):
+        curr_pos = self.position
+        grid_x = self.sim.grid_size[0]
+        return pow((curr_pos[0] / grid_x), 2)
+
+    def currLocWest(self):
+        curr_pos = self.position
+        grid_x = self.sim.grid_size[0]
+        return pow((curr_pos[0] / grid_x), 2)
 
     def sensePopulation(self):
         """ Obtains population count (of consumers) within sensory range. """
@@ -116,7 +161,7 @@ class Consumer(Creature):
         Orientation based on last moved direction.
         """
         last_act = self.last_action
-        target_pos = self.grid_pos
+        target_pos = self.position
         target_pos[0] += last_act[0]
         target_pos[1] += last_act[1]
         if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
@@ -129,7 +174,7 @@ class Consumer(Creature):
         Orientation based on last moved direction.
         """
         last_act = self.last_action
-        target_pos = self.grid_pos
+        target_pos = self.position
         target_pos[0] -= last_act[0]
         target_pos[1] -= last_act[1]
         if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
@@ -143,7 +188,7 @@ class Consumer(Creature):
         Orientation based on last moved direction.
         """
         last_act = self.last_action
-        target_pos = self.grid_pos
+        target_pos = self.posiion
         target_pos[0] -= last_act[1]
         target_pos[1] += last_act[0]
         if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
@@ -157,7 +202,7 @@ class Consumer(Creature):
         """
     
         last_act = self.last_action
-        target_pos = self.grid_pos
+        target_pos = self.position
         target_pos[0] += last_act[1]
         target_pos[1] -= last_act[0]
         if self.sim.is_pos_layer_empty("Wall", target_pos) and self.sim.is_pos_layer_empty("Producer", target_pos) and self.sim.is_pos_layer_empty("Consumer", target_pos) and not self.sim.is_pos_out_of_bounds(target_pos):
