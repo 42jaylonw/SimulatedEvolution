@@ -2,20 +2,10 @@ import time
 
 import cv2
 import numpy as np
-
-# from sim.creatures.comsumer import Consumer
-# from sim.creatures.producer import Producer
-
-LAYER_DICT = {
-    # grid : 0
-    "Producer": 1,
-    "Consumer": 2,
-    "Wall": 3,
-    "Elevation": 4,
-    "Light": 5,
-    "Temperature": 6
-}
-NUM_LAYERS = len(LAYER_DICT) + 1
+from sim.creatures.comsumer import Consumer
+from sim.creatures.producer import Producer
+from sim.emitter import LightSource, HeatSource
+from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
 
 
 class SimSpace:
@@ -28,24 +18,42 @@ class SimSpace:
         self.cfg = cfg
         self._cfg = cfg[self.name]
         self.creatures = None
+        self.walls = None
+        self.emitters = None
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
         self.max_steps = self._cfg['max_steps']
 
-    def reset(self, creatures):
+    def reset(self, creatures, walls, emitters):
         self.time_steps = 0
         self.layers[:] = 0
         self.creatures = creatures
+        self.walls = walls
+        self.emitters = emitters
+
         for creature in self.creatures:
             creature.reset()
 
+    # def reset(self, creatures, walls, emitters):
+    #     self.creatures = creatures
+    #     self.walls = walls
+    #     self.emitters = emitters
+
     def step(self):
         assert self.creatures is not None, "Reset first!"
+
+        # Refresh emitters
+        self.layers[LAYER_DICT["Light"]] = 0.
+        self.layers[LAYER_DICT["Temperature"]] = 0.
+        self.layers[LAYER_DICT["Elevation"]] = 0.
+        for emitter in self.emitters:
+            emitter.step()
+
         # make a priority
         for creature in self.creatures:
             creature.step()
-        # self.refresh_state() # WIP- ADD THIS BACK IF WE KEEP THIS APPROACH
+
         # print(self.layers)
         self.time_steps += 1
         if self.time_steps >= self.max_steps:
@@ -54,6 +62,7 @@ class SimSpace:
     def end_generation(self):
         pass
 
+    # Unused as of the new layer rework
     def refresh_state(self):
         self.layers[:] = 0.
         for creature in self.creatures:
@@ -68,6 +77,9 @@ class SimSpace:
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
+        if self.walls is not None:
+            for wall in self.walls:
+                render_img[wall.grid_pos] = wall.rgb
 
         # cv2.imshow(str(self.name),
         #            cv2.cvtColor(np.uint8(cv2.resize(render_img, self._cfg['visual_size'],
@@ -159,7 +171,7 @@ class SimSpace:
     def is_pos_out_of_bounds(self, pos):
         """
             :param:
-                pos: (x, y) position that is checked to see if outside of bounds
+                pos: [x, y] position that is checked to see if outside of bounds
             :return:
                 True: pos is outside of bounds of sim space
                 False: pos is within bounds of sim space
@@ -198,9 +210,8 @@ class SimSpace:
             np.transpose(img, (0, 1, 2)), self._cfg['visual_size'], interpolation=cv2.INTER_NEAREST) * 255)
         return img
 
-    def print_layer(self, layer_id):
+    def print_layer(self, layer):
         # Debug: Print CONSUMER layer grid -----------------
         np.set_printoptions(threshold=np.inf)
         np.set_printoptions(linewidth=150)
-        print(self.layers[LAYER_DICT[layer_id]])
-        # --------------------------------------------------
+        print(self.layers[layer])
