@@ -208,3 +208,25 @@ class Consumer(Creature):
     def check_empty(self, target_pos):
         return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
                             for layer in ["Wall", "Producer", "Consumer"]]))
+    
+    def metabolize(self, activity=0.0, climate=0.0):
+        """
+        Subtract Consumer's energy by the sum of activity, climate, and 10% of its size\n
+        params:
+            activity = added energy cost associated with movement
+
+            climate = added energy cost based on the climate layer that the creature resides in
+        """
+        self.energy -= (self.size * 0.1) + activity + (climate * 0.5)
+
+    def consume(self, energy=0):
+        """
+        Increment a Creature's energy by a specified amount\n
+        param:
+            energy = energy to add to Creature's current energy level 
+        Notes:
+            Only accepts positive energy values
+        """
+        if energy < 0: 
+            raise Exception(f"Cannot Consume {energy} energy")
+        self.energy += energy

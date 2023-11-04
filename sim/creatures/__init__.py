@@ -1,4 +1,5 @@
 import toml
+import hashlib
 import numpy as np
 from algorithm.genetic_algorithm import GeneticAlgorithm
 
@@ -14,7 +15,6 @@ class Creature:
     # properties
     energy: float
     size: float
-    metabolism: float
 
     def __init__(self, sim, genome=None):
         self.cfg = sim.cfg
@@ -28,14 +28,20 @@ class Creature:
             num_neurons=self._cfg['num_neurons'],
             reproduce_mode=self._cfg['reproduce_mode'],
             mutation_rate=self._cfg['mutation_rate'])
-
+        
         self._init_properties()
 
     def _init_properties(self):
         self.rgb = self._cfg['rgb']
         self.position = np.random.randint(self.sim.grid_size)
         self.sim.increment_pos_layer(self.name, self.position, 1)
-        self.energy = 0.
+        # Compute a unique hash based on the 4th byte of creature's genome
+        hasher = hashlib.sha256()
+        hasher.update(self.behavior_system.genome[3].encode())
+        hash = hasher.hexdigest()
+        # Assign size and energy properties based on the hash
+        self.size = int(hash[:32], 16) % 101 + 0.1
+        self.energy = int(hash[32:], 16) % 101 + 1
 
     def reset(self):
         self._init_properties()
