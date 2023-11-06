@@ -10,6 +10,7 @@ class Creature:
     _cfg: dict
     position: np.ndarray
     behavior_system: GeneticAlgorithm
+    energy_bar: EnergyBar
 
     # properties
     energy: float
@@ -35,12 +36,20 @@ class Creature:
         self.rgb = self._cfg['rgb']
         self.position = np.random.randint(self.sim.grid_size)
         self.sim.increment_pos_layer(self.name, self.position, 1)
-        self.energy = 0.
+        self.energy = 50.
+        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=100.0, satiation_level=85.0, size=1.0)
 
     def reset(self):
         self._init_properties()
 
     def step(self):
+        pass
+
+    def die(self):
+        """
+        Handles death. A creature that dies should remove itself from sim.creatures
+        and update the layer's grid position value.
+        """
         pass
 
     @property
