@@ -9,14 +9,21 @@
     <!-- Simulator controls -->
     <div class="col-sm-4">
         <button type="button" onclick="runSimulation()">Simulate</button>
+        {# <button id="simulateButton" type="button">Simulate</button> #}
         <button type="button" onclick="pauseSimulation()">Pause Simulation</button>
+        <button type="button" onclick="newSimulation()">New Simulation</button>
     </div>
     <!-- Simulation Area-->
     <div class="col-sm-4">
         <div class="square-container">
             <div class="sim-container">
             </div>
+             
         </div>
+        {# <div class="slider-container">
+            <input type="range" min="0" max="100" value="0" class="slider" id="generation-range">
+        </div> #}
+       
     </div>
 </div>
 {% endblock %}
@@ -24,8 +31,25 @@
 <!-- Scripts -->
 {% block script %}
 <!-- Grid functions -->
+{# <script
+type = "text/javascript"
+src = "{{ url_for('static', filename='creature_element.js') }}">
+</script> #}
 <script
 type = "text/javascript"
 src = "{{ url_for('static', filename='grid.js') }}"
 ></script>
+
+{# <script
+type = "text/javascript"
+src = "{{ url_for('static', filename='simulation-grid.js') }}"
+></script>
+<script
+type = "text/javascript"
+src = "{{ url_for('static', filename='cell.js') }}"
+></script>
+<script
+type = "text/javascript"
+src = "{{ url_for('static', filename='frontend-main.js') }}"
+></script> #}
 {% endblock script %}

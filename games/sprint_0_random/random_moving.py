@@ -72,5 +72,6 @@ def run_random_moving():
         # sim.print_layer("Consumer")
         sim.show_layer(5)
         # sim.print_layer(5)
+
 if __name__ == '__main__':
     run_random_moving()

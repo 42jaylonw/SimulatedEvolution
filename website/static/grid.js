@@ -1,4 +1,4 @@
-//TODO: handle user submitting quantity of producers and consumers 
+
 const output = document.querySelector('.sim-container');
 
 const grid={rows:50, cols:50};
@@ -28,15 +28,15 @@ function createGrid(total)
 //Create an outline for each cell that the mouse hovers over
 function showCellBorder(cell)
 {
-    cell.style.border = "3px solid black";
-    console.log("Entering " + cell.id);
+    // cell.style.border = "3px solid black";
+    cell.style.opacity = 0.5;
 }
 
 //Remove outline when mouse leaves cell
 function hideCellBorder(cell)
 {
-    cell.style.border = "none";
-    console.log("Leaving " + cell.id);
+    // cell.style.border = "none";
+    cell.style.opacity = 1;
 }
 //Edit a specified cell
 function editCell(cellId, color)
@@ -44,7 +44,11 @@ function editCell(cellId, color)
     const cell = document.getElementById(cellId);
     cell.style.backgroundColor = color;
 }
-
+function addCreature(creature)
+{
+    const cell = document.getElementById(creature.cellId);
+    cell.appendChild(creature.element);
+}
 //Create a new simulation grid on the server, then request the simulation grid information, then apply this data to frontend 
 let simulationID;
 function populateGrid()
@@ -59,7 +63,10 @@ function populateGrid()
             position = organism[0]
             color = organism[1]
             editCell('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+            // newCreature = new CreatureElement(organism[0], organism[1]);
+            // addCreature(newCreature)
         }
+        console.log("done setting up grid!");
         
     })
     .catch((error) =>{
@@ -91,7 +98,35 @@ function getGridData()
     });
 }
 
-//Request simulation grid data from server every 0.5 seconds
+function newSimulation()
+{
+    for(let i = 0; i < 50 * 50; i++)
+    {
+        editCell('cell-' + Math.floor(i/grid.rows) + '-' + i % grid.cols, 'white');
+    }
+   
+     //Create simulation grid and request its information
+     fetch('/new_grid')
+     .then((response) => response.json())
+     .then((data) => {
+         //Apply received data to grid
+         for(let organism of data)
+         {
+             position = organism[0]
+             color = organism[1]
+             editCell('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+             // newCreature = new CreatureElement(organism[0], organism[1]);
+             // addCreature(newCreature)
+         }
+         console.log("done setting up grid!");
+         
+     })
+     .catch((error) =>{
+         console.error('Error:', error);
+     });
+}
+
+//Request simulation grid data from server every 0.45 seconds
 function runSimulation()
 {
     simulationID = setInterval(getGridData, 500);
