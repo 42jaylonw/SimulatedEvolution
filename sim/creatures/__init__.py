@@ -2,6 +2,7 @@ import toml
 import hashlib
 import numpy as np
 from algorithm.genetic_algorithm import GeneticAlgorithm
+from sim.energy import EnergyBar
 
 
 class Creature:
@@ -45,6 +46,7 @@ class Creature:
         self.size = int(hash[:32], 16) % 101 + 0.1
         self.energy = int(hash[32:], 16) % 101 + 1
         self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size)
+        # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
     def reset(self):
         self._init_properties()

@@ -22,13 +22,13 @@ class EnergyBar:
         """
         self.current_energy = min(self.max_energy, self.current_energy + energy)
 
-    def is_empty(self)
+    def is_empty(self):
         """
         Returns true if there is no more energy left.
         """
         return self.current_energy == 0
 
-    def is_satiated(self)
+    def is_satiated(self):
         """
         Returns true if the creature is 'satiated'.
         A 'satiated' creature has energy above a given satiation threshold.
@@ -37,7 +37,7 @@ class EnergyBar:
         """
         return self.current_energy >= self.satiation_level
 
-    def movement_cost(self, elevation_curr=0.0, elevation_next=0.0, difficulty=1.0)
+    def movement_cost(self, elevation_curr=0.0, elevation_next=0.0, difficulty=1.0):
         """
         Calculates the cost of moving (in energy) based on the difference in elevation
         between two locations. 

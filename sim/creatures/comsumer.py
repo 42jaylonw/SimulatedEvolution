@@ -156,7 +156,7 @@ class Consumer(Creature):
         # TO-DO -- grab elevation from sim space on layer
         current_elevation = 0.0
         target_elevation = 0.0
-        self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0).
+        self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
 
         if self.sim.is_pos_out_of_bounds(target_pos) or not self.sim.is_pos_layer_empty("Producer", target_pos):
             # Space is occupied: no change in position can be made in this direction
