@@ -7,15 +7,16 @@ from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 
 SAVE_ZONE_RGB = [0.5647, 0.9333, 0.5647]
-PASS_CONDITION = 0.5
+PASS_CONDITION = 0.3
 
 
 class GoRightSim(SimSpace):
     def __init__(self, cfg):
         super().__init__(cfg)
         # set save zone to green
-        self.grid_rgb[int(self.grid_size[0] * PASS_CONDITION):, :, :] = SAVE_ZONE_RGB
+        self.grid_rgb[int(self.grid_size[0] * (1. - PASS_CONDITION)):, :, :] = SAVE_ZONE_RGB
         self.population = self._cfg['population']
+        self.min_survival_rate = self._cfg['min_survival_rate']
         self.reset([Consumer(self) for _ in range(self.population)])
         self.curr_generation = 0
         self.pass_rate_list = []
@@ -40,11 +41,15 @@ class GoRightSim(SimSpace):
     def get_survivors(self):
         survivors = []
         for creatures in self.creatures:
-            if creatures.position[0] >= int(self.grid_size[0] * PASS_CONDITION):
+            if creatures.position[0] >= int(self.grid_size[0] * (1. - PASS_CONDITION)):
                 survivors.append(creatures)
         return survivors
 
     def generate_offsprings(self, parent_pool):
+        min_num_parents = int(self.population * self.min_survival_rate)
+        if len(parent_pool) < min_num_parents:
+            new_creatures = [Consumer(self) for _ in range(min_num_parents - len(parent_pool))]
+            parent_pool = parent_pool + new_creatures
         offsprings = []
         for i in range(self.population):
             p0_id = np.random.randint(len(parent_pool))

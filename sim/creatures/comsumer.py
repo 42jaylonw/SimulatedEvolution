@@ -19,9 +19,9 @@ class Consumer(Creature):
         obs = self.get_observation()
         action = np.argmax(self.behavior_system.predict(obs))
         self.action_move(action)
-        self.energy_bar.consume_energy(self.move_cost)
-        if self.energy_bar.is_empty():
-            self.die()
+        # self.energy_bar.consume_energy(self.move_cost)
+        # if self.energy_bar.is_empty():
+        #     self.die()
 
     def die(self):
         # self.sim.creatures -= this
