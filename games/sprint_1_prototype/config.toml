@@ -2,18 +2,20 @@
 grid_size = [50, 50]
 visual_size = [800, 800]
 time_step = 0.001
-max_generations = 20
+max_generations = 30
 max_steps = 50
 population = 50
-
-[Producer]
-rgb = [0.5, 0.96, 0.0]
-num_observations = -1
-num_actions = -1
-genome = -1
-num_neurons = 4
-reproduce_mode = 1
-mutation_rate=0.2
+min_survival_rate = 0.25
+global_brightness = 0
+global_temperature = 0
+#[Producer]
+#rgb = [0.5, 0.96, 0.0]
+#num_observations = -1
+#num_actions = -1
+#genome = -1
+#num_neurons = 4
+#reproduce_mode = 1
+#mutation_rate = 0.2
 
 [Consumer]
 rgb = [0.96, 0.5, 0.0]
@@ -24,5 +26,5 @@ num_actions = 9
 genome = -1
 num_genomes = 4
 num_neurons = 3
-reproduce_mode = 1
-mutation_rate=0.2
+reproduce_mode = 0
+mutation_rate = 0.0

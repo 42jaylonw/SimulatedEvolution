@@ -38,7 +38,7 @@ class RandMoveConsumer(Consumer):
 
 def run_random_moving():
     num_producers = 100
-    num_consumers = 3
+    num_consumers = 300
     # create simulation space
     config = toml.load("games/sprint_0_random/config.toml")
     sim = SimSpace(config)
@@ -47,31 +47,30 @@ def run_random_moving():
     consumers = [RandMoveConsumer(sim) for _ in range(num_consumers)]
     # add organisms to simulation space
     # sim.reset(producers + consumers)
-    walls = None
+    walls = []
+    emitters = []
     walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
     walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
-    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 10, 2),
-                LightSource(sim, [(sim.grid_size[0] // 2) - 5, (sim.grid_size[1] // 2) + 5], 25, 1)]
+
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
+                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
     # add organisms, walls, emitters to simulation space
     sim.reset(producers + consumers, walls, emitters)
 
     for _ in range(1000):
         # render the simulation image
-        sim.step()
         sim.render()
-        info = sim.get_near_info(consumers[0].grid_pos, 2)
-        grid_info = info[0]  # the grid layer info 0 means empty, 1 means grid board or obstacles
-        producers_info = info[1]  # the dimension 2: the producer layer info 0 means empty, 1 means a producer
-        consumers_info = info[2]  # the dimension 3: the consumer layer info 0 means empty, 1 means a consumer
+        sim.step()
+        sim.show_layer(6)
+        #sim.print_layer(6)
+        #sim.render()
+        #info = sim.get_near_info(consumers[0].grid_pos, 2)
+        #grid_info = info[0]  # the grid layer info 0 means empty, 1 means grid board or obstacles
+        #producers_info = info[1]  # the dimension 2: the producer layer info 0 means empty, 1 means a producer
+        #consumers_info = info[2]  # the dimension 3: the consumer layer info 0 means empty, 1 means a consumer
         # print("grid_info: \n", grid_info)
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
-        # sim.show_layer(1)
-        sim.show_layer(2)
-        # sim.show_layer(3)
-        # sim.print_layer("Consumer")
-        sim.show_layer(5)
-        # sim.print_layer(5)
 
 if __name__ == '__main__':
     run_random_moving()

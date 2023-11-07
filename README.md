@@ -4,7 +4,7 @@
 1. Install python tutorial [here](https://kinsta.com/knowledgebase/install-python/).
 2. Install python dependencies
     ```commandline
-    pip install -r requirments.txt
+    pip install -r requirements.txt
     ```
 3. run sim
    ```commandline

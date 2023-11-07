@@ -2,6 +2,7 @@ import toml
 import hashlib
 import numpy as np
 from algorithm.genetic_algorithm import GeneticAlgorithm
+from sim.energy import EnergyBar
 
 
 class Creature:
@@ -11,6 +12,7 @@ class Creature:
     _cfg: dict
     position: np.ndarray
     behavior_system: GeneticAlgorithm
+    energy_bar: EnergyBar
 
     # properties
     energy: float
@@ -35,6 +37,7 @@ class Creature:
         self.rgb = self._cfg['rgb']
         self.position = np.random.randint(self.sim.grid_size)
         self.sim.increment_pos_layer(self.name, self.position, 1)
+
         # Compute a unique hash based on the 4th byte of creature's genome
         hasher = hashlib.sha256()
         hasher.update(self.behavior_system.genome[3].encode())
@@ -42,11 +45,20 @@ class Creature:
         # Assign size and energy properties based on the hash
         self.size = int(hash[:32], 16) % 101 + 0.1
         self.energy = int(hash[32:], 16) % 101 + 1
+        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size)
+        # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
     def reset(self):
         self._init_properties()
 
     def step(self):
+        pass
+
+    def die(self):
+        """
+        Handles death. A creature that dies should remove itself from sim.creatures
+        and update the layer's grid position value.
+        """
         pass
 
     @property

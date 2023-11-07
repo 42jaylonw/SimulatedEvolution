@@ -13,11 +13,21 @@ class Consumer(Creature):
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]
         self.last_action = [0, 0]
+        self.move_cost = 0.0
 
     def step(self):
         obs = self.get_observation()
         action = np.argmax(self.behavior_system.predict(obs))
         self.action_move(action)
+        # self.energy_bar.consume_energy(self.move_cost)
+        # if self.energy_bar.is_empty():
+        #     self.die()
+
+    def die(self):
+        # self.sim.creatures -= this
+        if self in self.sim.creatures:
+            self.sim.creatures.remove(self)
+        self.sim.increment_pos_layer("Consumer", self.position, -1)
 
     def get_observation(self):
 
@@ -141,24 +151,27 @@ class Consumer(Creature):
 
         target_pos = self.position + (d_x, d_y)
         self.curr_action = [d_x, d_y]
+        
+        self.move_cost = 0.0
+        # TO-DO -- grab elevation from sim space on layer
+        current_elevation = 0.0
+        target_elevation = 0.0
+        self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
 
-        if self.sim.is_pos_out_of_bounds(target_pos) or not self.sim.is_pos_layer_empty("Producer", target_pos):
+        if self.sim.is_pos_out_of_bounds(target_pos) or not self.sim.is_pos_layer_empty("Wall", target_pos):
             # Space is occupied: no change in position can be made in this direction
-            if not self.sim.is_pos_out_of_bounds(target_pos) and not self.sim.is_pos_layer_empty("Wall", target_pos):
-                print("PRODUCER blocking movement")
+            #print("wall blocked movement")
             d_x, d_y = 0, 0
             target_pos = self.position
 
-        self.sim.increment_pos_layer("Consumer", self.position,
-                                     -1)  # WIP - DELETE THIS IF REFRESH IN SIMSPACE USED INSTEAD
+        self.sim.increment_pos_layer("Consumer", self.position, -1)
 
         # Update the creature's position to the target position
         # The clipping shouldn't be necessary, but just in case - clip the new position to be within bounds of sim space
         self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
         self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
 
-        self.sim.increment_pos_layer("Consumer", self.position,
-                                     1)  # WIP DELETE THIS IF REFRESH IN SIMSPACE USED INSTEAD
+        self.sim.increment_pos_layer("Consumer", self.position, 1)
 
     def blockedFwd(self):
         """
