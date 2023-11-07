@@ -6,7 +6,8 @@ max_generations = 30
 max_steps = 50
 population = 50
 min_survival_rate = 0.25
-
+global_brightness = 0
+global_temperature = 0
 #[Producer]
 #rgb = [0.5, 0.96, 0.0]
 #num_observations = -1

@@ -36,7 +36,7 @@ class SimSpace:
         for creature in self.creatures:
             creature.reset()
 
-    # def reset(self, creatures, walls, emitters):
+    #def reset(self, creatures, walls, emitters):
     #     self.creatures = creatures
     #     self.walls = walls
     #     self.emitters = emitters
@@ -45,9 +45,12 @@ class SimSpace:
         assert self.creatures is not None, "Reset first!"
 
         # Refresh emitters
-        self.layers[LAYER_DICT["Light"]] = 0.
-        self.layers[LAYER_DICT["Temperature"]] = 0.
+        self.layers[LAYER_DICT["Light"]] = self._cfg['global_brightness']
+        self.layers[LAYER_DICT["Temperature"]] = self._cfg['global_temperature']
         self.layers[LAYER_DICT["Elevation"]] = 0.
+        for wall in self.walls:
+            wall.step()
+
         for emitter in self.emitters:
             emitter.step()
 
@@ -81,9 +84,8 @@ class SimSpace:
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
-        if self.walls is not None:
-            for wall in self.walls:
-                render_img[wall.grid_pos] = wall.rgb
+        for wall in self.walls:
+            render_img[wall.grid_pos()] = wall.rgb
 
         render_img = self.get_render_image(render_img)
         cv2.imshow(str(self.name),
@@ -148,6 +150,16 @@ class SimSpace:
         else:
             return False
 
+    def get_pos_layer(self, layer, pos):
+        """
+            :param:
+                layer: which layer to get
+                pos: (x, y) position on the grid layer to get the value of
+        """
+        # WIP: make this an assertion
+        if not self.is_pos_out_of_bounds(pos):
+            return self.layers[LAYER_DICT[layer], pos[0], pos[1]]
+
     def set_pos_layer(self, layer, pos, val=0):
         """
             :param:
@@ -159,14 +171,13 @@ class SimSpace:
         if not self.is_pos_out_of_bounds(pos):
             self.layers[LAYER_DICT[layer], pos[0], pos[1]] = val
 
-    def increment_pos_layer(self, layer, pos, val=0):
+    def increment_pos_layer(self, layer, pos, val=1):
         """
             :param:
                 layer: which layer should be incremented
                 pos: (x, y) position on the grid layer to update the value of
                 val: value to change the int/float at the layer position. can be negative
         """
-        # assert val == 0 or val == 1, "val must be 0 or 1!"
         if not self.is_pos_out_of_bounds(pos):
             self.layers[LAYER_DICT[layer], pos[0], pos[1]] += val
 
