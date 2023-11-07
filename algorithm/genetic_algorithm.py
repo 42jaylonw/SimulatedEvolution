@@ -296,7 +296,10 @@ def mutate_genome(genome, mutation_chance):
     for g in range(len(genome)):
         # gene mutates
         if random.randint(0, 100) / 100.0 <= mutation_chance:
-            mutate_index = random.randint(0, len(genome[g]) - 1)
+            # this code mutates the entire genome
+            # mutate_index = random.randint(0, len(genome[g]) - 1)
+            # this code mutates only the weights
+            mutate_index = random.randint(4, 5)
             mutate_char = int_to_hex(random.randint(0, 15))
             temp = list(genome[g])
             temp[mutate_index] = mutate_char
