@@ -38,12 +38,14 @@ class Cell
     //Method that lowers the opacity of a cell that the mouse hovers over
     decreaseCellOpacity()
     {
+        this.element.style.border = "solid gray";
         this.element.style.opacity = 0.5;
     }
 
     //Method that restores opacity of a cell when the mouse leaves cell
     restoreCellOpactiy()
     {
+        this.element.style.border = "none";
         this.element.style.opacity = 1;
     }
 
@@ -59,10 +61,10 @@ class Cell
         //Make the POST request
         fetch('/get_cell_data', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)})
         .then((response) => response.json())
-        //Post Request SUCCESS
+        //Post Request SUCCESS, Perform operations on response(cellLayerData)
         .then((cellLayerData) => {
 
-           console.log(cellLayerData[Layer.Consumer]);
+           console.log(cellLayerData);
             
         })
         //POST Request FAILED

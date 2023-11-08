@@ -8,6 +8,25 @@ simSpace.populateGrid();
 startSimButton = document.getElementById('simulateButton');
 pauseSimButton = document.getElementById('pauseSimulationButton');
 newSimButton = document.getElementById('newSimulationButton');
+
+let heatMapdisplayed = false;
+toggleClimateButton = document.getElementById('toggleClimateButton');
+
+toggleClimateButton.addEventListener('click', function(){
+    if(heatMapdisplayed)
+    {
+        simSpace.stopHeatmapDisplay();
+        toggleClimateButton.textContent = "Show Heatmap"
+    }
+    else
+    {
+      simSpace.displayHeatmap(); 
+      toggleClimateButton.textContent = "Hide Heatmap"
+        
+    }
+    heatMapdisplayed = !heatMapdisplayed;
+});
+
 //Start Simulation
 startSimButton.addEventListener('click', function(){
     simSpace.runSimulation();

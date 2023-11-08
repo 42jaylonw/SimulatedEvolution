@@ -13,7 +13,7 @@ class SimulationGrid
         this.cells = new Array(this.width * this.width);
         const output = document.querySelector('.sim-container');
         //Create NxN square grid containing Cell objects
-        for(let i = 0; i < this.cells.length; i++)
+        for(let i = 0; i < this.width * this.width; i++)
         {
             //Add create and add Cell to container
             let position = [Math.floor(i/this.width), i % this.width];
@@ -120,5 +120,55 @@ class SimulationGrid
     {
         console.log("stopping calls..");
         clearInterval(this.simulationID);
+    }
+
+    displayHeatmap()
+    {
+        fetch('/generate_mock_climate')
+        .then((response) => response.json())
+        //Request SUCCESS
+        .then((climateData) => {
+            // let color = "white";
+            let color;
+            let cellnum = 0;
+            for(let temperature of climateData)
+            {
+                let cell = 'cell-' + Math.floor(cellnum/this.width) + '-' + cellnum % this.width;
+                if (temperature < 0.2) 
+                {
+                    color = `rgb(0,0,255)`;
+                } 
+                else if (temperature < 0.4) 
+                {
+                    color = `rgb(0,255,255)`;
+                } 
+                else if (temperature < 0.6) 
+                {
+                   color = `rgb(0,255,0)`;
+                } 
+                else if (temperature < 0.8) 
+                {
+                    color = `rgb(255,255,0)`;
+                } 
+                else 
+                {
+                    color = `rgb(255,0,0)`;
+                }
+                this.changeCellColor(cell, color)
+                cellnum++;
+
+            }
+        })
+        //Request FAILURE
+        .catch((error) =>{
+            console.error('Error:', error);
+        });
+    }
+
+    stopHeatmapDisplay()
+    {
+        this.clearSimulation();
+        this.populateGrid();
+        console.log("stopping heatmap..");
     }
 }

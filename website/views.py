@@ -1,7 +1,10 @@
 from flask import Blueprint, render_template, jsonify, request
 import games.sprint_0_random.random_moving as random_moving
+import random
 
 views = Blueprint('views', __name__)
+
+
 
 # simulator for user session
 simulator = None
@@ -50,3 +53,8 @@ def get_cell_data():
     if(layers_at_cell[2] == 1):
         print(type(layers_at_cell[2]))
     return jsonify(layers_at_cell)
+
+@views.route('/generate_mock_climate')
+def get_climate_data():
+    temperatures = [random.random() for _ in range(2500)]
+    return jsonify(temperatures)

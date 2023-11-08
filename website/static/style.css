@@ -37,8 +37,8 @@ body{
 }
 .grid-item {
   border: 0;
-  min-width: 16px;
-  min-height: 16px;
+  min-width: 18px;
+  min-height: 18px;
 }
 
 /* Style for Simulator slider */
