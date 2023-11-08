@@ -72,5 +72,7 @@ def run_random_moving():
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
 
+def get_location_info(sim):
+    return sim.layers
 if __name__ == '__main__':
     run_random_moving()

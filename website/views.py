@@ -39,3 +39,14 @@ def get_grid_data():
     global simulator
     # return the updated position of creatures
     return jsonify(random_moving.get_updated_positions(simulator))
+
+@views.route('/get_cell_data', methods=["POST"])
+def get_cell_data():
+    global simulator
+
+    cell_location = request.json["position"]
+    cell_info = random_moving.get_location_info(simulator)
+    layers_at_cell = cell_info[:, cell_location[0], cell_location[1]].tolist()
+    if(layers_at_cell[2] == 1):
+        print(type(layers_at_cell[2]))
+    return jsonify(layers_at_cell)

@@ -1,23 +1,29 @@
+/**
+ * @class
+ * @classdesc A square grid that displays a simulated environment
+ */
 class SimulationGrid
 {
-    constructor(size)
+    /**
+     * @param {Int} width The width of the the NxN grid
+     */
+    constructor(width)
     {
-        this.cells = new Array(size * size);
+        this.width = width;
+        this.cells = new Array(this.width * this.width);
         const output = document.querySelector('.sim-container');
         //Create NxN square grid containing Cell objects
         for(let i = 0; i < this.cells.length; i++)
         {
-            //Add cell to container
-            let id = 'cell-' + Math.floor(i/size) + '-' + i % size;
-            let curCell = new Cell(id);
+            //Add create and add Cell to container
+            let position = [Math.floor(i/this.width), i % this.width];
+            let curCell = new Cell(position);
             output.append(curCell.element);
-            //Add cell to internal array
-            this.cells[i] = curCell;
         }
     }
     
-    //Edit a specified cell
-    editCell(cellId, color)
+    //Edit a specified cell by it's HTML Id
+    changeCellColor(cellId, color)
     {
         const cell = document.getElementById(cellId);
         cell.style.backgroundColor = color;
@@ -32,10 +38,9 @@ class SimulationGrid
             //Apply received data to grid
             for(let organism of data)
             {
-                const position = organism[0]
-                const color = organism[1]
-                //console.log('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
-                this.editCell('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+                let position = organism[0]
+                let color = organism[1]
+                this.changeCellColor('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
             }
             console.log("done setting up grid!");
             
@@ -55,12 +60,12 @@ class SimulationGrid
             //update frontend grid 
             for(let organism of data)
             {
-                oldPosition = organism[0]
-                newPosition = organism[1]
-                color = organism[2]
+                let oldPosition = organism[0]
+                let newPosition = organism[1]
+                let color = organism[2]
                 //Change grid data
-                this.editCell('cell-' + oldPosition[0] + '-' + oldPosition[1], 'white');
-                this.editCell('cell-' + newPosition[0] + '-' + newPosition[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+                this.changeCellColor('cell-' + oldPosition[0] + '-' + oldPosition[1], 'white');
+                this.changeCellColor('cell-' + newPosition[0] + '-' + newPosition[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
             }
             
         })
@@ -68,15 +73,52 @@ class SimulationGrid
             console.error('Error:', error);
         });
     }
-    //Request simulation grid data from server every 0.45 seconds
+
+    //Visually clear the simulation grid
+    clearSimulation()
+    {   
+        for(let i = 0; i < 50 * 50; i++)
+        {
+            this.changeCellColor('cell-' + Math.floor(i/this.width) + '-' + i % this.width, 'white');
+        }
+    }
+
+    //Create a new simulation
+    newSimulation()
+    {
+        //Clear any information of an old simulation
+        this.clearSimulation();
+        //Create GET request for new simluation information
+        fetch('/new_grid')
+        .then((response) => response.json())
+        //Request SUCCESS
+        .then((data) => {
+            //Apply received data to grid
+            for(let organism of data)
+            {
+                const position = organism[0]
+                const color = organism[1]
+                this.changeCellColor('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+            }
+            console.log("Created new Grid!");
+            
+        })
+        //Request FAILURE
+        .catch((error) =>{
+            console.error('Error:', error);
+        });
+    }
+    
+    //Request simulation grid data from server every 0.500 seconds
     runSimulation()
     {
-        this.simulationID = setInterval(this.getGridData, 1000);
+        this.simulationID = setInterval(() => {this.getGridData()}, 500);
     }
 
     //Stop sending simulation grid data requests
     pauseSimulation()
     {
+        console.log("stopping calls..");
         clearInterval(this.simulationID);
     }
 }
