@@ -42,7 +42,7 @@ class SimulationGrid
                 let color = organism[1]
                 this.changeCellColor('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
             }
-            console.log("done setting up grid!");
+            
             
         })
         .catch((error) =>{

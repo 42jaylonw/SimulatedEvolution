@@ -2,14 +2,14 @@
 //Create a 50x50 Simulation Grid
 simSpace = new SimulationGrid(50);
 simSpace.populateGrid();
-
+console.log("done setting up grid!");
 
 //Assign functions for each button
-startSimButton = document.getElementById('simulateButton');
-pauseSimButton = document.getElementById('pauseSimulationButton');
+simButton = document.getElementById('simulateButton');
 newSimButton = document.getElementById('newSimulationButton');
 
 let heatMapdisplayed = false;
+let isSimRunning = false;
 toggleClimateButton = document.getElementById('toggleClimateButton');
 
 toggleClimateButton.addEventListener('click', function(){
@@ -27,16 +27,19 @@ toggleClimateButton.addEventListener('click', function(){
     heatMapdisplayed = !heatMapdisplayed;
 });
 
-//Start Simulation
-startSimButton.addEventListener('click', function(){
-    simSpace.runSimulation();
-    startSimButton.disabled = true;
-});
-
-//Pause Simulation
-pauseSimButton.addEventListener('click', function(){
-    simSpace.pauseSimulation();
-    startSimButton.disabled = false;
+//Start/Pause Simulation
+simButton.addEventListener('click', function(){
+    if(!isSimRunning)
+    {
+        simSpace.runSimulation();
+        simButton.textContent = "Pause Simulation"
+    }
+    else
+    {
+        simSpace.pauseSimulation();
+        simButton.textContent = "Play Simulation"
+    }
+    isSimRunning = !isSimRunning;
 });
 
 //Create a new Simulation
