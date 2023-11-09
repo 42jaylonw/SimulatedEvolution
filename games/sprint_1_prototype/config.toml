@@ -2,7 +2,7 @@
 grid_size = [50, 50]
 visual_size = [800, 800]
 time_step = 0.001
-max_generations = 30
+max_generations = 2
 max_steps = 50
 population = 50
 min_survival_rate = 0.25
