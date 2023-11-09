@@ -1,5 +1,4 @@
-const Layer =
-{
+const Layer ={
     Producer: 1,
     Consumer: 2,
     Wall: 3,
@@ -14,13 +13,11 @@ const Layer =
  * @prop {Element} Cell.element an HTML element associated with the Cell object
  * @prop {Array[Int]} Cell.position the [X,Y] location of the created Cell object
  */
-class Cell
-{
+class Cell{
     /**
      * @param {Array[int]} position [X,Y] location to create a Cell object
      */
-    constructor(position)
-    {
+    constructor(position){
         //Create html element for Cell
         this.element = document.createElement('div');
         this.position = position;
@@ -36,15 +33,13 @@ class Cell
     }
 
     //Method that lowers the opacity of a cell that the mouse hovers over
-    decreaseCellOpacity()
-    {
+    decreaseCellOpacity(){
         this.element.style.border = "solid gray";
         this.element.style.opacity = 0.5;
     }
 
     //Method that restores opacity of a cell when the mouse leaves cell
-    restoreCellOpactiy()
-    {
+    restoreCellOpactiy(){
         this.element.style.border = "none";
         this.element.style.opacity = 1;
     }
@@ -52,8 +47,7 @@ class Cell
     /**
      * Method that displays all the layer information at a clicked Cell
      */
-    displayCellInfo()
-    {
+    displayCellInfo(){
         //Debug print
         console.log(`Output information of ${this.element.id} at position: ${this.position}`);
         //Format cell position to send to Python backend

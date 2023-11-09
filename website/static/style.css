@@ -19,12 +19,9 @@ body{
 .square-container{
   display: flex;
   justify-content: center;
-  /* background-color: gray; */
   max-width: 900vw;
   max-height: 900vh;
-  margin: 0 auto;
-  margin-top: 1vw;
-
+  margin: 0;
 }
   
 .sim-container {
@@ -41,10 +38,20 @@ body{
   min-height: 18px;
 }
 
-/* Style for Simulator slider */
-.slider-container{
-  width: 100%;
+
+.analysis-container{
+  background-color: grey;
+  width: 100px;
+  height: 100px;
 }
-.slider{
-  width: 100%;
+
+/* style for controls at buttom of screen */
+footer {
+  background-color: #333;
+  height: fit-content;
+}
+
+.left-window{
+  background-color: beige;
+  
 }

@@ -2,19 +2,16 @@
  * @class
  * @classdesc A square grid that displays a simulated environment
  */
-class SimulationGrid
-{
+class SimulationGrid{
     /**
      * @param {Int} width The width of the the NxN grid
      */
-    constructor(width)
-    {
+    constructor(width){
         this.width = width;
         this.cells = new Array(this.width * this.width);
         const output = document.querySelector('.sim-container');
         //Create NxN square grid containing Cell objects
-        for(let i = 0; i < this.width * this.width; i++)
-        {
+        for(let i = 0; i < this.width * this.width; i++){
             //Add create and add Cell to container
             let position = [Math.floor(i/this.width), i % this.width];
             let curCell = new Cell(position);
@@ -23,14 +20,12 @@ class SimulationGrid
     }
     
     //Edit a specified cell by it's HTML Id
-    changeCellColor(cellId, color)
-    {
+    changeCellColor(cellId, color){
         const cell = document.getElementById(cellId);
         cell.style.backgroundColor = color;
     }
     
-    populateGrid()
-    {
+    populateGrid(){
         //Create simulation grid and request its information
         fetch('/setup_grid')
         .then((response) => response.json())
@@ -51,15 +46,13 @@ class SimulationGrid
     }
 
     //Request state of simulation grid from server, then apply these changes on the frontend
-    getGridData()
-    {
+    getGridData(){
         //Request simulation grid data
         fetch('/get_grid_data')
         .then((response) => response.json())
         .then((data) => {
             //update frontend grid 
-            for(let organism of data)
-            {
+            for(let organism of data){
                 let oldPosition = organism[0]
                 let newPosition = organism[1]
                 let color = organism[2]
@@ -75,8 +68,7 @@ class SimulationGrid
     }
 
     //Visually clear the simulation grid
-    clearSimulation()
-    {   
+    clearSimulation(){   
         for(let i = 0; i < 50 * 50; i++)
         {
             this.changeCellColor('cell-' + Math.floor(i/this.width) + '-' + i % this.width, 'white');
@@ -84,8 +76,7 @@ class SimulationGrid
     }
 
     //Create a new simulation
-    newSimulation()
-    {
+    newSimulation(){
         //Clear any information of an old simulation
         this.clearSimulation();
         //Create GET request for new simluation information
@@ -94,8 +85,7 @@ class SimulationGrid
         //Request SUCCESS
         .then((data) => {
             //Apply received data to grid
-            for(let organism of data)
-            {
+            for(let organism of data){
                 const position = organism[0]
                 const color = organism[1]
                 this.changeCellColor('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
@@ -110,20 +100,17 @@ class SimulationGrid
     }
     
     //Request simulation grid data from server every 0.500 seconds
-    runSimulation()
-    {
+    runSimulation(){
         this.simulationID = setInterval(() => {this.getGridData()}, 500);
     }
 
     //Stop sending simulation grid data requests
-    pauseSimulation()
-    {
+    pauseSimulation(){
         console.log("stopping calls..");
         clearInterval(this.simulationID);
     }
 
-    displayHeatmap()
-    {
+    displayHeatmap(){
         fetch('/generate_mock_climate')
         .then((response) => response.json())
         //Request SUCCESS
@@ -131,8 +118,7 @@ class SimulationGrid
             // let color = "white";
             let color;
             let cellnum = 0;
-            for(let temperature of climateData)
-            {
+            for(let temperature of climateData){
                 let cell = 'cell-' + Math.floor(cellnum/this.width) + '-' + cellnum % this.width;
                 if (temperature < 0.2) 
                 {
@@ -165,8 +151,7 @@ class SimulationGrid
         });
     }
 
-    stopHeatmapDisplay()
-    {
+    stopHeatmapDisplay(){
         this.clearSimulation();
         this.populateGrid();
         console.log("stopping heatmap..");

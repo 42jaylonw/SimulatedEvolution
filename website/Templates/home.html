@@ -3,23 +3,34 @@
 {% block title %}Simulated Evolution Home{% endblock %}
 
 {% block content %}
-
-
-<div class="row">
-    <!-- Simulator controls -->
-    <div class="col-sm-4">
-        <button id="simulateButton" type="button">Play Simulation</button>
-        <button id="newSimulationButton" type="button">New Simulation</button> 
+ 
+<!--Layout for Home page-->
+<div class="row content">
+    <!-- Simulator control Information(left side of screen) -->
+    <div class="col-3 sidenav left-window">
+        <h1 class="text-center">Quick Controls</h1>
+        <p class="text-left">Pause/Play Simulation: SPACE<br>
+        Create New Simulation: SHIFT + N
+        </p>
     </div>
-    <!-- Simulation Area-->
-    <div class="col-sm-4">
+    <!-- Simulation Area(center of screen)-->
+    <div class="col-6">
         <div class="square-container">
             <div class="sim-container">
             </div>
         </div>
-        <button id="toggleClimateButton" type="button">Show Heatmap</button>
+    </div>
+    <!--Descriptive information of selected simulation cell(right of screen)-->
+    <div class="col-3 sidenav">
+        <div class="analysis-container">
+        </div>
     </div>
 </div>
+<footer class="container-fluid text-center">
+<button id="simulateButton" type="button">Play Simulation</button>
+<button id="newSimulationButton" type="button">New Simulation</button> 
+<button id="toggleClimateButton" type="button">Show Heatmap</button>
+</footer>
 {% endblock %}
 
 <!-- Scripts -->
@@ -37,5 +48,9 @@ src = "{{ url_for('static', filename='cell.js') }}"
 <script
 type = "text/javascript"
 src = "{{ url_for('static', filename='frontend-main.js') }}"
+></script>
+<script
+type = "text/javascript"
+src = "{{ url_for('static', filename='simulation-controls.js') }}"
 ></script>
 {% endblock script %}
