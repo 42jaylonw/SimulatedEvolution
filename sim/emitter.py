@@ -34,6 +34,10 @@ class Emitter():
         self.position[0] = np.clip(new_pos[0], 0, self.sim.grid_size[0] - 1)
         self.position[1] = np.clip(new_pos[1], 0, self.sim.grid_size[1] - 1)
 
+    def remove(self):
+        if self in self.sim.emitters:
+            self.sim.emitters.remove(self)
+
     """
     Update by radiating outwards in a circle from the center
     Note: Walls obstruct emitters
