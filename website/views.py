@@ -25,14 +25,14 @@ def set_grid():
     # initialize Simulator if one has not been made
     global simulator
     if simulator is None:
-        simulator = random_moving.generate_sim(0, 50)
+        simulator = random_moving.generate_sim(0, 10)
     # return the starting state of the simulator
     return jsonify(random_moving.get_initial_positions(simulator))
 
 @views.route('/new_grid', methods=["GET"])
 def new_grid():
     global simulator
-    simulator = random_moving.generate_sim(0, 50)
+    simulator = random_moving.generate_sim(0, 10)
     return jsonify(random_moving.get_initial_positions(simulator))
 
 

@@ -30,18 +30,19 @@ class Cell{
         this.element.onmouseenter = () => {this.decreaseCellOpacity()};
         this.element.onmouseleave = () => {this.restoreCellOpactiy()};
         this.element.onclick = () => {this.displayCellInfo()};
+        this.createInfoDisplay();        
     }
 
     //Method that lowers the opacity of a cell that the mouse hovers over
     decreaseCellOpacity(){
-        this.element.style.border = "solid gray";
-        this.element.style.opacity = 0.5;
+        this.element.style.border = "solid black";
+        this.infoDisplay.style.opacity = 1;
     }
 
     //Method that restores opacity of a cell when the mouse leaves cell
     restoreCellOpactiy(){
         this.element.style.border = "none";
-        this.element.style.opacity = 1;
+        this.infoDisplay.style.opacity = 0;
     }
 
     /**
@@ -65,6 +66,17 @@ class Cell{
         .catch((error) =>{
             console.error('Error:', error);
         });
+    }
+
+    createInfoDisplay(){
+        //Create new element 'info-display'
+        this.infoDisplay = document.createElement('div');
+        this.infoDisplay.classList.add('info-display');
+        // this.infoDisplay.innerText = `Climate: ${0.395}\nCreatures: ${53}\nLight-level: ${0.532}\n <Click for details>`;
+        this.infoDisplay.innerHTML = `Climate: ${0.395}` + '<br>' + `Creatures: ${53}` + '<br>' + `Light-level: ${0.532}` + '<p class="text-center" class="details-text">click for details</p>';
+
+        this.infoDisplay.style.opacity = 0; 
+        this.element.appendChild(this.infoDisplay); 
     }
 }
 

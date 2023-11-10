@@ -16,10 +16,16 @@ def generate_sim(num_producers=1, num_consumers=1):
     sim = SimSpace(config)
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
-    # add organisms to simulation space
-    sim.reset(producers + consumers)
-    return sim
+    walls = []
+    emitters = []
+    walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
+    walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
 
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
+                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
+    # add organisms to simulation space
+    sim.reset(producers + consumers, walls, emitters)
+    return sim
 
 # Get the initial positions of all active creatures in a specified sim space
 def get_initial_positions(sim):
@@ -28,7 +34,9 @@ def get_initial_positions(sim):
 
 # Allow all creatures to move, then return their new positions
 def get_updated_positions(sim):
+    # sim.step()
     return sim.update_simulator()
+    # return sim.get_creature_positions()
 
 
 class RandMoveConsumer(Consumer):
