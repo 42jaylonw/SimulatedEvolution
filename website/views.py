@@ -4,7 +4,8 @@ import random
 
 views = Blueprint('views', __name__)
 
-
+NUMCONSUMERS = 5
+NUMPRODUCERS = 1
 
 # simulator for user session
 simulator = None
@@ -25,7 +26,7 @@ def set_grid():
     # initialize Simulator if one has not been made
     global simulator
     if simulator is None:
-        simulator = random_moving.generate_sim(4, 100)
+        simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
     
     # return the starting state of the simulator
     creaturePositions = [(creature.grid_pos, creature.rgb) for creature in simulator.creatures]
@@ -39,7 +40,7 @@ def set_grid():
 @views.route('/new_grid', methods=["GET"])
 def new_grid():
     global simulator
-    simulator = random_moving.generate_sim(4, 100)
+    simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
     creaturePositions = [(creature.grid_pos, creature.rgb) for creature in simulator.creatures]
     wallPositions = [wall.position.tolist() for wall in simulator.walls]
     return jsonify([creaturePositions, wallPositions])
@@ -62,15 +63,3 @@ def get_cell_data():
     # cell_info = [1,2]
     layers_at_cell = cell_info[:, cell_location[0], cell_location[1]].tolist()
     return jsonify(layers_at_cell)
-
-@views.route('/generate_mock_climate')
-def get_climate_data():
-
-    idk = []
-    for i in range(50):
-        for j in range(50):
-           # (position, layerinformation)
-           idk.append(([i,j], simulator.layers[:, i, j].tolist()))
-    return jsonify(idk) 
-    # temperatures = [random.random() for _ in range(2500)]
-    # return jsonify(temperatures)

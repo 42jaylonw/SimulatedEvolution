@@ -4,39 +4,41 @@
  */
 class SimulationGrid{
     /**
-     * @param {Int} width The width of the the NxN grid
+     * Create an NxN simulation grid object
+     * @param {Int} width The width of the grid
+     * @property {Array[cell]} SimulationGrid.cells array containing Cell objects
+     * @property {Element} simContainerElement SimulationGrid container
      */
     constructor(width){
         this.width = width;
         this.cells = new Array(this.width * this.width);
-        const output = document.querySelector('.sim-container');
+        const simContainerElement = document.querySelector('.sim-container');
         //Create NxN square grid containing Cell objects
         for(let i = 0; i < this.width * this.width; i++){
             //Add create and add Cell to container
             let position = [Math.floor(i/this.width), i % this.width];
             let curCell = new Cell(position);
-            output.append(curCell.element);
+            simContainerElement.append(curCell.element);
             this.cells[i] = curCell;
         }
         this.setupGrid();
     }
     
-    //Edit a specified cell by it's HTML Id
-    changeCellColor(cellId, color){
-        const cell = document.getElementById(cellId);
-        cell.style.backgroundColor = color;
-    }
-    
+      /**
+     * Retreive Simulation data from backend
+     * @var {Array[((X,Y), RGB)]} creatures array containing position (X,Y) and color RGB of all creatures
+     * @var {Array[(X,Y)]} walls Array containing positions of all Walls
+     *  @var {Array[(X,Y), Array[Layers]]} layers Array containing Layer information at all positions (X,Y)
+     */
     setupGrid(){
         //Create simulation grid and request its information
         fetch('/setup_grid')
         .then((response) => response.json())
         .then((data) => {
             //Apply received data to grid
-            // console.log(data);
             let creatures = data[0];
             let walls = data[1];
-            let layers = data[2];
+            let layers = data[2];       
             this.handleGridData(creatures, layers, walls);
             
         })
@@ -46,6 +48,13 @@ class SimulationGrid{
     }
 
     //FIXME: adjust Walls should be static so, Walls should only be iterated over during setupGrid()
+    /**
+     * Update Simulation Grid object with data received from the backend
+     * @param {Array[((X,Y), RGB)]} creatureInfo Array containing position (X,Y) and color RGB of all creatures
+     * @param {Array[(X,Y), Array[Layers]]} layers Array containing Layer information at all positions (X,Y)
+     * @param {Array[(X,Y)]} walls Array containing positions of all Walls
+     * @param {bool} setCreatures Mode in which to update the Simulation Grid
+     */
     handleGridData(creatureInfo=[], layers=[], walls=[], setCreatures=false){
         //Check if data received specifies creature movement
         if(setCreatures){

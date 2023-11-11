@@ -30,16 +30,17 @@ body{
   height: 100%;
   display: grid;
   justify-content: center;
-  grid-template-columns: repeat(50, 1fr);
-  /* background-color: black; */
+  grid-template-columns: repeat(50, 18px);
 }
-/*  */
+/* Style for Cells */
 .cell-item {
   border: 0;
   min-width: 18px;
   min-height: 18px;
+  position: relative;
 }
 
+/* Style for Cell-overlay */
 .cell-overlay{
   min-width: inherit;
   min-height: inherit;
@@ -58,6 +59,7 @@ footer {
   background-color: #333;
   height: fit-content;
 }
+
 
 .left-window{
   background-color: beige;
