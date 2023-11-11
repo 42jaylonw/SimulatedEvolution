@@ -12,7 +12,7 @@ from sim.newlayersystem import LayerSystem
 class SimSpace:
     name = 'SimSpace'
     cfg: dict
-    layer_system: LayerSystem
+    layer_system: LayerSystem #EXPERIMENTAL
     layers: np.ndarray
     grid: np.ndarray
 
@@ -25,8 +25,10 @@ class SimSpace:
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
-        # EXPERIMENTAL
-        self.layer_system = LayerSystem(self.grid_size)
+
+        #EXPERIMENTAL
+        self.layer_system = LayerSystem.LayerSystem(self.grid_size)
+        #
 
         self.max_steps = self._cfg['max_steps']
         self.max_generations = self._cfg['max_generations']

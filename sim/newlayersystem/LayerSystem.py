@@ -1,5 +1,8 @@
 import numpy as np
 
+from sim.creatures.comsumer import Consumer
+from sim.creatures.producer import Producer
+
 MIN_BRIGHTNESS = 0
 MAX_BRIGHTNESS = 100
 
@@ -15,10 +18,20 @@ class LayerSystem():
         self.grid_spaces = [[GridSpace(self, [x, y]) for x in range(sim_dim[0])] for y in range(sim_dim[1])]
 
     def step(self):
+        # Clear emitters
+        self.clear_emitter_values()
+
+    def clear_emitter_values(self):
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 self.grid_spaces[x][y].set_light_level(0)
                 self.grid_spaces[x][y].set_temperature(0)
+
+    #Gets rid of every wall in the SimSpace
+    def clear_walls(self):
+        for x in range(self.dimensions[0]):
+            for y in range(self.dimensions[1]):
+                self.grid_spaces[x][y].wall_remove()
 
     def get_gridspace(self, pos):
         assert not self.out_of_bounds(pos)
@@ -35,6 +48,18 @@ class LayerSystem():
     def get_elevation(self, pos):
         assert not self.out_of_bounds(pos)
         return self.grid_spaces[pos[0]][pos[1]].get_elevation()
+
+    def get_num_creatures(self, pos):
+        assert not self.out_of_bounds(pos)
+        return self.grid_spaces[pos[0]][pos[1]].get_num_creatures()
+
+    def get_num_consumers(self, pos):
+        assert not self.out_of_bounds(pos)
+        return self.grid_spaces[pos[0]][pos[1]].get_num_consumers()
+
+    def get_num_producers(self, pos):
+        assert not self.out_of_bounds(pos)
+        return self.grid_spaces[pos[0]][pos[1]].get_num_producers()
 
     def get_creatures(self, pos):
         assert not self.out_of_bounds(pos)
@@ -118,16 +143,18 @@ class GridSpace():
     light_val: float
     temperature_val: float
     elevation_val: float
-    has_wall: bool
+    has_a_wall: bool
     def __init__(self, layer_system, pos):
         self.layer_system = layer_system
         self.position = pos
-        self.creatures = []
+        self.creatures = [] # consumers + producers
+        self.consumers = [] # subset list of creatures
+        self.producers = [] # subset list of creatures
         self.emitters = []
         self.light_val = 0
         self.temperature_val = 0
         self.elevation_val = 0
-        self.has_wall = False
+        self.has_a_wall = False
 
 
     def get_light_level(self):
@@ -136,12 +163,24 @@ class GridSpace():
         return self.temperature_val
     def get_elevation(self):
         return self.elevation_val
+    def get_num_creatures(self):
+        return len(self.creatures)
+    def get_num_consumers(self):
+        return len(self.consumers)
+    def get_num_producers(self):
+        return len(self.producers)
 
     def get_creatures(self):
         return self.creatures
 
+    def get_consumers(self):
+        return self.consumers
+
+    def get_producers(self):
+        return self.producers
+
     def has_wall(self):
-        return self.has_wall
+        return self.has_a_wall
 
     def get_emitters(self):
         return self.emitters
@@ -166,12 +205,22 @@ class GridSpace():
 
     def creature_enter(self, creature):
         self.creatures.append(creature)
+        if type(creature) == Consumer:
+            self.consumers.append(creature)
+        elif type(creature) == Producer:
+            self.producers.append(creature)
+
     def creature_exit(self, creature):
         self.creatures.remove(creature)
+        if type(creature) == Consumer:
+            self.consumers.remove(creature)
+        elif type(creature) == Producer:
+            self.producers.remove(creature)
+
     def wall_add(self):
-        self.has_wall = True
+        self.has_a_wall = True
     def wall_remove(self):
-        self.has_wall = False
+        self.has_a_wall = False
     def emitter_enter(self, emitter):
         self.emitters.append(emitter)
     def emitter_exit(self, emitter):
