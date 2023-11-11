@@ -6,8 +6,37 @@ from sim.creatures.producer import Producer
 
 from sim.wall import Wall
 from sim.emitter import LightSource, HeatSource
+from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
+def step(sim):
+    assert sim.creatures is not None, "Reset first!"
 
-
+    # Refresh emitters
+    sim.layers[LAYER_DICT["Light"]] = sim._cfg['global_brightness']
+    sim.layers[LAYER_DICT["Temperature"]] = sim._cfg['global_temperature']
+    sim.layers[LAYER_DICT["Elevation"]] = 0.
+    for wall in sim.walls:
+        wall.step()
+    #grid_space
+    """
+    -len(Wall) = 0?
+    -Emitters[]
+    """
+    positionData = []
+    for emitter in sim.emitters:
+        emitter.step()
+    # make a priority
+    for creature in sim.creatures:
+        oldPos = creature.grid_pos
+        creature.step()
+        newPos = creature.grid_pos
+        positionData.append((oldPos, newPos, creature.rgb))
+    idk = []
+    for i in range(50):
+        for j in range(50):
+           # (position, layerinformation)
+           idk.append(([i,j], sim.layers[:, i, j].tolist()))
+    # Return updated creature movement and updated layer information
+    return [positionData, idk]
 
 # Create a simulation space with a specified number of consumers and producers
 def generate_sim(num_producers=1, num_consumers=1):
@@ -16,10 +45,16 @@ def generate_sim(num_producers=1, num_consumers=1):
     sim = SimSpace(config)
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
-    # add organisms to simulation space
-    sim.reset(producers + consumers)
-    return sim
+    walls = []
+    emitters = []
+    walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
+    walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
 
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
+                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
+    # add organisms to simulation space
+    sim.reset(producers + consumers, walls, emitters)
+    return sim
 
 # Get the initial positions of all active creatures in a specified sim space
 def get_initial_positions(sim):
@@ -28,7 +63,8 @@ def get_initial_positions(sim):
 
 # Allow all creatures to move, then return their new positions
 def get_updated_positions(sim):
-    return sim.update_simulator()
+    # return sim.update_simulator()
+    return step(sim)
 
 
 class RandMoveConsumer(Consumer):
@@ -75,5 +111,7 @@ def run_random_moving():
         # print("producers_info: \n", producers_info)
         # print("consumers_info: \n", consumers_info)
 
+def get_location_info(sim):
+    return sim.layers
 if __name__ == '__main__':
     run_random_moving()
