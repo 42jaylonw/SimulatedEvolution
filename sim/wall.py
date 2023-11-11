@@ -26,6 +26,8 @@ class Wall():
     "Removes" the wall object from the layer system
     """
     def remove_wall(self):
+        if self in self.sim.walls:
+            self.sim.walls.remove(self)
         self.sim.set_pos_layer(self.__class__.__name__, self.position, 0)
 
     #@property

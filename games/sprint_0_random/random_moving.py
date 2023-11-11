@@ -73,7 +73,7 @@ class RandMoveConsumer(Consumer):
 
 
 def run_random_moving():
-    num_producers = 100
+    num_producers = 10
     num_consumers = 300
     # create simulation space
     config = toml.load("games/sprint_0_random/config.toml")
@@ -88,8 +88,11 @@ def run_random_moving():
     walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
     walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
 
-    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
-                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
+    for i in range(sim.grid_size[0]):
+        sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
+
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10)]#,
+    #            HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
     # add organisms, walls, emitters to simulation space
     sim.reset(producers + consumers, walls, emitters)
 
@@ -97,7 +100,7 @@ def run_random_moving():
         # render the simulation image
         sim.render()
         sim.step()
-        sim.show_layer(6)
+        #sim.show_layer(6)
         #sim.print_layer(6)
         #sim.render()
         #info = sim.get_near_info(consumers[0].grid_pos, 2)
