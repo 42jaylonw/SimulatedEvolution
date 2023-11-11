@@ -6,8 +6,37 @@ from sim.creatures.producer import Producer
 
 from sim.wall import Wall
 from sim.emitter import LightSource, HeatSource
+from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
+def step(sim):
+    assert sim.creatures is not None, "Reset first!"
 
-
+    # Refresh emitters
+    sim.layers[LAYER_DICT["Light"]] = sim._cfg['global_brightness']
+    sim.layers[LAYER_DICT["Temperature"]] = sim._cfg['global_temperature']
+    sim.layers[LAYER_DICT["Elevation"]] = 0.
+    for wall in sim.walls:
+        wall.step()
+    #grid_space
+    """
+    -len(Wall) = 0?
+    -Emitters[]
+    """
+    positionData = []
+    for emitter in sim.emitters:
+        emitter.step()
+    # make a priority
+    for creature in sim.creatures:
+        oldPos = creature.grid_pos
+        creature.step()
+        newPos = creature.grid_pos
+        positionData.append((oldPos, newPos, creature.rgb))
+    idk = []
+    for i in range(50):
+        for j in range(50):
+           # (position, layerinformation)
+           idk.append(([i,j], sim.layers[:, i, j].tolist()))
+    # Return updated creature movement and updated layer information
+    return [positionData, idk]
 
 # Create a simulation space with a specified number of consumers and producers
 def generate_sim(num_producers=1, num_consumers=1):
@@ -34,9 +63,8 @@ def get_initial_positions(sim):
 
 # Allow all creatures to move, then return their new positions
 def get_updated_positions(sim):
-    # sim.step()
-    return sim.update_simulator()
-    # return sim.get_creature_positions()
+    # return sim.update_simulator()
+    return step(sim)
 
 
 class RandMoveConsumer(Consumer):

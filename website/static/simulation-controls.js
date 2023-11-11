@@ -11,9 +11,13 @@ document.addEventListener('keydown', function (e) {
         changeSimulationMode();
     }
     //Press shift + 'N' to create a new simulation
-    if(e.shiftKey && e.code === 'KeyN')
-    {
+    if(e.shiftKey && e.code === 'KeyN'){
         simSpace.newSimulation();
+    }
+    //Press Tab to toggle heatmap
+    if(e.code === 'Tab'){
+        e.preventDefault();
+        toggleHeatmap();
     }
 });
 
@@ -24,18 +28,7 @@ toggleClimateButton = document.getElementById('toggleClimateButton');
 
 //Change simulation view to heatmap view
 toggleClimateButton.addEventListener('click', function(){
-    if(heatMapdisplayed)
-    {
-        simSpace.stopHeatmapDisplay();
-        toggleClimateButton.textContent = "Show Heatmap"
-    }
-    else
-    {
-      simSpace.displayHeatmap(); 
-      toggleClimateButton.textContent = "Hide Heatmap"
-        
-    }
-    heatMapdisplayed = !heatMapdisplayed;
+   toggleHeatmap();
 });
 
 //Start/Pause Simulation button
@@ -63,4 +56,20 @@ function changeSimulationMode()
         simButton.textContent = "Play Simulation"
     }
     isSimRunning = !isSimRunning;
+}
+
+function toggleHeatmap()
+{
+    if(heatMapdisplayed)
+    {
+        simSpace.stopHeatmapDisplay();
+        toggleClimateButton.textContent = "Show Heatmap"
+    }
+    else
+    {
+      simSpace.displayHeatmap(); 
+      toggleClimateButton.textContent = "Hide Heatmap"
+        
+    }
+    heatMapdisplayed = !heatMapdisplayed;
 }

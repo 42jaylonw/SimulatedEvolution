@@ -16,7 +16,9 @@ class SimulationGrid{
             let position = [Math.floor(i/this.width), i % this.width];
             let curCell = new Cell(position);
             output.append(curCell.element);
+            this.cells[i] = curCell;
         }
+        this.setupGrid();
     }
     
     //Edit a specified cell by it's HTML Id
@@ -25,24 +27,65 @@ class SimulationGrid{
         cell.style.backgroundColor = color;
     }
     
-    populateGrid(){
+    setupGrid(){
         //Create simulation grid and request its information
         fetch('/setup_grid')
         .then((response) => response.json())
         .then((data) => {
             //Apply received data to grid
-            for(let organism of data)
-            {
-                let position = organism[0]
-                let color = organism[1]
-                this.changeCellColor('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
-            }
-            
+            // console.log(data);
+            let creatures = data[0];
+            let walls = data[1];
+            let layers = data[2];
+            this.handleGridData(creatures, layers, walls);
             
         })
         .catch((error) =>{
             console.error('Error:', error);
         });
+    }
+
+    //FIXME: adjust Walls should be static so, Walls should only be iterated over during setupGrid()
+    handleGridData(creatureInfo=[], layers=[], walls=[], setCreatures=false){
+        //Check if data received specifies creature movement
+        if(setCreatures){
+            //Update simulation grid according to creature movement
+             for(let organism of creatureInfo){
+                //Clear old Cell that Creature occupied then update the newly occupied Cell
+                let oldPosition = organism[0];
+                let newPosition = organism[1];
+                let color = organism[2];
+                var oldCell = this.cells[this.width * oldPosition[0] + oldPosition[1]];
+                var newCell = this.cells[this.width * newPosition[0] + newPosition[1]];
+                oldCell.setCellColor("white");
+                newCell.setCellColor(`rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+            }
+        }
+        //Set up initial Creature positions
+        else{
+            //Update simulation grid according to initial positions
+            for(let organism of creatureInfo){
+                var position = organism[0];
+                let color = organism[1];
+                //Access cell object instead of the element directly
+                var cell = this.cells[this.width * position[0] + position[1]];
+                cell.setCellColor(`rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+            }
+        }
+        //Set up walls
+        for(let wall of walls)
+        {
+            var position = wall;
+            var cell = this.cells[this.width * position[0] + position[1]];
+            cell.setCellColor("black");
+        }
+        //Update layer information
+        for(let layer of layers){
+            let layerPosition = layer[0];
+            let layerInformation = layer[1];
+            var cell = this.cells[this.width * layerPosition[0] + layerPosition[1]];
+            cell.updateProperties(layerInformation);
+        }
     }
 
     //Request state of simulation grid from server, then apply these changes on the frontend
@@ -51,16 +94,9 @@ class SimulationGrid{
         fetch('/get_grid_data')
         .then((response) => response.json())
         .then((data) => {
-            //update frontend grid 
-            for(let organism of data){
-                let oldPosition = organism[0]
-                let newPosition = organism[1]
-                let color = organism[2]
-                //Change grid data
-                this.changeCellColor('cell-' + oldPosition[0] + '-' + oldPosition[1], 'white');
-                this.changeCellColor('cell-' + newPosition[0] + '-' + newPosition[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
-            }
-            
+            let creatureInfo = data[0];
+            let layers = data[1];
+            this.handleGridData(creatureInfo, layers, [], true);       
         })
         .catch((error) =>{
             console.error('Error:', error);
@@ -69,9 +105,10 @@ class SimulationGrid{
 
     //Visually clear the simulation grid
     clearSimulation(){   
-        for(let i = 0; i < 50 * 50; i++)
+        for(let i = 0; i < this.width * this.width; i++)
         {
-            this.changeCellColor('cell-' + Math.floor(i/this.width) + '-' + i % this.width, 'white');
+            let curCell = this.cells[i];
+            curCell.setCellColor("white");
         }
     }
 
@@ -85,10 +122,21 @@ class SimulationGrid{
         //Request SUCCESS
         .then((data) => {
             //Apply received data to grid
-            for(let organism of data){
-                const position = organism[0]
-                const color = organism[1]
-                this.changeCellColor('cell-' + position[0] + '-' + position[1], `rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+            let creatures = data[0]
+            for(let organism of creatures)
+            {
+                var position = organism[0];
+                let color = organism[1];
+                //Access cell object instead of the element directly
+                var cell = this.cells[this.width * position[0] + position[1]];
+                cell.setCellColor(`rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+            }
+            let walls = data[1]
+            for(let wall of walls)
+            {
+                var position = wall
+                var cell = this.cells[this.width * position[0] + position[1]];
+                cell.setCellColor("black");
             }
             console.log("Created new Grid!");
             
@@ -111,49 +159,15 @@ class SimulationGrid{
     }
 
     displayHeatmap(){
-        fetch('/generate_mock_climate')
-        .then((response) => response.json())
-        //Request SUCCESS
-        .then((climateData) => {
-            // let color = "white";
-            let color;
-            let cellnum = 0;
-            for(let temperature of climateData){
-                let cell = 'cell-' + Math.floor(cellnum/this.width) + '-' + cellnum % this.width;
-                if (temperature < 0.2) 
-                {
-                    color = `rgb(0,0,255)`;
-                } 
-                else if (temperature < 0.4) 
-                {
-                    color = `rgb(0,255,255)`;
-                } 
-                else if (temperature < 0.6) 
-                {
-                   color = `rgb(0,255,0)`;
-                } 
-                else if (temperature < 0.8) 
-                {
-                    color = `rgb(255,255,0)`;
-                } 
-                else 
-                {
-                    color = `rgb(255,0,0)`;
-                }
-                this.changeCellColor(cell, color)
-                cellnum++;
-
-            }
-        })
-        //Request FAILURE
-        .catch((error) =>{
-            console.error('Error:', error);
-        });
+        for(let cell of this.cells){
+            cell.displayCellOverlay();
+        }
     }
 
     stopHeatmapDisplay(){
-        this.clearSimulation();
-        this.populateGrid();
+        for(let cell of this.cells){
+            cell.hideCellOverlay();
+        }
         console.log("stopping heatmap..");
     }
 }
