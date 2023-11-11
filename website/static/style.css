@@ -54,12 +54,6 @@ body{
   height: 100px;
 }
 
-/* style for controls at buttom of screen */
-footer {
-  background-color: #333;
-  height: fit-content;
-}
-
 
 .left-window{
   background-color: beige;

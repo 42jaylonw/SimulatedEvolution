@@ -14,7 +14,11 @@
         Create New Simulation: SHIFT + N<br>
         Toggle Heatmap: TAB
         </p>
-        <h5 class="text-center">Or use the buttons below</h5>
+        <h5 class="text-center">Or use the buttons below<br>
+            <button id="simulateButton" type="button">Play Simulation</button>
+            <button id="toggleClimateButton" type="button">Show Heatmap</button>
+            <button id="newSimulationButton" type="button">New Simulation</button> 
+        </h5>
     </div>
     <!-- Simulation Area(center of screen)-->
     <div class="col-6">
@@ -29,12 +33,6 @@
         </div>
     </div> #}
 </div>
-<!--Simulator Controls(bottom of screen)-->
-<footer class="container-fluid text-center">
-    <button id="simulateButton" type="button">Play Simulation</button>
-    <button id="newSimulationButton" type="button">New Simulation</button> 
-    <button id="toggleClimateButton" type="button">Show Heatmap</button>
-</footer>
 {% endblock %}
 
 <!-- Scripts -->

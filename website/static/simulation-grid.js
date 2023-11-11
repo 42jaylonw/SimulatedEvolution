@@ -24,7 +24,7 @@ class SimulationGrid{
         this.setupGrid();
     }
     
-      /**
+    /**
      * Retreive Simulation data from backend
      * @var {Array[((X,Y), RGB)]} creatures array containing position (X,Y) and color RGB of all creatures
      * @var {Array[(X,Y)]} walls Array containing positions of all Walls

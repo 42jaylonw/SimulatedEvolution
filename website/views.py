@@ -4,8 +4,8 @@ import random
 
 views = Blueprint('views', __name__)
 
-NUMCONSUMERS = 5
-NUMPRODUCERS = 1
+NUMCONSUMERS = 50
+NUMPRODUCERS = 0
 
 # simulator for user session
 simulator = None
