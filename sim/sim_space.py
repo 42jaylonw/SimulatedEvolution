@@ -6,11 +6,13 @@ from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
 from sim.emitter import LightSource, HeatSource
 from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
+from sim.newlayersystem import LayerSystem
 
 
 class SimSpace:
     name = 'SimSpace'
     cfg: dict
+    layer_system: LayerSystem
     layers: np.ndarray
     grid: np.ndarray
 
@@ -23,6 +25,9 @@ class SimSpace:
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.layers = np.zeros((NUM_LAYERS, *self.grid_size), dtype=np.int64)
+        # EXPERIMENTAL
+        self.layer_system = LayerSystem(self.grid_size)
+
         self.max_steps = self._cfg['max_steps']
         self.max_generations = self._cfg['max_generations']
 
@@ -45,9 +50,13 @@ class SimSpace:
         assert self.creatures is not None, "Reset first!"
 
         # Refresh emitters
-        self.layers[LAYER_DICT["Light"]] = self._cfg['global_brightness']
-        self.layers[LAYER_DICT["Temperature"]] = self._cfg['global_temperature']
+        self.layers[LAYER_DICT["Light"]] = float(self._cfg['global_brightness'])
+        self.layers[LAYER_DICT["Temperature"]] = float(self._cfg['global_temperature'])
         self.layers[LAYER_DICT["Elevation"]] = 0.
+
+        # EXPERIMENTAL
+        self.layer_system.step()
+
         for wall in self.walls:
             wall.step()
 
@@ -69,16 +78,6 @@ class SimSpace:
     def termination(self):
         pass
 
-    # Unused as of the new layer rework
-    def refresh_state(self):
-        self.layers[:] = 0.
-        for creature in self.creatures:
-            # if isinstance(creature, Producer):
-            # clear all
-            creature_pos = creature.grid_pos
-            # self.layers[LAYER_DICT[type(creature)], creature_pos[0], creature_pos[1]] = 1.
-            self.layers[LAYER_DICT["Producer"], creature_pos[0], creature_pos[1]] += 1.
-            self.layers[LAYER_DICT["Consumer"], creature_pos[0], creature_pos[1]] += 1.
 
     def render(self):
         render_img = np.copy(self.grid_rgb)

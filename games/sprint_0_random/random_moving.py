@@ -52,8 +52,8 @@ def run_random_moving():
     walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
     walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
 
-    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
-                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10)]#,
+    #            HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
     # add organisms, walls, emitters to simulation space
     sim.reset(producers + consumers, walls, emitters)
 
@@ -62,7 +62,7 @@ def run_random_moving():
         sim.render()
         sim.step()
         sim.show_layer(6)
-        #sim.print_layer(6)
+        sim.print_layer(6)
         #sim.render()
         #info = sim.get_near_info(consumers[0].grid_pos, 2)
         #grid_info = info[0]  # the grid layer info 0 means empty, 1 means grid board or obstacles

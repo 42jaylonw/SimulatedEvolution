@@ -173,6 +173,8 @@ class Consumer(Creature):
 
         self.sim.increment_pos_layer("Consumer", self.position, 1)
 
+
+
     def blockedFwd(self):
         """
         Returns 1 if the creature's forward direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.

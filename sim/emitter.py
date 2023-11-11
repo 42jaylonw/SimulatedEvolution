@@ -51,16 +51,12 @@ class Emitter():
                 y = int(round(r * math.cos(math.radians(angle)) + self.position[1]))
                 emit_pos = [x, y]
 
-                #print(cur_val)
-                #print(self.sim.get_pos_layer(self.layer, emit_pos))
-
-                #cur_total_val = cur_val + self.sim.get_pos_layer(self.layer, emit_pos)
-
                 if self.sim.is_pos_out_of_bounds(emit_pos) or not self.sim.is_pos_layer_empty("Wall", emit_pos):
                     break
                 else:
-                    cur_total_val = cur_val + self.sim.get_pos_layer(self.layer, emit_pos)
+                    cur_total_val = 0.99 * (cur_val + self.sim.get_pos_layer(self.layer, emit_pos))
                     self.sim.set_pos_layer(self.layer, emit_pos, np.clip(cur_total_val, self.min_val, self.max_val))
+                    self.sim.layer_system
 
     # @property
     # def grid_pos(self):
