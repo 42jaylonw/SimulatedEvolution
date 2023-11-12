@@ -119,7 +119,40 @@ class Cell{
      * @property {bool} Cell.isWall Is this Cell a wall?
      * @property {Element} Cell.infoDisplay.innerHTML The HTML text associated with the Cell.infoDisplay container
      */
-    updateProperties(layerInfo){
+    
+
+    updateProperties(numConsumer, numProducer, isWall=false, temp=0){
+        this.numConsumers = numConsumer;
+        this.numProducers = numProducer;
+        this.temperature = temp;
+        //Check if this Cell is a Wall
+        this.isWall = isWall;
+        //Display different based on whether the Cell is a Wall
+        if(this.isWall){
+            this.infoDisplay.innerHTML = "Wall";
+            this.setCellColor(`rgb(${(0)}, ${(0)}, ${(0)})`);
+            return;
+        }
+        if(this.numConsumers <= 0 && this.numProducers <= 0){
+            this.setCellColor("white");
+            return;
+        }
+        if(this.numProducers > 0){
+            this.setCellColor(`rgb(${(0.5*255)}, ${(0.96 * 255)}, ${(0)})`);
+        }
+        if(this.numConsumers > 0){
+            
+            this.setCellColor(`rgb(${(0.96 *255)}, ${(0.5 * 255)}, ${(0)})`);
+        }
+        this.infoDisplay.innerHTML = `Climate: ${this.temperature}` + '<br>' + `Consumers: ${this.numConsumers}` + 
+            '<br>' + `Producers: ${this.numProducers}` + 
+            '<p class="text-center" class="details-text">click for details</p>';
+        
+      
+        
+        this.updateCellOverlay(); 
+    }
+    updatePropertiesOLD(layerInfo){
         //Update Cell properties
         this.numConsumers = layerInfo[Layer.Consumer];
         this.numProducers = layerInfo[Layer.Producer];
@@ -208,6 +241,10 @@ class Cell{
                 color = `rgb(255,0,0, 0.25)`;
             }
             this.overlay.style.backgroundColor = color;
+        }
+
+        print(){
+            console.log("CONSUMERS:" + this.numConsumers + " PRODUCERS: " + this.numProducers + " At position: " + this.position);
         }
 }
 

@@ -181,14 +181,15 @@ class Consumer(Creature):
             d_x, d_y = 0, 0
             target_pos = self.position
 
+        print("POS BEFORE MOVE ", self.position, " TARGET: ", target_pos)
         self.layer_system.creature_move(self.position, target_pos, self) #EXPERIMENTAL
-
+        self.position = target_pos
         #self.sim.increment_pos_layer("Consumer", self.position, -1)
 
         # Update the creature's position to the target position
         # The clipping shouldn't be necessary, but just in case - clip the new position to be within bounds of sim space
-        self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
-        self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
+        # self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
+        # self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
 
         #self.sim.increment_pos_layer("Consumer", self.position, 1)
 
@@ -241,7 +242,7 @@ class Consumer(Creature):
 
     def check_empty(self, target_pos):
 
-        return int(not self.layer_system.has_wall(target_pos)) # EXPERIMENTAL, might need producer + consumer check too
+        return int((not self.layer_system.out_of_bounds(target_pos)) and (not self.layer_system.has_wall(target_pos))) # EXPERIMENTAL, might need producer + consumer check too
 
         #return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
         #                    for layer in ["Wall", "Producer", "Consumer"]]))

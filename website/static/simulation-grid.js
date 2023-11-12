@@ -31,20 +31,41 @@ class SimulationGrid{
      *  @var {Array[(X,Y), Array[Layers]]} layers Array containing Layer information at all positions (X,Y)
      */
     setupGrid(){
-        //Create simulation grid and request its information
-        fetch('/setup_grid')
+        console.log("SETTING GRIED");
+        fetch('/new_setup_grid')
         .then((response) => response.json())
-        .then((data) => {
-            //Apply received data to grid
-            let creatures = data[0];
-            let walls = data[1];
-            let layers = data[2];       
-            this.handleGridData(creatures, layers, walls);
+        .then((packet) => {
+            //"position, numConsumer, numProduc, isWall, temperature)"
+            for(let data of packet){
+                var position = data[0];
+                var numConsumer = data[1];
+                var numProducer = data[2];
+                var isWall = data[3];
+                var temp = data[4];
+                var cell = this.cells[this.width * position[0] + position[1]];
+                cell.updateProperties(numConsumer, numProducer, isWall, temp);
+            }
+           
             
         })
         .catch((error) =>{
             console.error('Error:', error);
         });
+        this.print();
+        // //Create simulation grid and request its information
+        // fetch('/setup_grid')
+        // .then((response) => response.json())
+        // .then((data) => {
+        //     //Apply received data to grid
+        //     let creatures = data[0];
+        //     let walls = data[1];
+        //     let layers = data[2];       
+        //     this.handleGridData(creatures, layers, walls);
+            
+        // })
+        // .catch((error) =>{
+        //     console.error('Error:', error);
+        // });
     }
 
     //FIXME: adjust Walls should be static so, Walls should only be iterated over during setupGrid()
@@ -102,10 +123,20 @@ class SimulationGrid{
         //Request simulation grid data
         fetch('/get_grid_data')
         .then((response) => response.json())
-        .then((data) => {
-            let creatureInfo = data[0];
-            let layers = data[1];
-            this.handleGridData(creatureInfo, layers, [], true);       
+        .then((packet) => {
+            for(let data of packet){
+                //Per creature(oldPos, newPos) call this CreatureInfo (should supplant position)
+                var position = data[0];
+                var numConsumer = data[1];
+                var numProducer = data[2];
+                var isWall = data[3];
+                var temp = data[4];
+                var cell = this.cells[this.width * position[0] + position[1]];
+                cell.updateProperties(numConsumer, numProducer, isWall, temp);
+            }
+            // let creatureInfo = data[0];
+            // let layers = data[1];
+            // this.handleGridData(creatureInfo, layers, [], true);       
         })
         .catch((error) =>{
             console.error('Error:', error);
@@ -125,40 +156,41 @@ class SimulationGrid{
     newSimulation(){
         //Clear any information of an old simulation
         this.clearSimulation();
-        //Create GET request for new simluation information
-        fetch('/new_grid')
-        .then((response) => response.json())
-        //Request SUCCESS
-        .then((data) => {
-            //Apply received data to grid
-            let creatures = data[0]
-            for(let organism of creatures)
-            {
-                var position = organism[0];
-                let color = organism[1];
-                //Access cell object instead of the element directly
-                var cell = this.cells[this.width * position[0] + position[1]];
-                cell.setCellColor(`rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
-            }
-            let walls = data[1]
-            for(let wall of walls)
-            {
-                var position = wall
-                var cell = this.cells[this.width * position[0] + position[1]];
-                cell.setCellColor("black");
-            }
-            console.log("Created new Grid!");
+        this.setupGrid();
+        // //Create GET request for new simluation information
+        // fetch('/new_grid')
+        // .then((response) => response.json())
+        // //Request SUCCESS
+        // .then((data) => {
+        //     //Apply received data to grid
+        //     let creatures = data[0]
+        //     for(let organism of creatures)
+        //     {
+        //         var position = organism[0];
+        //         let color = organism[1];
+        //         //Access cell object instead of the element directly
+        //         var cell = this.cells[this.width * position[0] + position[1]];
+        //         cell.setCellColor(`rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+        //     }
+        //     let walls = data[1]
+        //     for(let wall of walls)
+        //     {
+        //         var position = wall
+        //         var cell = this.cells[this.width * position[0] + position[1]];
+        //         cell.setCellColor("black");
+        //     }
+        //     console.log("Created new Grid!");
             
-        })
-        //Request FAILURE
-        .catch((error) =>{
-            console.error('Error:', error);
-        });
+        // })
+        // //Request FAILURE
+        // .catch((error) =>{
+        //     console.error('Error:', error);
+        // });
     }
     
     //Request simulation grid data from server every 0.500 seconds
     runSimulation(){
-        this.simulationID = setInterval(() => {this.getGridData()}, 500);
+        this.simulationID = setInterval(() => {this.getGridData()}, 1500);
     }
 
     //Stop sending simulation grid data requests
@@ -178,5 +210,11 @@ class SimulationGrid{
             cell.hideCellOverlay();
         }
         console.log("stopping heatmap..");
+    }
+
+    print(){
+        for(let cell of this.cells){
+            cell.print();
+        }
     }
 }

@@ -15,7 +15,7 @@ class LayerSystem():
     def __init__(self, sim_dim):
         self.dimensions = sim_dim
         # TODO: check if x and y need to be swapped
-        self.grid_spaces = [[GridSpace(self, [x, y]) for x in range(sim_dim[0])] for y in range(sim_dim[1])]
+        self.grid_spaces = [[GridSpace(self, [x, y]) for y in range(sim_dim[0])] for x in range(sim_dim[1])]
 
     def step(self):
         # Clear emitters
@@ -93,6 +93,7 @@ class LayerSystem():
         return self.grid_spaces[pos[0]][pos[1]].increment_elevation(val)
 
     def creature_enter(self, pos, creature):
+        print("CREATURE ENTER: ", pos)
         assert not self.out_of_bounds(pos)
         self.grid_spaces[pos[0]][pos[1]].creature_enter(creature)
 
@@ -103,8 +104,10 @@ class LayerSystem():
     # move from pos1 to pos2
     def creature_move(self, pos1, pos2, creature):
         assert not self.out_of_bounds(pos1) and not self.out_of_bounds(pos2)
+        print("MOVE FROM ", pos1, " TO: ", pos2)
         self.creature_exit(pos1, creature)
         self.creature_enter(pos2, creature)
+        print("END MOVE!")
 
     def wall_add(self, pos):
         assert not self.out_of_bounds(pos)
@@ -132,7 +135,12 @@ class LayerSystem():
                 False: pos is within bounds of sim space
         """
         return pos[0] < 0 or pos[0] > self.dimensions[0] - 1 or pos[1] < 0 or pos[1] > self.dimensions[1] - 1
-
+    
+    
+    def print(self):
+        for grid_space in self.grid_spaces:
+            print(grid_space.get_properties())
+  
 
 
 class GridSpace():
@@ -204,6 +212,7 @@ class GridSpace():
         self.elevation_val = np.clip(self.elevation_val + inc, MIN_ELEVATION, MAX_ELEVATION)
 
     def creature_enter(self, creature):
+        print("CREATURE ENTER")
         self.creatures.append(creature)
         if type(creature) == Consumer:
             self.consumers.append(creature)
@@ -211,6 +220,7 @@ class GridSpace():
             self.producers.append(creature)
 
     def creature_exit(self, creature):
+        print("CREATURE EXIT at", self.position)
         self.creatures.remove(creature)
         if type(creature) == Consumer:
             self.consumers.remove(creature)
@@ -225,3 +235,6 @@ class GridSpace():
         self.emitters.append(emitter)
     def emitter_exit(self, emitter):
         self.emitters.remove(emitter)
+    def get_properties(self):
+        #"(position, numConsumer, numProduc, isWall, temperature)"
+        return (self.position, self.get_num_consumers(), self.get_num_producers(), self.has_a_wall, np.int16(self.temperature_val).item())

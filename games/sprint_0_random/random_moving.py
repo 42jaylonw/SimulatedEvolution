@@ -7,6 +7,8 @@ from sim.creatures.producer import Producer
 from sim.wall import Wall
 from sim.emitter import LightSource, HeatSource
 from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
+
+GRIDSIZE = 2
 def step(sim):
     assert sim.creatures is not None, "Reset first!"
 
@@ -14,6 +16,9 @@ def step(sim):
     sim.layers[LAYER_DICT["Light"]] = sim._cfg['global_brightness']
     sim.layers[LAYER_DICT["Temperature"]] = sim._cfg['global_temperature']
     sim.layers[LAYER_DICT["Elevation"]] = 0.
+
+    sim.layer_system.step()
+
     for wall in sim.walls:
         wall.step()
     #grid_space
@@ -24,34 +29,44 @@ def step(sim):
     positionData = []
     for emitter in sim.emitters:
         emitter.step()
+
     # make a priority
     for creature in sim.creatures:
         oldPos = creature.grid_pos
         creature.step()
         newPos = creature.grid_pos
-        positionData.append((oldPos, newPos, creature.rgb))
+        #positionData.append((oldPos, newPos, creature.rgb))
+        positionData.append((oldPos, newPos))
     idk = []
-    for i in range(50):
-        for j in range(50):
+    for i in range(GRIDSIZE):
+        for j in range(GRIDSIZE):
            # (position, layerinformation)
            idk.append(([i,j], sim.layers[:, i, j].tolist()))
     # Return updated creature movement and updated layer information
-    return [positionData, idk]
+    # return [positionData, idk]
+    return positionData
 
 # Create a simulation space with a specified number of consumers and producers
-def generate_sim(num_producers=1, num_consumers=1):
+def generate_sim(num_producers=0, num_consumers=1):
     # create list of producers and consumers
     config = toml.load("games/sprint_0_random/config.toml")
     sim = SimSpace(config)
     producers = [Producer(sim) for _ in range(num_producers)]
-    consumers = [Consumer(sim) for _ in range(num_consumers)]
+
+    # consumers = [Consumer(sim, [0,1]) for _ in range(num_consumers)]
+    consumers = [Consumer(sim)]
     walls = []
     emitters = []
-    walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
-    walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
+    # walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
+    # walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
+    walls =()
+    #USING NEW LAYER SYS
+    # for i in range(sim.grid_size[0]):
+    #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
 
-    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
-                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
+    # emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
+    #             HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
+    emitters = ()
     # add organisms to simulation space
     sim.reset(producers + consumers, walls, emitters)
     return sim
