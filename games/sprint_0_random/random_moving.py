@@ -8,7 +8,7 @@ from sim.wall import Wall
 from sim.emitter import LightSource, HeatSource
 from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
 
-GRIDSIZE = 4
+GRIDSIZE = 50
 def step(sim):
     assert sim.creatures is not None, "Reset first!"
 
@@ -53,20 +53,18 @@ def generate_sim(num_producers=0, num_consumers=1):
     sim = SimSpace(config)
     producers = [Producer(sim) for _ in range(num_producers)]
 
-    # consumers = [Consumer(sim, [0,1]) for _ in range(num_consumers)]
-    consumers = [Consumer(sim)]
+    consumers = [Consumer(sim) for _ in range(num_consumers)]
     walls = []
     emitters = []
     # walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
     # walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
     walls =()
     #USING NEW LAYER SYS
-    # for i in range(sim.grid_size[0]):
-    #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
+    for i in range(sim.grid_size[0]):
+        sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
 
-    # emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
-    #             HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
-    emitters = ()
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
+                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
     # add organisms to simulation space
     sim.reset(producers + consumers, walls, emitters)
     return sim

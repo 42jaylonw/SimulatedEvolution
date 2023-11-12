@@ -4,9 +4,9 @@ import random
 
 views = Blueprint('views', __name__)
 
-NUMCONSUMERS = 1
-NUMPRODUCERS = 0
-GRIDSIZE = 4
+NUMCONSUMERS = 100
+NUMPRODUCERS = 1000
+GRIDSIZE = 50
 # simulator for user session
 simulator = None
 
@@ -32,7 +32,7 @@ def new_set_grid():
         for j in range(GRIDSIZE):
            #[(a,b,b,c)]
            gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
-    print("NEW_SETUP_GRID",gridspacesInformation)
+    # print("NEW_SETUP_GRID",gridspacesInformation)
     return jsonify(gridspacesInformation)
 
 
@@ -62,9 +62,17 @@ def set_grid():
 def new_grid():
     global simulator
     simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
-    creaturePositions = [(creature.grid_pos, creature.rgb) for creature in simulator.creatures]
-    wallPositions = [wall.creaturePositionsion.tolist() for wall in simulator.walls]
-    return jsonify([wallPositions])
+    gridspacesInformation = []
+    for i in range(GRIDSIZE):
+        for j in range(GRIDSIZE):
+           #[(a,b,b,c)]
+           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
+    # print("NEW_SETUP_GRID",gridspacesInformation)
+    return jsonify(gridspacesInformation)
+    # simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
+    # creaturePositions = [(creature.grid_pos, creature.rgb) for creature in simulator.creatures]
+    # wallPositions = [wall.creaturePositionsion.tolist() for wall in simulator.walls]
+    # return jsonify([wallPositions])
 
 
 # Update the state of the simulation grid and send it to the webpage

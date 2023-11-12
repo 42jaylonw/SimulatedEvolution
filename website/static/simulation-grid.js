@@ -156,41 +156,50 @@ class SimulationGrid{
     newSimulation(){
         //Clear any information of an old simulation
         this.clearSimulation();
-        this.setupGrid();
-        // //Create GET request for new simluation information
-        // fetch('/new_grid')
-        // .then((response) => response.json())
-        // //Request SUCCESS
-        // .then((data) => {
-        //     //Apply received data to grid
-        //     let creatures = data[0]
-        //     for(let organism of creatures)
-        //     {
-        //         var position = organism[0];
-        //         let color = organism[1];
-        //         //Access cell object instead of the element directly
-        //         var cell = this.cells[this.width * position[0] + position[1]];
-        //         cell.setCellColor(`rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
-        //     }
-        //     let walls = data[1]
-        //     for(let wall of walls)
-        //     {
-        //         var position = wall
-        //         var cell = this.cells[this.width * position[0] + position[1]];
-        //         cell.setCellColor("black");
-        //     }
-        //     console.log("Created new Grid!");
+        // this.setupGrid();
+        //Create GET request for new simluation information
+        fetch('/new_grid')
+        .then((response) => response.json())
+        //Request SUCCESS
+        .then((packet) => {
+            for(let data of packet){
+                var position = data[0];
+                var numConsumer = data[1];
+                var numProducer = data[2];
+                var isWall = data[3];
+                var temp = data[4];
+                var cell = this.cells[this.width * position[0] + position[1]];
+                cell.updateProperties(numConsumer, numProducer, isWall, temp);
+            }
+            // //Apply received data to grid
+            // let creatures = data[0]
+            // for(let organism of creatures)
+            // {
+            //     var position = organism[0];
+            //     let color = organism[1];
+            //     //Access cell object instead of the element directly
+            //     var cell = this.cells[this.width * position[0] + position[1]];
+            //     cell.setCellColor(`rgb(${(color[0] *255)}, ${(color[1] * 255)}, ${(color[2] * 255)})`);
+            // }
+            // let walls = data[1]
+            // for(let wall of walls)
+            // {
+            //     var position = wall
+            //     var cell = this.cells[this.width * position[0] + position[1]];
+            //     cell.setCellColor("black");
+            // }
+            console.log("Created new Grid!");
             
-        // })
-        // //Request FAILURE
-        // .catch((error) =>{
-        //     console.error('Error:', error);
-        // });
+        })
+        //Request FAILURE
+        .catch((error) =>{
+            console.error('Error:', error);
+        });
     }
     
     //Request simulation grid data from server every 0.500 seconds
     runSimulation(){
-        this.simulationID = setInterval(() => {this.getGridData()}, 1500);
+        this.simulationID = setInterval(() => {this.getGridData()}, 500);
     }
 
     //Stop sending simulation grid data requests

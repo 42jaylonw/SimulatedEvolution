@@ -93,7 +93,7 @@ class LayerSystem():
         return self.grid_spaces[pos[0]][pos[1]].increment_elevation(val)
 
     def creature_enter(self, pos, creature):
-        print("CREATURE ENTER: ", pos)
+        # print("CREATURE ENTER: ", pos)
         assert not self.out_of_bounds(pos)
         self.grid_spaces[pos[0]][pos[1]].creature_enter(creature)
 
@@ -104,10 +104,10 @@ class LayerSystem():
     # move from pos1 to pos2
     def creature_move(self, pos1, pos2, creature):
         assert not self.out_of_bounds(pos1) and not self.out_of_bounds(pos2)
-        print("MOVE FROM ", pos1, " TO: ", pos2)
+        # print("MOVE FROM ", pos1, " TO: ", pos2)
         self.creature_exit(pos1, creature)
         self.creature_enter(pos2, creature)
-        print("END MOVE!")
+        # print("END MOVE!")
 
     def wall_add(self, pos):
         assert not self.out_of_bounds(pos)

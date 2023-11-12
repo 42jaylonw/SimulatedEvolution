@@ -180,31 +180,33 @@ class Consumer(Creature):
         target_elevation = 0.0
         self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
 
-        if self.layer_system.out_of_bounds(target_pos):
-            print("trying to move out of bounds")
+        # if self.layer_system.out_of_bounds(target_pos):
+        #     print("trying to move out of bounds")
 
         if self.layer_system.out_of_bounds(target_pos) or self.layer_system.has_wall(target_pos): #EXPERIMENTAL
             # Space is occupied: no change in position can be made in this direction
-            if not self.layer_system.out_of_bounds(target_pos):
-                print("wall blocked movement")
+            # if not self.layer_system.out_of_bounds(target_pos):
+            #     print("wall blocked movement")
             d_x, d_y = 0, 0
             target_pos = self.position
 
-        print("POS BEFORE MOVE ", self.position, " TARGET: ", target_pos)
+        # print("POS BEFORE MOVE ", self.position, " TARGET: ", target_pos)
         #self.layer_system.creature_move(self.position, target_pos, self) #EXPERIMENTAL
-        self.layer_system.creature_exit(self.position, self)
+
+        # self.layer_system.creature_exit(self.position, self)
 
 
 
         #self.position = target_pos
         #self.sim.increment_pos_layer("Consumer", self.position, -1)
-
+        self.layer_system.creature_move(self.position, target_pos, self)
         # Update the creature's position to the target position
+        self.position = target_pos
         # The clipping shouldn't be necessary, but just in case - clip the new position to be within bounds of sim space
-        self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
-        self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
+        # self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
+        # self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
 
-        self.layer_system.creature_enter(self.position, self)
+        # self.layer_system.creature_enter(self.position, self)
         #self.sim.increment_pos_layer("Consumer", self.position, 1)
 
 

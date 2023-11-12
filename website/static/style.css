@@ -30,7 +30,7 @@ body{
   height: 100%;
   display: grid;
   justify-content: center;
-  grid-template-columns: repeat(4, 18px);
+  grid-template-columns: repeat(50, 18px);
 }
 /* Style for Cells */
 .cell-item {

@@ -72,7 +72,7 @@ class SimSpace:
         # print(self.layers)
         self.time_steps += 1
 
-        self.layer_system.print()
+        # self.layer_system.print()
         if self.time_steps >= self.max_steps:
             self.end_generation()
 

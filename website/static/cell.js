@@ -135,7 +135,6 @@ class Cell{
         }
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
-            return;
         }
         if(this.numProducers > 0){
             this.setCellColor(`rgb(${(0.5*255)}, ${(0.96 * 255)}, ${(0)})`);
@@ -222,23 +221,23 @@ class Cell{
         let color;
         if (this.temperature < 20) 
             {
-                color = `rgb(0,0,255, 0.25)`;
+                color = `rgb(0,0,255, 0.3)`;
             } 
             else if (this.temperature < 40) 
             {
-                color = `rgb(0,255,255, 0.25)`;
+                color = `rgb(0,255,255, 0.3)`;
             } 
             else if (this.temperature < 60) 
             {
-                color = `rgb(0,255,0, 0.25)`;
+                color = `rgb(0,255,0, 0.3)`;
             } 
             else if (this.temperature < 80) 
             {
-                color = `rgb(255,255,0, 0.25)`;
+                color = `rgb(255,255,0, 0.3)`;
             } 
             else 
             {
-                color = `rgb(255,0,0, 0.25)`;
+                color = `rgb(255,0,0, 0.3)`;
             }
             this.overlay.style.backgroundColor = color;
         }
