@@ -8,7 +8,7 @@ from sim.wall import Wall
 from sim.emitter import LightSource, HeatSource
 from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
 
-GRIDSIZE = 2
+GRIDSIZE = 4
 def step(sim):
     assert sim.creatures is not None, "Reset first!"
 

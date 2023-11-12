@@ -6,7 +6,7 @@ views = Blueprint('views', __name__)
 
 NUMCONSUMERS = 1
 NUMPRODUCERS = 0
-GRIDSIZE = 2
+GRIDSIZE = 4
 # simulator for user session
 simulator = None
 

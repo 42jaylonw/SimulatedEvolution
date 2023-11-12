@@ -138,8 +138,10 @@ class LayerSystem():
     
     
     def print(self):
-        for grid_space in self.grid_spaces:
-            print(grid_space.get_properties())
+        for i in range(len(self.grid_spaces)):
+            for j in range(len(self.grid_spaces[i])):
+                grid_space = self.get_gridspace([i, j])
+                print(grid_space.get_properties())
   
 
 
@@ -212,7 +214,7 @@ class GridSpace():
         self.elevation_val = np.clip(self.elevation_val + inc, MIN_ELEVATION, MAX_ELEVATION)
 
     def creature_enter(self, creature):
-        print("CREATURE ENTER")
+        #print("CREATURE ENTER")
         self.creatures.append(creature)
         if type(creature) == Consumer:
             self.consumers.append(creature)
@@ -220,7 +222,7 @@ class GridSpace():
             self.producers.append(creature)
 
     def creature_exit(self, creature):
-        print("CREATURE EXIT at", self.position)
+        #print("CREATURE EXIT at", self.position)
         self.creatures.remove(creature)
         if type(creature) == Consumer:
             self.consumers.remove(creature)
