@@ -20,6 +20,7 @@ class Consumer(Creature):
         action = np.argmax(self.behavior_system.predict(obs))
         self.action_move(action)
         self.energy_bar.consume_energy(self.move_cost)
+        self.energy_bar.age_tick()
         if self.energy_bar.is_empty():
             self.die()
 
