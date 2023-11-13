@@ -3,24 +3,15 @@ import numpy as np
 from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
-
-from sim.wall import Wall
 from sim.emitter import LightSource, HeatSource
-from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS
 
 GRIDSIZE = 50
 def step(sim):
     assert sim.creatures is not None, "Reset first!"
 
-    # Refresh emitters
-    sim.layers[LAYER_DICT["Light"]] = sim._cfg['global_brightness']
-    sim.layers[LAYER_DICT["Temperature"]] = sim._cfg['global_temperature']
-    sim.layers[LAYER_DICT["Elevation"]] = 0.
-
+    # Refresh emitter layer values
     sim.layer_system.step()
 
-    for wall in sim.walls:
-        wall.step()
     #grid_space
     """
     -len(Wall) = 0?
@@ -54,19 +45,16 @@ def generate_sim(num_producers=0, num_consumers=1):
     producers = [Producer(sim) for _ in range(num_producers)]
 
     consumers = [Consumer(sim) for _ in range(num_consumers)]
-    walls = []
     emitters = []
-    # walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
-    # walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
-    walls =()
-    #USING NEW LAYER SYS
+
+    # Adding walls using the new LayerSystem
     for i in range(sim.grid_size[0]):
         sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
 
     emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
                 HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
     # add organisms to simulation space
-    sim.reset(producers + consumers, walls, emitters)
+    sim.reset(producers + consumers, emitters)
     return sim
 
 # Get the initial positions of all active creatures in a specified sim space
@@ -96,25 +84,19 @@ def run_random_moving():
     consumers = [RandMoveConsumer(sim) for _ in range(num_consumers)]
     # add organisms to simulation space
     # sim.reset(producers + consumers)
-    walls = []
-    emitters = []
-    walls = [Wall(sim, [i, i]) for i in range(sim.grid_size[0])]
-    walls += [Wall(sim, [i, sim.grid_size[0] // 2]) for i in range(sim.grid_size[0])]
 
     for i in range(sim.grid_size[0]):
         sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
 
     emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10)]#,
     #            HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
-    # add organisms, walls, emitters to simulation space
-    sim.reset(producers + consumers, walls, emitters)
+    # add organisms + emitters to simulation space
+    sim.reset(producers + consumers, emitters)
 
     for _ in range(1000):
         # render the simulation image
         sim.render()
         sim.step()
-        #sim.show_layer(6)
-        #sim.print_layer(6)
         #sim.render()
         #info = sim.get_near_info(consumers[0].grid_pos, 2)
         #grid_info = info[0]  # the grid layer info 0 means empty, 1 means grid board or obstacles
