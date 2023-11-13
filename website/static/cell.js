@@ -34,7 +34,13 @@ class Cell{
         this.createCellOverlay();   
     }
 
-    //Create HTMl Element for Cell object
+  
+    /**
+     * Create HTMl Element for Cell object
+     * @param {int} position [X,Y] position in SimulationGrid (refer to simulation-grid.js)
+     * @property {Element} Cell.element HTML element associated with Cell
+     * @property {int} Cell.position [X,Y] position of Cell
+     */
     createCellElement(position){
         //Create html element
         this.element = document.createElement('div');
@@ -45,8 +51,11 @@ class Cell{
         this.element.classList.add('cell-item');
         this.element.style.backgroundColor = "white";
         //Add event listeners
+        //Mark cell when user hovers over it
         this.element.onmouseenter = () => {this.decreaseCellOpacity()};
+        //Unmark cell when user no longer hovers over it
         this.element.onmouseleave = () => {this.restoreCellOpactiy()};
+        //Display detailed information about Cell when user clicks on it
         this.element.onclick = () => {this.displayCellInfo()};
     }
 
@@ -111,16 +120,17 @@ class Cell{
     }
 
     /**
-     * Update Cell properties given an array of layer information
-     * @param {Array[int]} layerInfo Information about each layer
+     * Update Cell properties
+     * @param {int} numConsumer Number of consumers to set in Cell
+     * @param {int} numProducer Number of producers to set in Cell
+     * @param {boolean} isWall set this cell as a Wall?
+     * @param {int} temp Temperature to set at this Cell
      * @property {int} Cell.numConsumers Total number of Consumers in this Cell
      * @property {int} Cell.numProducers Total number of Producers in this Cell
      * @property {int | float} Cell.temperature Temperature at this Cell
      * @property {bool} Cell.isWall Is this Cell a wall?
      * @property {Element} Cell.infoDisplay.innerHTML The HTML text associated with the Cell.infoDisplay container
      */
-    
-
     updateProperties(numConsumer, numProducer, isWall=false, temp=0){
         this.numConsumers = numConsumer;
         this.numProducers = numProducer;
@@ -133,42 +143,27 @@ class Cell{
             this.setCellColor(`rgb(${(0)}, ${(0)}, ${(0)})`);
             return;
         }
+        //No Creatures present
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
         }
+        //ESTABLISH PRIORITY
+        //Consumers are on top of Producers
+        //Set color to Producer
         if(this.numProducers > 0){
             this.setCellColor(`rgb(${(0.5*255)}, ${(0.96 * 255)}, ${(0)})`);
         }
+        //Set color to Consumer
         if(this.numConsumers > 0){
             
             this.setCellColor(`rgb(${(0.96 *255)}, ${(0.5 * 255)}, ${(0)})`);
         }
+        //Update display information for this cell
         this.infoDisplay.innerHTML = `Climate: ${this.temperature}` + '<br>' + `Consumers: ${this.numConsumers}` + 
             '<br>' + `Producers: ${this.numProducers}` + 
             '<p class="text-center" class="details-text">click for details</p>';
         
-      
-        
-        this.updateCellOverlay(); 
-    }
-    updatePropertiesOLD(layerInfo){
-        //Update Cell properties
-        this.numConsumers = layerInfo[Layer.Consumer];
-        this.numProducers = layerInfo[Layer.Producer];
-        this.temperature = layerInfo[Layer.Temperature];
-        //Check if this Cell is a Wall
-        if(layerInfo[Layer.Wall] == 1){
-            this.isWall = true;
-        }
-        //Display different based on whether the Cell is a Wall
-        if(this.isWall){
-            this.infoDisplay.innerHTML = "Wall";
-        }
-        else{
-            this.infoDisplay.innerHTML = `Climate: ${this.temperature}` + '<br>' + `Consumers: ${this.numConsumers}` + 
-                '<br>' + `Producers: ${this.numProducers}` + 
-                '<p class="text-center" class="details-text">click for details</p>';
-        }
+        //Update the overlay at this Cell
         this.updateCellOverlay(); 
     }
 
@@ -197,6 +192,7 @@ class Cell{
         this.hideCellOverlay();
     }
 
+    //TODO combine displayCellOverlay and hideCellOverlay into 1 function
     /**
      * Display Cell overlay
      * @property {Element} this.overlay  HTML container that displays general Cell information
@@ -241,7 +237,8 @@ class Cell{
             }
             this.overlay.style.backgroundColor = color;
         }
-
+        
+        //USED FOR DEBUGGING
         print(){
             console.log("CONSUMERS:" + this.numConsumers + " PRODUCERS: " + this.numProducers + " At position: " + this.position);
         }

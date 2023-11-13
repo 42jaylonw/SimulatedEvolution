@@ -1,6 +1,6 @@
 [SimSpace]
-grid_size = [50, 50]
-visual_size = [800, 800]
+grid_size = [ 50, 50,]
+visual_size = [ 800, 800,]
 time_step = 0.1
 max_steps = 1000
 max_generations = 1
@@ -8,7 +8,7 @@ global_brightness = 0.2
 global_temperature = 0.5
 
 [Producer]
-rgb = [0.5, 0.96, 0.0]
+rgb = [ 0.5, 0.96, 0.0,]
 sensory_range = 3
 num_observations = 16
 num_actions = 9
@@ -19,7 +19,7 @@ reproduce_mode = 1
 mutation_rate = 0.2
 
 [Consumer]
-rgb = [0.96, 0.5, 0.0]
+rgb = [ 0.96, 0.5, 0.0,]
 init_speed = 1
 sensory_range = 3
 num_observations = 16

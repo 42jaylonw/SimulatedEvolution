@@ -1,11 +1,14 @@
 from flask import Blueprint, render_template, jsonify, request
 import games.sprint_0_random.random_moving as random_moving
 import random
-
+#TEMP
+import temp_sim_to_frontend as sim_to_front
+#END TEMP
 views = Blueprint('views', __name__)
 
 NUMCONSUMERS = 100
-NUMPRODUCERS = 1000
+NUMPRODUCERS = 500
+# NOTE: Currently, Changing GRIDSIZE also requires change at line 2 of frontend-main.js
 GRIDSIZE = 50
 # simulator for user session
 simulator = None
@@ -22,80 +25,29 @@ def about_page():
 
 @views.route('/new_setup_grid')
 def new_set_grid():
+    """Initialize SimSpace"""
      # initialize Simulator if one has not been made
     global simulator
     if simulator is None:
-        simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
+        # Should use post request data to create simulation
+        # request.json["position"]
+        simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, GRIDSIZE)
+    return sim_to_front.get_sim_state(simulator)
 
-    gridspacesInformation = []
-    for i in range(GRIDSIZE):
-        for j in range(GRIDSIZE):
-           #[(a,b,b,c)]
-           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
-    # print("NEW_SETUP_GRID",gridspacesInformation)
-    return jsonify(gridspacesInformation)
-
-
-
-
-# Create a simulation and send the state to the webpage
-@views.route('/setup_grid', methods=["GET"])
-def set_grid():
-    # initialize Simulator if one has not been made
-    global simulator
-    if simulator is None:
-        simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
- 
-    # return the starting state of the simulator
-    creaturePositions = [(creature.grid_pos, creature.rgb) for creature in simulator.creatures]
-    wallPositions = [wall.position.tolist() for wall in simulator.walls]
-    idk = []
-    for i in range(GRIDSIZE):
-        for j in range(GRIDSIZE):
-           curGridSpace = simulator.layer_system.get_gridspace([i,j])
-           # (position, layerinformation)
-           idk.append(([i,j], simulator.layers[:, i, j].tolist()))
-    return jsonify([creaturePositions, wallPositions, idk])
 
 
 @views.route('/new_grid', methods=["GET"])
 def new_grid():
+    """Create a new grid on backend then send it to front"""
     global simulator
-    simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
-    gridspacesInformation = []
-    for i in range(GRIDSIZE):
-        for j in range(GRIDSIZE):
-           #[(a,b,b,c)]
-           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
-    # print("NEW_SETUP_GRID",gridspacesInformation)
-    return jsonify(gridspacesInformation)
-    # simulator = random_moving.generate_sim(NUMPRODUCERS, NUMCONSUMERS)
-    # creaturePositions = [(creature.grid_pos, creature.rgb) for creature in simulator.creatures]
-    # wallPositions = [wall.creaturePositionsion.tolist() for wall in simulator.walls]
-    # return jsonify([wallPositions])
+    simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, GRIDSIZE)
+    return sim_to_front.get_sim_state(simulator)
 
 
 # Update the state of the simulation grid and send it to the webpage
 @views.route('/get_grid_data', methods=["GET"])
 def get_grid_data():
+    """Perform SimSpace Step then update front-end"""
     global simulator
     simulator.step()
-    gridspacesInformation = []
-    for i in range(GRIDSIZE):
-        for j in range(GRIDSIZE):
-           #[(a,b,b,c)]
-           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
-    return jsonify(gridspacesInformation)
-    # return the updated position of creatures
-    # return jsonify(random_moving.get_updated_positions(simulator))
-
-@views.route('/get_cell_data', methods=["POST"])
-def get_cell_data():
-    global simulator
-
-    cell_location = request.json["position"]
-    # get Sim Layers
-    cell_info = random_moving.get_location_info(simulator)
-    # cell_info = [1,2]
-    layers_at_cell = cell_info[:, cell_location[0], cell_location[1]].tolist()
-    return jsonify(layers_at_cell)
+    return sim_to_front.get_sim_state(simulator)
