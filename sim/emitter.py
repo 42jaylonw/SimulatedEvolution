@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from sim.layer_dictionary import LAYER_DICT, NUM_LAYERS, MAX_BRIGHTNESS, MAX_TEMPERATURE, MAX_ELEVATION
+from sim.newlayersystem.LayerSystem import MIN_BRIGHTNESS, MAX_BRIGHTNESS, MIN_TEMPERATURE, MAX_TEMPERATURE, MIN_ELEVATION, MAX_ELEVATION
 
 # "Abstract" class
 class Emitter():
@@ -21,23 +21,35 @@ class Emitter():
     def __init__(self, sim, pos, e_range, e_val):
         self.layer = None
         self.sim = sim
+
+        self.layer_system = sim.layer_system
+
         self.position = pos
         self.position[0] = np.clip(pos[0], 0, self.sim.grid_size[0] - 1)
         self.position[1] = np.clip(pos[1], 0, self.sim.grid_size[1] - 1)
         #print(self.position)
         self.emit_range = e_range
-        self.min_val = -MAX_BRIGHTNESS
-        self.max_val = MAX_BRIGHTNESS # arbitrary value
+        self.min_val = 0 # arbitrary value
+        self.max_val = 0 # arbitrary value
         self.emit_val = e_val
 
+        # Update the Layer System
+        self.layer_system.emitter_enter(self.position, self)
+
     def move_to_pos(self, new_pos):
+        # Update the Layer System
+        self.layer_system.emitter_move(self.position, new_pos, self)
+        # Move emitter pos
         self.position[0] = np.clip(new_pos[0], 0, self.sim.grid_size[0] - 1)
         self.position[1] = np.clip(new_pos[1], 0, self.sim.grid_size[1] - 1)
 
+
     def remove(self):
+        # Remove reference from SimSpace emitters list
         if self in self.sim.emitters:
             self.sim.emitters.remove(self)
-
+        # Update the Layer System
+        self.layer_system.emitter_exit(self.position, self)
     """
     Update by radiating outwards in a circle from the center
     Note: Walls obstruct emitters
@@ -51,52 +63,50 @@ class Emitter():
                 y = int(round(r * math.cos(math.radians(angle)) + self.position[1]))
                 emit_pos = [x, y]
 
-                #print(cur_val)
-                #print(self.sim.get_pos_layer(self.layer, emit_pos))
-
-                #cur_total_val = cur_val + self.sim.get_pos_layer(self.layer, emit_pos)
-
-                if self.sim.is_pos_out_of_bounds(emit_pos) or not self.sim.is_pos_layer_empty("Wall", emit_pos):
+                if self.layer_system.out_of_bounds(emit_pos) or self.layer_system.has_wall(emit_pos):
                     break
                 else:
-                    cur_total_val = cur_val + self.sim.get_pos_layer(self.layer, emit_pos)
-                    self.sim.set_pos_layer(self.layer, emit_pos, np.clip(cur_total_val, self.min_val, self.max_val))
-
-    # @property
-    # def grid_pos(self):
-    #     assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
-    #     return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
-
-# Light Layer
+                    # TODO: Make the subclasses specify the functions instead
+                    match self.layer:
+                        case "Light":
+                            self.layer_system.increment_light_level(emit_pos, cur_val)
+                            continue
+                        case "Temperature":
+                            self.layer_system.increment_temperature(emit_pos, cur_val)
+                            continue
+                        case _:
+                            continue
+# Light Level
 class LightSource(Emitter):
     brightness: int
 
     def __init__(self, sim, pos, e_range, e_val):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Light"
-        self.min_val = 0
+        self.min_val = MIN_BRIGHTNESS
         self.max_val = MAX_BRIGHTNESS
         self.emit_val = np.clip(e_val, self.min_val, self.max_val)
 
-# Temperature Layer
+# Temperature
 class HeatSource(Emitter):
     max_heat: int
 
     def __init__(self, sim, pos, e_range, e_val):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Temperature"
+        self.min_val = MIN_TEMPERATURE
         self.max_val = MAX_TEMPERATURE
-        self.min_val = -self.max_val
         self.emit_val = np.clip(e_val, self.min_val, self.max_val)
 
 # Elevation Layer (Experimental)
 # "Mountains" / "Hills" / "Valleys" (negative e_vals)
+# TODO: redesign how elevation gets set - emitters might not be a good fit behavior-wise
 class HillEmitter(Emitter):
     max_elevation: int
 
     def __init__(self, sim, pos, e_range, e_val):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Elevation"
+        self.min_val = MIN_ELEVATION
         self.max_val = MAX_ELEVATION
-        self.min_val = -self.max_val
         self.emit_val = np.clip(e_val, self.min_val, self.max_val) # WIP: will support negative values

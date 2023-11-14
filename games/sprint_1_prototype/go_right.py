@@ -65,9 +65,6 @@ class GoRightSim(SimSpace):
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
             render_img[creature.grid_pos] = creature.rgb
-        if self.walls is not None:
-            for wall in self.walls:
-                render_img[wall.grid_pos] = wall.rgb
 
         render_img = self.get_render_image(render_img)
         # put text

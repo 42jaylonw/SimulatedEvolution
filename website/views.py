@@ -1,8 +1,15 @@
 from flask import Blueprint, render_template, jsonify, request
 import games.sprint_0_random.random_moving as random_moving
-
+import random
+#TEMP
+import temp_sim_to_frontend as sim_to_front
+#END TEMP
 views = Blueprint('views', __name__)
 
+NUMCONSUMERS = 100
+NUMPRODUCERS = 500
+# NOTE: Currently, Changing GRIDSIZE also requires change at line 2 of frontend-main.js
+GRIDSIZE = 50
 # simulator for user session
 simulator = None
 
@@ -16,26 +23,31 @@ def home_page():
 def about_page():
     return render_template("about.html")
 
-# Create a simulation and send the state to the webpage
-@views.route('/setup_grid', methods=["GET"])
-def set_grid():
-    # initialize Simulator if one has not been made
+@views.route('/new_setup_grid')
+def new_set_grid():
+    """Initialize SimSpace"""
+     # initialize Simulator if one has not been made
     global simulator
     if simulator is None:
-        simulator = random_moving.generate_sim(0, 50)
-    # return the starting state of the simulator
-    return jsonify(random_moving.get_initial_positions(simulator))
+        # Should use post request data to create simulation
+        # request.json["position"]
+        simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, GRIDSIZE)
+    return sim_to_front.get_sim_state(simulator)
+
+
 
 @views.route('/new_grid', methods=["GET"])
 def new_grid():
+    """Create a new grid on backend then send it to front"""
     global simulator
-    simulator = random_moving.generate_sim(0, 50)
-    return jsonify(random_moving.get_initial_positions(simulator))
+    simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, GRIDSIZE)
+    return sim_to_front.get_sim_state(simulator)
 
 
 # Update the state of the simulation grid and send it to the webpage
 @views.route('/get_grid_data', methods=["GET"])
 def get_grid_data():
+    """Perform SimSpace Step then update front-end"""
     global simulator
-    # return the updated position of creatures
-    return jsonify(random_moving.get_updated_positions(simulator))
+    simulator.step()
+    return sim_to_front.get_sim_state(simulator)

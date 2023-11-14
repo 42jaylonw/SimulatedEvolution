@@ -22,6 +22,8 @@ class Creature:
         self.cfg = sim.cfg
         self._cfg = sim.cfg[self.name]
         self.sim = sim
+        self.layer_system = sim.layer_system #EXPERIMENTAL
+        self.position = None
 
         self.behavior_system = GeneticAlgorithm(
             num_observations=self._cfg['num_observations'],
@@ -32,11 +34,17 @@ class Creature:
             mutation_rate=self._cfg['mutation_rate'])
         
         self._init_properties()
+        #EXPERIMENTAL
+        # self.layer_system.creature_enter(self.position, self)
 
     def _init_properties(self):
         self.rgb = self._cfg['rgb']
-        self.position = np.random.randint(self.sim.grid_size)
-        self.sim.increment_pos_layer(self.name, self.position, 1)
+
+        if self.position is None:
+            self.position = np.random.randint(self.sim.grid_size)
+            self.layer_system.creature_enter(self.position, self)
+        
+        #self.sim.increment_pos_layer(self.name, self.position, 1)
 
         # Compute a unique hash based on the 4th byte of creature's genome
         hasher = hashlib.sha256()

@@ -28,7 +28,8 @@ class Consumer(Creature):
         # self.sim.creatures -= this
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
-        self.sim.increment_pos_layer("Consumer", self.position, -1)
+
+        self.layer_system.creature_exit(self.position, self)
 
     def get_observation(self):
 
@@ -111,20 +112,34 @@ class Consumer(Creature):
         """ Obtains population count (of consumers) within sensory range. """
 
         # Obtains nearby information from function centered on the creature
-        near_info = self.sim.get_near_info(self.position, self.sensory_range)
+        #near_info = self.sim.get_near_info(self.position, self.sensory_range)
 
         # sums number of 1s in consumer layer of the array (if this is how the array works)
-        num_consumers = np.sum(near_info[2])
+        #num_consumers = np.sum(near_info[2])
+
+        # EXPERIMENTAL - original code commented out above, the implementation below
+        # should do the same job of counting the nearby consumers
+        num_consumers = 0
+        center = self.position
+        length = self.sensory_range
+        start_x = np.clip(center[0] - length, 0, self.sim.grid_size[0])
+        end_x = np.clip(center[0] + length, 0, self.sim.grid_size[0])
+        start_y = np.clip(center[1] - length, 0, self.sim.grid_size[1])
+        end_y = np.clip(center[1] + length, 0, self.sim.grid_size[1])
+
+        for x_pos in range(start_x, end_x):
+            for y_pos in range(start_y, end_y):
+                num_consumers += self.layer_system.get_num_consumers([x_pos, y_pos])
+        # ---------
 
         return num_consumers
 
     def senseNearest(self):
-        move_dir = np.random.randint(0, 4)
-        self.action_move(move_dir)
-        # d_x = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
-        # d_y = np.random.choice([-self.speed, self.speed], p=[0.5, 0.5])
-        # self.position[0] = np.clip(self.position[0] + d_x, 0, self.sim.grid_size[0] - 1)
-        # self.position[1] = np.clip(self.position[1] + d_y, 0, self.sim.grid_size[1] - 1)
+        pass
+        # TODO: check if this function is/will be used anywhere
+        # WIP - uncomment this when needed
+        #move_dir = np.random.randint(0, 4)
+        #self.action_move(move_dir)
 
     def action_move(self, action: int):
         """
@@ -159,20 +174,15 @@ class Consumer(Creature):
         target_elevation = 0.0
         self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
 
-        if self.sim.is_pos_out_of_bounds(target_pos) or not self.sim.is_pos_layer_empty("Wall", target_pos):
-            # Space is occupied: no change in position can be made in this direction
-            #print("wall blocked movement")
+        if self.layer_system.out_of_bounds(target_pos) or self.layer_system.has_wall(target_pos):
+            # Space is blocked: no change in position can be made in this direction
             d_x, d_y = 0, 0
             target_pos = self.position
 
-        self.sim.increment_pos_layer("Consumer", self.position, -1)
-
+        # Update the Layer System
+        self.layer_system.creature_move(self.position, target_pos, self)
         # Update the creature's position to the target position
-        # The clipping shouldn't be necessary, but just in case - clip the new position to be within bounds of sim space
-        self.position[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
-        self.position[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
-
-        self.sim.increment_pos_layer("Consumer", self.position, 1)
+        self.position = target_pos
 
     def blockedFwd(self):
         """
@@ -220,8 +230,13 @@ class Consumer(Creature):
         return self.check_empty(target_pos)
 
     def check_empty(self, target_pos):
-        return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
-                            for layer in ["Wall", "Producer", "Consumer"]]))
+
+        return int((not self.layer_system.out_of_bounds(target_pos)) and (not self.layer_system.has_wall(target_pos)))
+        # WIP - this replaces the old implementation (commented out below) which relied on the old layer system
+        # TODO: NOTE: this does not check for producers/consumers that "block" this consumer, and these checks might need to be added back
+
+        #return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
+        #                    for layer in ["Wall", "Producer", "Consumer"]]))
     
     def metabolize(self, activity=0.0, climate=0.0):
         """
