@@ -31,7 +31,7 @@ class new_Producer(Creature):
     # for light levels, use will's function
     def get_light_level(self, pos):
         # get list of producers at space in pool
-        
+        producer_list = self.sim.get_producers(pos)
         # get their sizes and add them up
         # light level for the creature is (their size / size total) * light lvl
         return 1.0
