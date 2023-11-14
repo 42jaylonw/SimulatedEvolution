@@ -83,7 +83,6 @@ class LightSource(Emitter):
         self.min_val = MIN_BRIGHTNESS
         self.max_val = MAX_BRIGHTNESS
         self.emit_val = np.clip(e_val, self.min_val, self.max_val)
-        print(self.emit_val)
 
     def step(self):
         emit_pos_pairs = self.get_emit_position_pairs()
@@ -102,7 +101,6 @@ class HeatSource(Emitter):
         self.min_val = MIN_TEMPERATURE
         self.max_val = MAX_TEMPERATURE
         self.emit_val = np.clip(e_val, self.min_val, self.max_val)
-        print(self.emit_val)
 
     def step(self):
         emit_pos_pairs = self.get_emit_position_pairs()

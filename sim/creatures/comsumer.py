@@ -229,14 +229,10 @@ class Consumer(Creature):
         return self.check_empty(target_pos)
 
     def check_empty(self, target_pos):
+        return int((not self.layer_system.out_of_bounds(target_pos)) and (not self.layer_system.has_wall(target_pos))
+                and (not self.layer_system.get_num_consumers(target_pos) == 0) and
+                   (not self.layer_system.get_num_producers(target_pos) == 0))
 
-        return int((not self.layer_system.out_of_bounds(target_pos)) and (not self.layer_system.has_wall(target_pos)))
-        # WIP - this replaces the old implementation (commented out below) which relied on the old layer system
-        # TODO: NOTE: this does not check for producers/consumers that "block" this consumer, and these checks might need to be added back
-
-        #return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
-        #                    for layer in ["Wall", "Producer", "Consumer"]]))
-    
     def metabolize(self, activity=0.0, climate=0.0):
         """
         Subtract Consumer's energy by the sum of activity, climate, and 10% of its size\n

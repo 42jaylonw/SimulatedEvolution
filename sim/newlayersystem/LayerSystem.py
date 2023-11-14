@@ -241,6 +241,9 @@ class GridSpace():
         self.elevation_val = 0
         self.has_a_wall = False
 
+        #WIP
+        self.pheremones = []
+
 
     def get_light_level(self):
         return self.light_val
