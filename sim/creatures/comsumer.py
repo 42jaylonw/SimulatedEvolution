@@ -19,10 +19,10 @@ class Consumer(Creature):
         obs = self.get_observation()
         action = np.argmax(self.behavior_system.predict(obs))
         self.action_move(action)
-        # self.energy_bar.consume_energy(self.move_cost)
-        # self.energy_bar.age_tick()
-        # if self.energy_bar.is_empty():
-        #     self.die()
+        self.energy_bar.consume_energy(self.move_cost)
+        self.energy_bar.age_tick()
+        if self.energy_bar.is_empty():
+            self.die()
 
     def die(self):
         # self.sim.creatures -= this
@@ -244,3 +244,15 @@ class Consumer(Creature):
         if energy < 0: 
             raise Exception(f"Cannot Consume {energy} energy")
         self.energy += energy
+
+    def eat_on_square(self):
+        """
+        Eats a creature at a position. 
+        If there is no creature to eat here, then does nothing.
+        """
+        self.sim
+    def reproduce(self, child_starting_energy=30):
+        """
+        Create a new creature at a space nearby.
+        Also updates the parent's max energy. 
+        """
