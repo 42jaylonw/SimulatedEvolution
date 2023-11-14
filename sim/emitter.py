@@ -27,7 +27,7 @@ class Emitter():
         self.position = pos
         self.position[0] = np.clip(pos[0], 0, self.sim.grid_size[0] - 1)
         self.position[1] = np.clip(pos[1], 0, self.sim.grid_size[1] - 1)
-        #print(self.position)
+
         self.emit_range = e_range
         self.min_val = 0 # arbitrary value
         self.max_val = 0 # arbitrary value
@@ -54,28 +54,25 @@ class Emitter():
     Update by radiating outwards in a circle from the center
     Note: Walls obstruct emitters
     """
-    def step(self):
+    def get_emit_position_pairs(self):
+        emit_position_pairs = []
+        emit_positions = []
         for angle in range(0, 360, 1):
-            cur_val = np.clip(self.emit_val, self.min_val, self.max_val)
             for r in range(0, self.emit_range, 1):
-
                 x = int(round(r * math.sin(math.radians(angle)) + self.position[0]))
                 y = int(round(r * math.cos(math.radians(angle)) + self.position[1]))
                 emit_pos = [x, y]
-
+                pos_dist_pair = (emit_pos, r)
                 if self.layer_system.out_of_bounds(emit_pos) or self.layer_system.has_wall(emit_pos):
                     break
-                else:
-                    # TODO: Make the subclasses specify the functions instead
-                    match self.layer:
-                        case "Light":
-                            self.layer_system.increment_light_level(emit_pos, cur_val)
-                            continue
-                        case "Temperature":
-                            self.layer_system.increment_temperature(emit_pos, cur_val)
-                            continue
-                        case _:
-                            continue
+                if emit_pos not in emit_positions:
+                    emit_positions.append(emit_pos)
+                    emit_position_pairs.append(pos_dist_pair)
+        return emit_position_pairs
+
+    def step(self):
+        pass
+
 # Light Level
 class LightSource(Emitter):
     brightness: int
@@ -86,6 +83,14 @@ class LightSource(Emitter):
         self.min_val = MIN_BRIGHTNESS
         self.max_val = MAX_BRIGHTNESS
         self.emit_val = np.clip(e_val, self.min_val, self.max_val)
+        print(self.emit_val)
+
+    def step(self):
+        emit_pos_pairs = self.get_emit_position_pairs()
+        cur_val = self.emit_val
+        for emit_pos, dist in emit_pos_pairs:
+            # TODO: make a gradual fading out of values towards 0
+            self.layer_system.increment_light_level(emit_pos, cur_val)
 
 # Temperature
 class HeatSource(Emitter):
@@ -97,6 +102,15 @@ class HeatSource(Emitter):
         self.min_val = MIN_TEMPERATURE
         self.max_val = MAX_TEMPERATURE
         self.emit_val = np.clip(e_val, self.min_val, self.max_val)
+        print(self.emit_val)
+
+    def step(self):
+        emit_pos_pairs = self.get_emit_position_pairs()
+        cur_val = self.emit_val
+        for emit_pos, dist in emit_pos_pairs:
+            cur_val = self.emit_val * ((self.emit_range - dist) / self.emit_range)
+            self.layer_system.increment_temperature(emit_pos, cur_val)
+
 
 # Elevation Layer (Experimental)
 # "Mountains" / "Hills" / "Valleys" (negative e_vals)

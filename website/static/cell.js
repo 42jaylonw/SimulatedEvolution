@@ -215,6 +215,7 @@ class Cell{
      */
     updateCellOverlay(){
         let color;
+
         if (this.temperature < 20) 
             {
                 color = `rgb(0,0,255, 0.3)`;
@@ -237,7 +238,7 @@ class Cell{
             }
             this.overlay.style.backgroundColor = color;
         }
-        
+
         //USED FOR DEBUGGING
         print(){
             console.log("CONSUMERS:" + this.numConsumers + " PRODUCERS: " + this.numProducers + " At position: " + this.position);
