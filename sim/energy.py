@@ -23,7 +23,7 @@ class EnergyBar:
         """
         self.max_energy = self.max_energy + value
         if self.max_energy < 0:
-            self.max_energy = 0:
+            self.max_energy = 0
         if self.current_energy > self.max_energy:
             self.current_energy = self.max_energy
 
@@ -33,7 +33,7 @@ class EnergyBar:
         At the default rate, the creature loses 1 max energy per 50 time steps.
         """
         neg_age_rate = self.age_rate * -1
-        adjust_max_energy(neg_age_rate)
+        self.adjust_max_energy(neg_age_rate)
 
     def replenish_energy(self, energy):
         """
