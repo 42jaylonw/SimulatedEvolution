@@ -28,16 +28,20 @@ class new_Producer(Creature):
 
     
     # use when calculating light absorption
-    # for light levels, use will's function
+    # for raw light levels, use will's refactored function
     def get_light_level(self, pos):
         # get list of producers at space in pool
         producer_list = self.sim.get_producers(pos)
         # get their sizes and add them up
+        size_total = 0
+        for (producer in producer_list):
+            size_total += (producer.size * producer.current_size)
         # light level for the creature is (their size / size total) * light lvl
-        return 1.0
+        ret = ((self.size * self.current_size) / size_total) * self.sim.get_light_level(pos)
+        return ret
 
     def get_temp(self, pos):
-        return 60.0
+        return self.sim.get_temperature(pos)
 
     # returns true on energy gain,false on no gained energy
     # values calculated before metabolizing
@@ -83,8 +87,8 @@ class new_Producer(Creature):
         tile_score = 0.0
 
         # add based on light and heat values
-        tile_score += get_temp(x, y)
-        tile_score = tile_score * get_light_level(x, y) * 100
+        tile_score += self.get_temp(x, y)
+        tile_score = tile_score * self.get_light_level(x, y) * 100
 
         ret[0] = int(tile_score)
 
