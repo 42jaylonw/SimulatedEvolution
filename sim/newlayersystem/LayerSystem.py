@@ -321,6 +321,11 @@ class GridSpace():
     def emitter_exit(self, emitter):
         self.emitters.remove(emitter)
 
-    # Returns a list of the properties (WIP - this does not return all properties yet) at this GridSpace
+    # Returns a dictionary of the properties (WIP - this does not return all properties yet) at this GridSpace
     def get_properties(self):
-        return (self.position, self.get_num_consumers(), self.get_num_producers(), self.has_a_wall, np.int16(self.temperature_val).item())
+       
+        return  {"position": self.position,
+                "consumerCount": self.get_num_consumers(),
+                "producerCount": self.get_num_producers(),
+                "isWall": self.has_a_wall,
+                "temperature": np.int16(self.temperature_val).item()}

@@ -41,18 +41,11 @@ class SimulationGrid{
         fetch('/new_setup_grid')
         .then((response) => response.json())
         .then((packet) => {
+            console.log(packet);
             //"position, numConsumer, numProduc, isWall, temperature)"
             for(let data of packet){
-                var position = data[0];
-                var numConsumer = data[1];
-                var numProducer = data[2];
-                var isWall = data[3];
-                var temp = data[4];
-                var cell = this.cells[this.width * position[0] + position[1]];
-                cell.updateProperties(numConsumer, numProducer, isWall, temp);
-            }
-           
-            
+                this.handleData(data);
+            } 
         })
         .catch((error) =>{
             console.error('Error:', error);
@@ -66,14 +59,7 @@ class SimulationGrid{
         .then((response) => response.json())
         .then((packet) => {
             for(let data of packet){
-                //Per creature(oldPos, newPos) call this CreatureInfo (should supplant position)
-                var position = data[0];
-                var numConsumer = data[1];
-                var numProducer = data[2];
-                var isWall = data[3];
-                var temp = data[4];
-                var cell = this.cells[this.width * position[0] + position[1]];
-                cell.updateProperties(numConsumer, numProducer, isWall, temp);
+                this.handleData(data);
             }   
         })
         .catch((error) =>{
@@ -100,13 +86,7 @@ class SimulationGrid{
         //Request SUCCESS
         .then((packet) => {
             for(let data of packet){
-                var position = data[0];
-                var numConsumer = data[1];
-                var numProducer = data[2];
-                var isWall = data[3];
-                var temp = data[4];
-                var cell = this.cells[this.width * position[0] + position[1]];
-                cell.updateProperties(numConsumer, numProducer, isWall, temp);
+                this.handleData(data);
             }
             console.log("Created new Grid!");
             
@@ -117,7 +97,16 @@ class SimulationGrid{
         });
     }
     
-
+    
+    handleData(data){
+         var position = data["position"];
+         var numConsumer = data["consumerCount"];
+         var numProducer = data["producerCount"];
+         var isWall = data["isWall"];
+         var temp = data["temperature"];
+         var cell = this.cells[this.width * position[0] + position[1]];
+         cell.updateProperties(numConsumer, numProducer, isWall, temp);
+    }
     //Request simulation grid data from server every 0.500 seconds
     runSimulation(){
         this.simulationID = setInterval(() => {this.getGridData()}, 500);
@@ -129,19 +118,11 @@ class SimulationGrid{
         clearInterval(this.simulationID);
     }
 
-    //Display cellOverlay for all Cells
-    displayHeatmap(){
+    //Display/hid heatmap information for each cell
+    toggleHeatmapDisplay(isDisplayed){
         for(let cell of this.cells){
-            cell.displayCellOverlay();
+            cell.toggleCellOverlay(isDisplayed);
         }
-    }
-
-     //Hide cellOverlay for all Cells
-    stopHeatmapDisplay(){
-        for(let cell of this.cells){
-            cell.hideCellOverlay();
-        }
-        console.log("stopping heatmap..");
     }
     
 

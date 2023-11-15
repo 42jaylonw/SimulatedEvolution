@@ -1,13 +1,14 @@
 from flask import Blueprint, render_template, jsonify, request
 import games.sprint_0_random.random_moving as random_moving
 import random
+import json
 #TEMP
 import temp_sim_to_frontend as sim_to_front
 #END TEMP
 views = Blueprint('views', __name__)
 
-NUMCONSUMERS = 100
-NUMPRODUCERS = 500
+NUMCONSUMERS = 5
+NUMPRODUCERS = 3
 # NOTE: Currently, Changing GRIDSIZE also requires change at line 2 of frontend-main.js
 GRIDSIZE = 50
 # simulator for user session
@@ -51,3 +52,10 @@ def get_grid_data():
     global simulator
     simulator.step()
     return sim_to_front.get_sim_state(simulator)
+
+@views.route('/get_creatures_at_grid_space', methods=["POST"])
+def get_creatures_at_grid_space():
+    position = json.loads(request.data)["position"]
+    global simulator
+    return sim_to_front.get_creatures_wrapper(simulator, position)
+    # return {"genome": "28ue93hw", "size": 2, "energy" : 95}

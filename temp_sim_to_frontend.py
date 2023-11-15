@@ -6,7 +6,6 @@ from sim.creatures.producer import Producer
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
 
-
 def create_sim(num_producers=1, num_consumers=1, width=50):
     """
     Create a SimSpace object
@@ -64,3 +63,14 @@ def get_sim_state(simulator):
            gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
     # return information of all gridspaces
     return jsonify(gridspacesInformation)
+
+# Get the information of all creatures at specified location
+def get_creatures_wrapper(sim, position):
+    creature_data = {"producers" : list(), "consumers" : list()}
+    producers = sim.layer_system.get_producers(position)
+    for producer in producers:
+        creature_data["producers"].append(producer.creature_info)
+    consumers = sim.layer_system.get_consumers(position)
+    for consumer in consumers:
+        creature_data["consumers"].append(consumer.creature_info)
+    return jsonify(creature_data)

@@ -1,11 +1,3 @@
-const Layer ={
-    Producer: 1,
-    Consumer: 2,
-    Wall: 3,
-    Elevation: 4,
-    List:  5,
-    Temperature: 6,
-}
 /**
  * @class Cell
  * @classdesc A class that creates Cells of a Simulation-grid object to establish
@@ -28,6 +20,7 @@ class Cell{
         this.numProducers = 0;
         this.temperature = 0;
         this.isWall = false;
+        this.analysisContainer = document.querySelector('.analysis-container');
         //Create HTML elements associated with Cell object
         this.createCellElement(position);
         this.createInfoDisplay();     
@@ -99,26 +92,32 @@ class Cell{
     displayCellInfo(){
         //Debug print
         console.log(`Output information of ${this.element.id} at position: ${this.position}`);
-        console.log(this);
-      
-        
-        // //Format cell position to send to Python backend
-        // const data = {position: this.position};
-        // //Make the POST request
-        // fetch('/get_cell_data', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)})
-        // .then((response) => response.json())
-        // //Post Request SUCCESS, Perform operations on response(cellLayerData)
-        // .then((cellLayerData) => {
-
-        //    console.log(cellLayerData);
-            
-        // })
-        // //POST Request FAILED
-        // .catch((error) =>{
-        //     console.error('Error:', error);
-        // });
+        console.log(this);   
+        //Format cell position to send to Python backend
+        const data = {position: this.position};
+        //Make the POST request
+        fetch('/get_creatures_at_grid_space', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)})
+        .then((response) => response.json())
+        //Post Request SUCCESS, Perform operations on response(cellLayerData)
+        .then((payload) => {
+            var producers = payload["producers"];
+            var consumers = payload["consumers"];
+            this.analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${this.position}</h2> ` + 
+                this.generateCreatureText("CONSUMERS", consumers) + "<br>" + this.generateCreatureText("PRODUCERS", producers);
+        })
+        //POST Request FAILED
+        .catch((error) =>{
+            console.error('Error:', error);
+        });
     }
 
+    generateCreatureText(creatureCLass, creatures){
+        var creatureText = creatureCLass
+        for(let creature of creatures){
+            creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
+        }
+        return creatureText
+    }
     /**
      * Update Cell properties
      * @param {int} numConsumer Number of consumers to set in Cell
@@ -189,23 +188,21 @@ class Cell{
         this.overlay = document.createElement('div');
         this.overlay.classList.add('cell-overlay');
         this.element.appendChild(this.overlay);
-        this.hideCellOverlay();
+        this.toggleCellOverlay(false);
     }
 
-    //TODO combine displayCellOverlay and hideCellOverlay into 1 function
     /**
      * Display Cell overlay
      * @property {Element} this.overlay  HTML container that displays general Cell information
      */
-    displayCellOverlay(){
-        this.overlay.style.display = 'block';
-    }
-     /**
-     * Hide Cell overlay
-     * @property {Element} this.overlay  HTML container that displays general Cell information
-     */
-    hideCellOverlay(){
-        this.overlay.style.display = 'none';
+    toggleCellOverlay(showOverlay){
+        if(showOverlay){
+            this.overlay.style.display = 'block';
+        }
+        else{
+            this.overlay.style.display = 'none';    
+        }
+        
     }
 
      /**

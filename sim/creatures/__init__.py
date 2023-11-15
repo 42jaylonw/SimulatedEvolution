@@ -32,7 +32,7 @@ class Creature:
             num_neurons=self._cfg['num_neurons'],
             reproduce_mode=self._cfg['reproduce_mode'],
             mutation_rate=self._cfg['mutation_rate'])
-        
+        self.genome = self.behavior_system.genome
         self._init_properties()
         #EXPERIMENTAL
         # self.layer_system.creature_enter(self.position, self)
@@ -75,6 +75,11 @@ class Creature:
         # return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
         return int(self.position[0]), int(self.position[1])
 
+    @property
+    def creature_info(self):
+        return {"genome" : self.genome,
+                "size": self.size,
+                "energy": self.energy}
 
 class Corpse:
     pass

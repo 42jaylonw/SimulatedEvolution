@@ -58,18 +58,19 @@ function changeSimulationMode()
     isSimRunning = !isSimRunning;
 }
 
+//Display/hide heatmap based on last state of heatmap
 function toggleHeatmap()
 {
-    if(heatMapdisplayed)
-    {
-        simSpace.stopHeatmapDisplay();
-        toggleClimateButton.textContent = "Show Heatmap"
-    }
-    else
-    {
-      simSpace.displayHeatmap(); 
-      toggleClimateButton.textContent = "Hide Heatmap"
-        
-    }
+    //Change state
     heatMapdisplayed = !heatMapdisplayed;
+    //Change text on toggle button
+    if(heatMapdisplayed){
+        toggleClimateButton.textContent = "Hide Heatmap"
+    }
+    else{
+      toggleClimateButton.textContent = "Show Heatmap"
+    }
+    //toggle heatmap
+    simSpace.toggleHeatmapDisplay(heatMapdisplayed);
+    
 }
