@@ -99,6 +99,13 @@ def generate_genome():
     return genome
 
 
+def generate_producer_genome():
+    genome = ""
+    for i in range(4):
+        genome += int_to_hex(random.randint(0, 255))
+    return genome
+
+
 def sensor_switch_handler(properties, sensor):
     match sensor:
         # blocked forwards
@@ -417,6 +424,10 @@ class GeneticAlgorithm:
         child_genome = reproduce_genome(self.genome, other.genome, self.reproduce_mode)
         child_genome = clean_genome(mutate_genome(child_genome, self.mutation_rate))
         return child_genome
+
+    def mutate_genome(self):
+        genome = self.genome
+        return mutate_genome(genome)
 
 
 if __name__ == '__main__':
