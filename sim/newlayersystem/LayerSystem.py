@@ -1,5 +1,6 @@
 import numpy as np
 
+from sim import GridUtils
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
 
@@ -12,6 +13,9 @@ MAX_TEMPERATURE = 100
 
 MIN_ELEVATION = -100
 MAX_ELEVATION = 100
+
+MIN_PHEREMONE_STRENGTH = 0
+MAX_PHEREMONE_STRENGTH = 100
 
 # Component Used by SimSpace to keep track of layers and data at all positions in the SimSpace
 class LayerSystem():
@@ -206,7 +210,7 @@ class LayerSystem():
                 True: pos is outside of bounds of sim space
                 False: pos is within bounds of sim space
         """
-        return pos[0] < 0 or pos[0] > self.dimensions[0] - 1 or pos[1] < 0 or pos[1] > self.dimensions[1] - 1
+        return GridUtils.out_of_bounds(self.dimensions, pos)
     
     # Debug function to print properties of every GridSpace in the LayerSystem
     def print(self):
