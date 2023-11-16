@@ -106,13 +106,13 @@ class new_Producer(Creature):
         ret[0] = int(tile_score)
 
         return ret
-    
+
 
     def die(self):
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
-        self.layer_system.creature_exit(self.position, self)
+        self.sim.layer_system.creature_exit(self.position, self)
 
     def step(self):
         
@@ -162,6 +162,12 @@ class new_Producer(Creature):
 
                     expansion = max(possible_expansion, key=lambda x: x[0])
                     # TODO: handle creation of new plant at expansion tile
+                    new_genome = self.behavior_system.mutate_genome()
+                    new_plant = self.__class__(self.sim, new_genome)
+                    new_plant.position = expansion[1:3]
+                    self.sim.creatures.append(new_plant)
+                    self.sim.layer_system.creature_enter(new_plant)
+                    
         
         self.producer_metabolize()
 
