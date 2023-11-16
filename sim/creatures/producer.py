@@ -6,6 +6,19 @@ class Producer(Creature):
     def step(self):
         pass
 
+class Food():
+    name = 'Food'
+
+    def __init__(self, sim, genome=None):
+        # TODO: hash from genome 
+        self.saturation = 0.5
+        self.seed_bearer = False
+        self.genome = genome
+
+
+
+
+
 class new_Producer(Creature):
     name = 'new_Producer'
 
@@ -34,7 +47,7 @@ class new_Producer(Creature):
         producer_list = self.sim.get_producers(pos)
         # get their sizes and add them up
         size_total = 0
-        for (producer in producer_list):
+        for producer in producer_list:
             size_total += (producer.size * producer.current_size)
         # light level for the creature is (their size / size total) * light lvl
         ret = ((self.size * self.current_size) / size_total) * self.sim.get_light_level(pos)
@@ -93,9 +106,16 @@ class new_Producer(Creature):
         ret[0] = int(tile_score)
 
         return ret
+    
+
+    def die(self):
+        if self in self.sim.creatures:
+            self.sim.creatures.remove(self)
+
+        self.layer_system.creature_exit(self.position, self)
 
     def step(self):
-        # not sure what this line does ???
+        
         if self.sim.is_pos_layer_empty("Producer", self.position):
             self.sim.increment_pos_layer("Producer", self.position, 1)
 
@@ -112,6 +132,7 @@ class new_Producer(Creature):
             # if not, grow plant in most optimal neighbor
             elif (self.current_size == 1.0):
                 # fruit bearer
+                # TODO: for fruit bearers, remember to kill fruits if plant dies
                 if (self.fruit_bearer):
                     # create food object at position
                     # note multiple food objects can occupy this position
@@ -141,4 +162,11 @@ class new_Producer(Creature):
 
                     expansion = max(possible_expansion, key=lambda x: x[0])
                     # TODO: handle creation of new plant at expansion tile
+        
+        self.producer_metabolize()
+
+        # check if dead
+        if self.energy == 0.0:
+            self.die()
+
                     
