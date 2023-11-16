@@ -1,5 +1,5 @@
 import math
-
+import numpy as np
 """
     Gets positions radiating outwards in a circle from the center
     :param
@@ -26,6 +26,19 @@ def get_circle_coord_dist_pairs(layer_system, center_pos, radius, do_obstruction
                 emit_position_pairs.append(pos_dist_pair)
     return emit_position_pairs
 
+# WIP
+def get_rectangle_area_coords(dim, center, length, width=None):
+    if width is None:
+        width = length
+    coord_positions = []
+    start_x = np.clip(center[0] - length, 0, dim[0])
+    end_x = np.clip(center[0] + length, 0, dim[0])
+    start_y = np.clip(center[1] - width, 0, dim[1])
+    end_y = np.clip(center[1] + width, 0, dim[1])
+
+    for x_pos in range(start_x, end_x):
+        for y_pos in range(start_y, end_y):
+            coord_positions.append(np.ndarray([x_pos, y_pos]))
 
 # Checks whether the position is out of bounds of given bounds or not (True if out of bounds, False if within bounds)
 # Input: bounds -> grid bounds to check

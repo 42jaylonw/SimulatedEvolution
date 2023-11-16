@@ -24,11 +24,13 @@ class Consumer(Creature):
         #     self.die()
 
     def die(self):
-        # self.sim.creatures -= this
-        if self in self.sim.creatures:
-            self.sim.creatures.remove(self)
-
-        self.layer_system.creature_exit(self.position, self)
+        super().die(self)
+        pass
+        # NOTE - this has been moved to the parent class
+        #if self in self.sim.creatures:
+        #    self.sim.creatures.remove(self)
+        #
+        #self.layer_system.creature_exit(self.position, self)
 
     def get_observation(self):
 
