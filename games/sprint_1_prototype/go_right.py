@@ -63,8 +63,8 @@ class GoRightSim(SimSpace):
 
     def render(self):
         render_img = np.copy(self.grid_rgb)
-        for creature in self.creatures:
-            render_img[creature.grid_pos] = creature.rgb
+        # for creature in self.creatures:
+        #     render_img[creature.grid_pos] = creature.rgb
 
         render_img = self.get_render_image(render_img)
         # put text

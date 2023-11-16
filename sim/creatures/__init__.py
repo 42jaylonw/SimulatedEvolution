@@ -3,6 +3,8 @@ import hashlib
 import numpy as np
 from algorithm.genetic_algorithm import GeneticAlgorithm
 from sim.energy import EnergyBar
+from sim.visualization.appearance import rgb_mutation
+from sim.visualization.random_ship_generator import InvaderCreator
 
 
 class Creature:
@@ -15,6 +17,7 @@ class Creature:
     energy_bar: EnergyBar
 
     # properties
+    species_id: int
     energy: float
     size: float
 
@@ -22,7 +25,7 @@ class Creature:
         self.cfg = sim.cfg
         self._cfg = sim.cfg[self.name]
         self.sim = sim
-        self.layer_system = sim.layer_system #EXPERIMENTAL
+        self.layer_system = sim.layer_system  # EXPERIMENTAL
         self.position = None
 
         self.behavior_system = GeneticAlgorithm(
@@ -34,17 +37,24 @@ class Creature:
             mutation_rate=self._cfg['mutation_rate'])
         self.genome = self.behavior_system.genome
         self._init_properties()
-        #EXPERIMENTAL
+        # EXPERIMENTAL
         # self.layer_system.creature_enter(self.position, self)
 
     def _init_properties(self):
-        self.rgb = self._cfg['rgb']
+        if 'num_species' in self._cfg:
+            self.species_id = np.random.randint(self._cfg['num_species'])
+        else:
+            self.species_id = 0
+        self.rgb = rgb_mutation(self._cfg['rgb'], self.species_id, self._cfg['num_species'])
+        if self.name == 'Consumer':
+            self.appearance = InvaderCreator(img_size=5).get_an_invader(5)
+            self.appearance_mask = (self.appearance.sum(2) != 0).astype(np.uint8)
 
         if self.position is None:
             self.position = np.random.randint(self.sim.grid_size)
             self.layer_system.creature_enter(self.position, self)
-        
-        #self.sim.increment_pos_layer(self.name, self.position, 1)
+
+        # self.sim.increment_pos_layer(self.name, self.position, 1)
 
         # Compute a unique hash based on the 4th byte of creature's genome
         hasher = hashlib.sha256()
@@ -77,9 +87,10 @@ class Creature:
 
     @property
     def creature_info(self):
-        return {"genome" : self.genome,
+        return {"genome": self.genome,
                 "size": self.size,
                 "energy": self.energy}
+
 
 class Corpse:
     pass

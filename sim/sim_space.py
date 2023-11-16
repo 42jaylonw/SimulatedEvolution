@@ -58,12 +58,11 @@ class SimSpace:
     def termination(self):
         pass
 
-
     def render(self):
         render_img = np.copy(self.grid_rgb)
         for creature in self.creatures:
-            render_img[creature.grid_pos] = creature.rgb
-
+            if not hasattr(creature, 'appearance'):
+                render_img[creature.grid_pos] = creature.rgb
         render_img = self.get_render_image(render_img)
         cv2.imshow(str(self.name),
                    cv2.cvtColor(render_img, cv2.COLOR_RGB2BGR))
@@ -75,15 +74,15 @@ class SimSpace:
     """
     def get_near_info(self, center, length):
         """
-        #:param:
-        #    length: how far from the center
-        #    example:
-        #        near_info = sim.get_near_info(center=(0, 0), length=2)
-        #        near_info.shape: (3, 3, 3)
-        #:return:
-        #        the dimension 1: the grid layer info 0 means empty, 1 means grid board or obstacles
-        #        the dimension 2: the producer layer info 0 means empty, 1 means a producer
-        #        the dimension 3: the consumer layer info 0 means empty, 1 means a consumer
+    #:param:
+    #    length: how far from the center
+    #    example:
+    #        near_info = sim.get_near_info(center=(0, 0), length=2)
+    #        near_info.shape: (3, 3, 3)
+    #:return:
+    #        the dimension 1: the grid layer info 0 means empty, 1 means grid board or obstacles
+    #        the dimension 2: the producer layer info 0 means empty, 1 means a producer
+    #        the dimension 3: the consumer layer info 0 means empty, 1 means a consumer
     """
         x, y = center
         rows, cols = self.grid_size
@@ -131,6 +130,25 @@ class SimSpace:
         return positionData
 
     def get_render_image(self, img):
+        scale = int(self._cfg['visual_size'][0] / img.shape[0])
         img = np.uint8(cv2.resize(
             np.transpose(img, (1, 0, 2)), self._cfg['visual_size'], interpolation=cv2.INTER_NEAREST) * 255)
+
+        for creature in self.creatures:
+            if hasattr(creature, 'appearance'):
+                top_half = int(scale / 2)
+                bot_half = scale - int(scale / 2)
+                x, y = creature.grid_pos
+                scaled_x = x * scale + int(scale / 2)
+                scaled_y = y * scale + int(scale / 2)
+                grid_background = img[scaled_x - top_half:scaled_x + bot_half, scaled_y - top_half: scaled_y + bot_half]
+                mask = cv2.resize(creature.appearance_mask, (scale, scale), interpolation=cv2.INTER_NEAREST)
+                mask = mask.reshape(scale, scale, 1)
+                masked_grid_background = (1 - mask) * grid_background
+                appearance = cv2.resize(creature.appearance, (scale, scale), interpolation=cv2.INTER_NEAREST)
+                normalized_appearance = np.float32(appearance) / 255. - 0.5
+                appearance = np.uint8(255 * (creature.rgb + 0.05 * normalized_appearance))
+                img[scaled_x - top_half:scaled_x + bot_half,
+                scaled_y - top_half: scaled_y + bot_half] = mask * appearance + masked_grid_background
+
         return img
