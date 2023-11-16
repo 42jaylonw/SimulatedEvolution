@@ -1,7 +1,9 @@
 import numpy as np
 import math
 
-from sim.newlayersystem.LayerSystem import MIN_BRIGHTNESS, MAX_BRIGHTNESS, MIN_TEMPERATURE, MAX_TEMPERATURE, MIN_ELEVATION, MAX_ELEVATION
+from sim import GridUtils
+from sim.newlayersystem.LayerSystem import MIN_BRIGHTNESS, MAX_BRIGHTNESS, MIN_TEMPERATURE, MAX_TEMPERATURE
+from sim.newlayersystem.LayerSystem import MIN_ELEVATION, MAX_ELEVATION, MIN_PHEREMONE_STRENGTH, MAX_PHEREMONE_STRENGTH
 
 # "Abstract" class
 class Emitter():
@@ -55,28 +57,13 @@ class Emitter():
     Note: Walls obstruct emitters
     """
     def get_emit_position_pairs(self):
-        emit_position_pairs = []
-        emit_positions = []
-        for angle in range(0, 360, 1):
-            for r in range(0, self.emit_range, 1):
-                x = int(round(r * math.sin(math.radians(angle)) + self.position[0]))
-                y = int(round(r * math.cos(math.radians(angle)) + self.position[1]))
-                emit_pos = [x, y]
-                pos_dist_pair = (emit_pos, r)
-                if self.layer_system.out_of_bounds(emit_pos) or self.layer_system.has_wall(emit_pos):
-                    break
-                if emit_pos not in emit_positions:
-                    emit_positions.append(emit_pos)
-                    emit_position_pairs.append(pos_dist_pair)
-        return emit_position_pairs
+        return GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, self.emit_range, True)
 
     def step(self):
         pass
 
 # Light Level
 class LightSource(Emitter):
-    brightness: int
-
     def __init__(self, sim, pos, e_range, e_val):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Light"
@@ -93,8 +80,6 @@ class LightSource(Emitter):
 
 # Temperature
 class HeatSource(Emitter):
-    max_heat: int
-
     def __init__(self, sim, pos, e_range, e_val):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Temperature"
@@ -110,15 +95,31 @@ class HeatSource(Emitter):
             self.layer_system.increment_temperature(emit_pos, cur_val)
 
 
-# Elevation Layer (Experimental)
-# "Mountains" / "Hills" / "Valleys" (negative e_vals)
-# TODO: redesign how elevation gets set - emitters might not be a good fit behavior-wise
+# Elevation Layer (Experimental) "Mountains" / "Hills" / "Valleys" (negative e_vals) Does NOT get refreshed to 0 at
+# every step() TODO: move the get_emit_position_pairs() function to a separate class, and implement a single-use tool
+#                    instead of hill-emitters
 class HillEmitter(Emitter):
-    max_elevation: int
-
     def __init__(self, sim, pos, e_range, e_val):
         super().__init__(sim, pos, e_range, e_val)
         self.layer = "Elevation"
         self.min_val = MIN_ELEVATION
         self.max_val = MAX_ELEVATION
-        self.emit_val = np.clip(e_val, self.min_val, self.max_val) # WIP: will support negative values
+        self.emit_val = np.clip(e_val, self.min_val, self.max_val)
+
+# TODO: WIP - should Pheremone dataclass be internal or provided to the initialization function?
+class PheremoneEmitter(Emitter):
+    def __init__(self, sim, pos, e_range, pheremone):
+        super().__init__(sim, pos, e_range, pheremone.strength)
+        self.layer = "Pheremone"
+        self.min_val = MIN_PHEREMONE_STRENGTH
+        self.max_val = MAX_PHEREMONE_STRENGTH
+        self.emit_val = np.clip(pheremone.strength, self.min_val, self.max_val)
+        self.emit_source = pheremone.source
+
+    def step(self):
+        emit_pos_pairs = self.get_emit_position_pairs()
+        cur_val = self.emit_val
+        for emit_pos, dist in emit_pos_pairs:
+            cur_val = self.emit_val * ((self.emit_range - dist) / self.emit_range)
+            self.layer_system.increment_pheremone(emit_pos, cur_val)
+            self.layer_system.increment_temperature(emit_pos, cur_val)
