@@ -75,7 +75,8 @@ class LightSource(Emitter):
         emit_pos_pairs = self.get_emit_position_pairs()
         cur_val = self.emit_val
         for emit_pos, dist in emit_pos_pairs:
-            # TODO: make a gradual fading out of values towards 0
+            # TODO: make a universal decay coefficient rather than depend on individual emit strength + range
+            cur_val = self.emit_val * ((self.emit_range - dist) / self.emit_range)
             self.layer_system.increment_light_level(emit_pos, cur_val)
 
 # Temperature
@@ -92,34 +93,4 @@ class HeatSource(Emitter):
         cur_val = self.emit_val
         for emit_pos, dist in emit_pos_pairs:
             cur_val = self.emit_val * ((self.emit_range - dist) / self.emit_range)
-            self.layer_system.increment_temperature(emit_pos, cur_val)
-
-
-# Elevation Layer (Experimental) "Mountains" / "Hills" / "Valleys" (negative e_vals) Does NOT get refreshed to 0 at
-# every step() TODO: move the get_emit_position_pairs() function to a separate class, and implement a single-use tool
-#                    instead of hill-emitters
-class HillEmitter(Emitter):
-    def __init__(self, sim, pos, e_range, e_val):
-        super().__init__(sim, pos, e_range, e_val)
-        self.layer = "Elevation"
-        self.min_val = MIN_ELEVATION
-        self.max_val = MAX_ELEVATION
-        self.emit_val = np.clip(e_val, self.min_val, self.max_val)
-
-# TODO: WIP - should Pheremone dataclass be internal or provided to the initialization function?
-class PheremoneEmitter(Emitter):
-    def __init__(self, sim, pos, e_range, pheremone):
-        super().__init__(sim, pos, e_range, pheremone.strength)
-        self.layer = "Pheremone"
-        self.min_val = MIN_PHEREMONE_STRENGTH
-        self.max_val = MAX_PHEREMONE_STRENGTH
-        self.emit_val = np.clip(pheremone.strength, self.min_val, self.max_val)
-        self.emit_source = pheremone.source
-
-    def step(self):
-        emit_pos_pairs = self.get_emit_position_pairs()
-        cur_val = self.emit_val
-        for emit_pos, dist in emit_pos_pairs:
-            cur_val = self.emit_val * ((self.emit_range - dist) / self.emit_range)
-            self.layer_system.increment_pheremone(emit_pos, cur_val)
             self.layer_system.increment_temperature(emit_pos, cur_val)
