@@ -99,6 +99,13 @@ def generate_genome():
     return genome
 
 
+def generate_producer_genome():
+    genome = ""
+    for i in range(4):
+        genome += int_to_hex(random.randint(0, 255))
+    return genome
+
+
 def sensor_switch_handler(properties, sensor):
     match sensor:
         # blocked forwards
