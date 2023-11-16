@@ -130,10 +130,11 @@ class Cell{
      * @property {bool} Cell.isWall Is this Cell a wall?
      * @property {Element} Cell.infoDisplay.innerHTML The HTML text associated with the Cell.infoDisplay container
      */
-    updateProperties(numConsumer, numProducer, isWall=false, temp=0){
+    updateProperties(numConsumer, numProducer, isWall=false, temp=0, lightLevel=0){
         this.numConsumers = numConsumer;
         this.numProducers = numProducer;
         this.temperature = temp;
+        this.lightLevel = lightLevel;
         //Check if this Cell is a Wall
         this.isWall = isWall;
         //Display different based on whether the Cell is a Wall
@@ -158,8 +159,8 @@ class Cell{
             this.setCellColor(`rgb(${(0.96 *255)}, ${(0.5 * 255)}, ${(0)})`);
         }
         //Update display information for this cell
-        this.infoDisplay.innerHTML = `Climate: ${this.temperature}` + '<br>' + `Consumers: ${this.numConsumers}` + 
-            '<br>' + `Producers: ${this.numProducers}` + 
+        this.infoDisplay.innerHTML = `Temperature: ${this.temperature}<br>Light-level ${this.lightLevel}` + '<br>' + `Consumers: ${this.numConsumers}` + 
+            '<br>' + `Producers: ${this.numProducers}` +  
             '<p class="text-center" class="details-text">click for details</p>';
         
         //Update the overlay at this Cell
@@ -195,7 +196,10 @@ class Cell{
      * Display Cell overlay
      * @property {Element} this.overlay  HTML container that displays general Cell information
      */
-    toggleCellOverlay(showOverlay){
+    toggleCellOverlay(showOverlay, mode){
+        if(mode == "lightmap"){
+            this.updateCellOverlay(mode);
+        }
         if(showOverlay){
             this.overlay.style.display = 'block';
         }
@@ -210,35 +214,40 @@ class Cell{
      * @property {Element} this.overlay  HTML container that displays general Cell information
      * @property {int | float} this.temperature Temperature at Cell
      */
-    updateCellOverlay(){
+    updateCellOverlay(mode){
         let color;
-
-        if (this.temperature < 20) 
-            {
-                color = `rgb(0,0,255, 0.3)`;
-            } 
-            else if (this.temperature < 40) 
-            {
-                color = `rgb(0,255,255, 0.3)`;
-            } 
-            else if (this.temperature < 60) 
-            {
-                color = `rgb(0,255,0, 0.3)`;
-            } 
-            else if (this.temperature < 80) 
-            {
-                color = `rgb(255,255,0, 0.3)`;
-            } 
-            else 
-            {
-                color = `rgb(255,0,0, 0.3)`;
-            }
+        if(mode == "lightmap"){
+            color = `rgb(${this.lightLevel},${this.lightLevel},${this.lightLevel}, 0.5)`;
             this.overlay.style.backgroundColor = color;
+            return;
         }
+        if (this.temperature < 20) 
+        {
+            color = `rgb(0,0,255, 0.3)`;
+        } 
+        else if (this.temperature < 40) 
+        {
+            color = `rgb(0,255,255, 0.3)`;
+        } 
+        else if (this.temperature < 60) 
+        {
+            color = `rgb(0,255,0, 0.3)`;
+        } 
+        else if (this.temperature < 80) 
+        {
+            color = `rgb(255,255,0, 0.3)`;
+        } 
+        else 
+        {
+            color = `rgb(255,0,0, 0.3)`;
+        }
+       
+        this.overlay.style.backgroundColor = color;
+    }
 
         //USED FOR DEBUGGING
-        print(){
-            console.log("CONSUMERS:" + this.numConsumers + " PRODUCERS: " + this.numProducers + " At position: " + this.position);
+    print(){
+        console.log("CONSUMERS:" + this.numConsumers + " PRODUCERS: " + this.numProducers + " At position: " + this.position);
         }
 }
 

@@ -41,7 +41,6 @@ class SimulationGrid{
         fetch('/new_setup_grid')
         .then((response) => response.json())
         .then((packet) => {
-            console.log(packet);
             //"position, numConsumer, numProduc, isWall, temperature)"
             for(let data of packet){
                 this.handleData(data);
@@ -104,8 +103,9 @@ class SimulationGrid{
          var numProducer = data["producerCount"];
          var isWall = data["isWall"];
          var temp = data["temperature"];
+         var lightLevel = data["light"];
          var cell = this.cells[this.width * position[0] + position[1]];
-         cell.updateProperties(numConsumer, numProducer, isWall, temp);
+         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
     }
     //Request simulation grid data from server every 0.500 seconds
     runSimulation(){
@@ -119,9 +119,10 @@ class SimulationGrid{
     }
 
     //Display/hid heatmap information for each cell
-    toggleHeatmapDisplay(isDisplayed){
+    toggleHeatmapDisplay(isDisplayed, mode){
+        console.log(mode);
         for(let cell of this.cells){
-            cell.toggleCellOverlay(isDisplayed);
+            cell.toggleCellOverlay(isDisplayed, mode);
         }
     }
     

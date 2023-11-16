@@ -17,7 +17,10 @@ document.addEventListener('keydown', function (e) {
     //Press Tab to toggle heatmap
     if(e.code === 'Tab'){
         e.preventDefault();
-        toggleHeatmap();
+        toggleHeatmap("heatmap");
+    }
+    if(e.shiftKey && e.code ==='KeyM'){
+        toggleHeatmap("lightmap")
     }
 });
 
@@ -59,7 +62,7 @@ function changeSimulationMode()
 }
 
 //Display/hide heatmap based on last state of heatmap
-function toggleHeatmap()
+function toggleHeatmap(mode)
 {
     //Change state
     heatMapdisplayed = !heatMapdisplayed;
@@ -71,6 +74,6 @@ function toggleHeatmap()
       toggleClimateButton.textContent = "Show Heatmap"
     }
     //toggle heatmap
-    simSpace.toggleHeatmapDisplay(heatMapdisplayed);
+    simSpace.toggleHeatmapDisplay(heatMapdisplayed, mode);
     
 }
