@@ -425,6 +425,10 @@ class GeneticAlgorithm:
         child_genome = clean_genome(mutate_genome(child_genome, self.mutation_rate))
         return child_genome
 
+    def mutate_genome(self):
+        genome = self.genome
+        return mutate_genome(genome)
+
 
 if __name__ == '__main__':
     state = [22, 24, 2, 0, 1, 0, 1, 1]
