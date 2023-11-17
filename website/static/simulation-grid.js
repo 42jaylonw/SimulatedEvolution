@@ -38,7 +38,8 @@ class SimulationGrid{
      */
     setupGrid(){
         console.log("SETTING GRIED");
-        fetch('/new_setup_grid')
+        const data = {size: this.width};
+        fetch('/new_setup_grid', {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(data)})
         .then((response) => response.json())
         .then((packet) => {
             //"position, numConsumer, numProduc, isWall, temperature)"

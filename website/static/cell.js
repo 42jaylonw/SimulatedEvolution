@@ -20,7 +20,10 @@ class Cell{
         this.numProducers = 0;
         this.temperature = 0;
         this.isWall = false;
+        // document.addEventListener("DOMContentLoaded", () =>{
         this.analysisContainer = document.querySelector('.analysis-container');
+        // });
+        
         //Create HTML elements associated with Cell object
         this.createCellElement(position);
         this.createInfoDisplay();     
@@ -100,6 +103,9 @@ class Cell{
         .then((response) => response.json())
         //Post Request SUCCESS, Perform operations on response(cellLayerData)
         .then((payload) => {
+            if(this.analysisContainer == null){
+                console.log("PRODUCERS NULL");
+            }
             var producers = payload["producers"];
             var consumers = payload["consumers"];
             this.analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${this.position}</h2> ` + 
