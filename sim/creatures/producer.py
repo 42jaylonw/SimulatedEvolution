@@ -162,9 +162,9 @@ class Producer(Creature):
                     # TODO: handle creation of new plant at expansion tile
                     new_genome = self.behavior_system.mutate_genome()
                     new_plant = self.__class__(self.sim, new_genome)
-                    new_plant.position = expansion[1:3]
-                    self.sim.creatures.append(new_plant)
+                    new_plant.set_position(expansion[1:3])
                     self.sim.layer_system.creature_enter(expansion[1:3], new_plant)
+                    self.sim.creatures.append(new_plant)
 
                     # reset plant so it doesn't proliferate
                     self.current_size = 0.02
