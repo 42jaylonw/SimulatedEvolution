@@ -83,6 +83,16 @@ class Creature:
         self.layer_system.creature_exit(self.position, self)
         pass
 
+    # NOTE: This assumes that the creature has already been spawned.
+    def set_position(self, target_pos):
+        assert self.position is not None
+        target_pos[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
+        target_pos[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
+        # Update the Layer System
+        self.layer_system.creature_move(self.position, target_pos, self)
+        # Update the creature's position to the target position
+        self.position = target_pos
+
     @property
     def grid_pos(self):
         assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)

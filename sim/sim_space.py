@@ -70,46 +70,6 @@ class SimSpace:
             exit()
         time.sleep(self._cfg['time_step'])
 
-    # This function's computation has been moved to the Consumer class
-    """
-    def get_near_info(self, center, length):
-        """
-    #:param:
-    #    length: how far from the center
-    #    example:
-    #        near_info = sim.get_near_info(center=(0, 0), length=2)
-    #        near_info.shape: (3, 3, 3)
-    #:return:
-    #        the dimension 1: the grid layer info 0 means empty, 1 means grid board or obstacles
-    #        the dimension 2: the producer layer info 0 means empty, 1 means a producer
-    #        the dimension 3: the consumer layer info 0 means empty, 1 means a consumer
-    """
-        x, y = center
-        rows, cols = self.grid_size
-        output_size = (length * 2 - 1, length * 2 - 1)
-
-        # Calculate the boundaries for slicing the grid_map
-        x_start = max(0, x - length + 1)
-        x_end = min(rows, x + length)
-        y_start = max(0, y - length + 1)
-        y_end = min(cols, y + length)
-
-        # Calculate the boundaries for placing the slice into the output array
-        out_x_start = length - 1 - (x - x_start)
-        out_x_end = length - 1 + (x_end - x)
-        out_y_start = length - 1 - (y - y_start)
-        out_y_end = length - 1 + (y_end - y)
-
-        # Place the slice into the output array
-        # todo: make it not reverse
-        output = np.ones((NUM_LAYERS, *output_size)) * np.array([1] + [0] * (NUM_LAYERS - 1)).reshape(NUM_LAYERS, 1, 1)
-        for layer_id in range(NUM_LAYERS):
-            layer_info = self.layers[layer_id]
-            output[layer_id, out_x_start:out_x_end, out_y_start:out_y_end
-            ] = layer_info[x_start:x_end, y_start:y_end]
-        return output
-    """
-
     # return the starting position of all organism
     def get_creature_positions(self):
         return [(creature.grid_pos, creature.rgb) for creature in self.creatures]

@@ -179,11 +179,13 @@ class Consumer(Creature):
             # Space is blocked: no change in position can be made in this direction
             d_x, d_y = 0, 0
             target_pos = self.position
+        
+        self.set_position(target_pos)
 
         # Update the Layer System
-        self.layer_system.creature_move(self.position, target_pos, self)
+        #self.layer_system.creature_move(self.position, target_pos, self) # WIP
         # Update the creature's position to the target position
-        self.position = target_pos
+        #self.position = target_pos #WIP
 
     def blockedFwd(self):
         """

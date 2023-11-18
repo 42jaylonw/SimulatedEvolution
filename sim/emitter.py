@@ -92,5 +92,7 @@ class HeatSource(Emitter):
         emit_pos_pairs = self.get_emit_position_pairs()
         cur_val = self.emit_val
         for emit_pos, dist in emit_pos_pairs:
+            if dist == 0:
+                cur_val = self.emit_val
             cur_val = self.emit_val * ((self.emit_range - dist) / self.emit_range)
             self.layer_system.increment_temperature(emit_pos, cur_val)
