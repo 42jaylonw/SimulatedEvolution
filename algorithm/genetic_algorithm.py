@@ -425,9 +425,12 @@ class GeneticAlgorithm:
         child_genome = clean_genome(mutate_genome(child_genome, self.mutation_rate))
         return child_genome
 
+    def generate_prod_genome(self):
+        return generate_producer_genome()
+
     def mutate_genome(self):
         genome = self.genome
-        return mutate_genome(genome)
+        return mutate_genome(genome, self.mutation_rate)
 
 
 if __name__ == '__main__':
