@@ -1,10 +1,5 @@
 import numpy as np
 from . import Creature
-class Producer(Creature):
-    name = 'Producer'
-
-    def step(self):
-        pass
 
 class Food():
     name = 'Food'
@@ -16,14 +11,14 @@ class Food():
         self.genome = genome
 
 
+class Producer(Creature):
+    name = 'Producer'
 
-
-
-class new_Producer(Creature):
-    name = 'new_Producer'
-
-    def __init__(self, sim, genome):
+    def __init__(self, sim, genome=None):
         super().__init__(sim, genome)
+
+        if (self.genome == None):
+            self.genome = self.GeneticAlgorithm.generate_prod_genome()
 
         # TODO: hash values from genome
         self.ideal_temp = 60.0
@@ -44,17 +39,24 @@ class new_Producer(Creature):
     # for raw light levels, use will's refactored function
     def get_light_level(self, pos):
         # get list of producers at space in pool
-        producer_list = self.sim.get_producers(pos)
+        producer_list = self.sim.layer_system.get_producers(pos)
+        if len(producer_list) == 0:
+            return self.sim.layer_system.get_light_level(pos)
         # get their sizes and add them up
         size_total = 0
         for producer in producer_list:
             size_total += (producer.size * producer.current_size)
+
+        if size_total == 0:
+            print("help")
+            print(pos)
+            print(producer_list)
         # light level for the creature is (their size / size total) * light lvl
-        ret = ((self.size * self.current_size) / size_total) * self.sim.get_light_level(pos)
+        ret = ((self.size * self.current_size) / size_total) * self.sim.layer_system.get_light_level(pos)
         return ret
 
     def get_temp(self, pos):
-        return self.sim.get_temperature(pos)
+        return self.sim.layer_system.get_temperature(pos)
 
     # returns true on energy gain,false on no gained energy
     # values calculated before metabolizing
@@ -92,16 +94,16 @@ class new_Producer(Creature):
 
     # producer_expansion is used to assess what neighboring tile would be best
     # returns an array with [(score of space), x, y]
-    def producer_expansion(self, x, y):
-        ret = [0, x, y]
+    def producer_expansion(self, pos):
+        ret = [0, pos[0], pos[1]]
 
         # tile_score is our running score for the tile
         # as a candidate for growth
         tile_score = 0.0
 
         # add based on light and heat values
-        tile_score += self.get_temp(x, y)
-        tile_score = tile_score * self.get_light_level(x, y) * 100
+        tile_score += self.get_temp(pos)
+        tile_score = tile_score * self.get_light_level(pos) * 100
 
         ret[0] = int(tile_score)
 
@@ -115,10 +117,6 @@ class new_Producer(Creature):
         self.sim.layer_system.creature_exit(self.position, self)
 
     def step(self):
-        
-        if self.sim.is_pos_layer_empty("Producer", self.position):
-            self.sim.increment_pos_layer("Producer", self.position, 1)
-
         # check if light and temp are sufficient for growth
         if (self.check_suff_energy()):
             # if current size is not 1.0, grow in size
@@ -151,22 +149,25 @@ class new_Producer(Creature):
 
                         if (i < 2):
                             target_pos[0] = target_pos[0] + (pow(-1, i))
-                            if not self.sim.is_pos_out_of_bounds(target_pos) and self.sim.is_pos_layer_empty("Wall", target_pos):
-                                exp_tile = self.producer_expansion(target_pos[0], target_pos[1])
+                            if not self.sim.layer_system.out_of_bounds(target_pos) and not self.sim.layer_system.has_wall(target_pos):
+                                exp_tile = [self.producer_expansion(target_pos)]
                                 possible_expansion += exp_tile
                         elif (i >= 2):
                             target_pos[1] = target_pos[1] + (pow(-1, i))
-                            if not self.sim.is_pos_out_of_bounds(target_pos) and self.sim.is_pos_layer_empty("Wall", target_pos):
-                                exp_tile = self.producer_expansion(target_pos[0], target_pos[1])
+                            if not self.sim.layer_system.out_of_bounds(target_pos) and not self.sim.layer_system.has_wall(target_pos):
+                                exp_tile = [self.producer_expansion(target_pos)]
                                 possible_expansion += exp_tile
 
                     expansion = max(possible_expansion, key=lambda x: x[0])
                     # TODO: handle creation of new plant at expansion tile
                     new_genome = self.behavior_system.mutate_genome()
                     new_plant = self.__class__(self.sim, new_genome)
-                    new_plant.position = expansion[1:3]
+                    new_plant.set_position(expansion[1:3])
+                    self.sim.layer_system.creature_enter(expansion[1:3], new_plant)
                     self.sim.creatures.append(new_plant)
-                    self.sim.layer_system.creature_enter(new_plant)
+
+                    # reset plant so it doesn't proliferate
+                    self.current_size = 0.02
                     
         
         self.producer_metabolize()
