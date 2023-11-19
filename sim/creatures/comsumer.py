@@ -1,14 +1,19 @@
 import numpy as np
 from . import Creature
+from sim.GridUtils import get_circle_coord_dist_pairs
+from sim.pheremone import Pheremone
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
+PHEREMONE_EMIT_RANGE = 8 # WIP - arbitrary constant for now -
+PHEREMONE_EMIT_STRENGTH = 80 # WIP - arbitrary constant for now -
 
 class Consumer(Creature):
     name = 'Consumer'
 
     def __init__(self, sim, genome=None):
         super().__init__(sim, genome)
+
         self.speed = sim.cfg['Consumer']['init_speed']
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]
@@ -186,6 +191,15 @@ class Consumer(Creature):
         #self.layer_system.creature_move(self.position, target_pos, self) # WIP
         # Update the creature's position to the target position
         #self.position = target_pos #WIP
+
+    # TODO: finalize + test this implementation
+    # WIP - consumer acts like an emitter onto the pheremone layer
+    # Emit range + strength are defined by arbitrary constants for now
+    def emit_pheremones(self):
+        pheremone = Pheremone(PHEREMONE_EMIT_STRENGTH, self)
+        emit_positions = get_circle_coord_dist_pairs(self.layer_system, self.position, PHEREMONE_EMIT_RANGE)
+        for emit_pos in emit_positions:
+            self.layer_system.add_pheremone(emit_pos, pheremone)
 
     def blockedFwd(self):
         """

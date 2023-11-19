@@ -1,6 +1,8 @@
 import numpy as np
+import math
 
 from sim import GridUtils
+from sim.pheremone import Pheremone
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
 
@@ -16,6 +18,7 @@ MAX_ELEVATION = 100
 
 MIN_PHEREMONE_STRENGTH = 0
 MAX_PHEREMONE_STRENGTH = 100
+PHEREMONE_DECAY = 0.5
 
 # Component Used by SimSpace to keep track of layers and data at all positions in the SimSpace
 class LayerSystem():
@@ -25,15 +28,20 @@ class LayerSystem():
 
     # step() function gets called every SimSpace step
     def step(self):
-        # Clear emitters
+        # Clear/update layer values
         self.clear_emitter_values()
 
-    # Called every step() to refresh / update temperature and light values
+    # Called every step() to refresh / update temperature and light values, decay pheremone values
     def clear_emitter_values(self):
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 self.grid_spaces[x][y].set_light_level(0)
                 self.grid_spaces[x][y].set_temperature(0)
+                self.grid_spaces[x][y].decay_pheremones()
+
+    def add_pheremone(self, pos, pheremone):
+        assert not self.out_of_bounds(pos)
+        self.get_gridspace(pos).add_pheremone(pheremone)
 
     # Gets rid of every wall in the SimSpace
     def clear_walls(self):
@@ -112,6 +120,12 @@ class LayerSystem():
     def get_emitters(self, pos):
         assert not self.out_of_bounds(pos)
         return self.get_gridspace(pos).get_emitters()
+
+    # Returns a list of all pheremones present at the specified position
+    # Output type: List [] of Pheremone objects
+    def get_pheremones(self, pos):
+        assert not self.out_of_bounds(pos)
+        return self.get_gridspace(pos).get_pheremones()
 
     # Sets the light value at the specified position
     # Input parameter val should be type float
@@ -233,6 +247,7 @@ class GridSpace():
     temperature_val: float
     elevation_val: float
     has_a_wall: bool
+
     def __init__(self, layer_system, pos):
         self.layer_system = layer_system
         self.position = pos
@@ -281,6 +296,9 @@ class GridSpace():
 
     def get_emitters(self):
         return self.emitters
+    
+    def get_pheremones(self):
+        return self.pheremones
 
     def set_light_level(self, val):
         self.light_val = np.clip(val, MIN_BRIGHTNESS, MAX_BRIGHTNESS)
@@ -309,6 +327,11 @@ class GridSpace():
             self.producers.append(creature)
 
     def creature_exit(self, creature):
+        # If the creature has not yet been assigned to a position, do not perform exit
+        # Note: this may cause issues if the creature position is not perfectly mapped to the layer system (which should not happen)
+        if creature.position is None:
+            return
+
         # Handles the specific type (Consumer/Producer) internally
         self.creatures.remove(creature)
         if type(creature) == Consumer:
@@ -318,12 +341,33 @@ class GridSpace():
 
     def wall_add(self):
         self.has_a_wall = True
+
     def wall_remove(self):
         self.has_a_wall = False
+
     def emitter_enter(self, emitter):
         self.emitters.append(emitter)
+
     def emitter_exit(self, emitter):
         self.emitters.remove(emitter)
+
+    def add_pheremone(self, pheremone):
+        affected_pheremone = None
+        for p in self.pheremones:
+            if p.source.species_id == pheremone.source.species_id:
+                affected_pheremone = p
+        
+        if affected_pheremone is None:
+            self.pheremones.append(pheremone)
+        else:
+            affected_pheremone.strength += pheremone.strength
+    
+    def decay_pheremones(self):
+        for p in self.pheremones:
+            p.strength = math.floor(p.strength * PHEREMONE_DECAY) # WIP - this might need to be changed to linear decay
+            # Remove pheremones if their strength is 0
+            if p.strength == 0:
+                self.pheremones.remove(p)
 
     # Returns a dictionary of the properties (WIP - this does not return all properties yet) at this GridSpace
     def get_properties(self):
