@@ -27,15 +27,18 @@ class Creature:
         self.sim = sim
         self.layer_system = sim.layer_system  # EXPERIMENTAL
         self.position = None
-
-        self.behavior_system = GeneticAlgorithm(
-            num_observations=self._cfg['num_observations'],
-            num_actions=self._cfg['num_actions'],
-            genome=genome,
-            num_neurons=self._cfg['num_neurons'],
-            reproduce_mode=self._cfg['reproduce_mode'],
-            mutation_rate=self._cfg['mutation_rate'])
-        self.genome = self.behavior_system.genome
+        if self.name == 'Consumer':
+            self.behavior_system = GeneticAlgorithm(
+                num_observations=self._cfg['num_observations'],
+                num_actions=self._cfg['num_actions'],
+                genome=genome,
+                num_neurons=self._cfg['num_neurons'],
+                reproduce_mode=self._cfg['reproduce_mode'],
+                mutation_rate=self._cfg['mutation_rate'])
+            self.genome = self.behavior_system.genome
+        elif self.name == 'Producer':
+            self.genome = self.generate_producer_genome()
+            self.mutation_rate=self._cfg['mutation_rate']
         self._init_properties()
         # EXPERIMENTAL
         # self.layer_system.creature_enter(self.position, self)
@@ -57,9 +60,10 @@ class Creature:
         # self.sim.increment_pos_layer(self.name, self.position, 1)
 
         # Compute a unique hash based on the 4th byte of creature's genome
-        hasher = hashlib.sha256()
-        hasher.update(self.behavior_system.genome[3].encode())
-        hash = hasher.hexdigest()
+        if self.name == 'Consumer':
+            hash = self.generate_hash(self.genome[3])
+        else:
+            hash = self.generate_hash(self.genome)
         # Assign size and energy properties based on the hash
         self.size = int(hash[:32], 16) % 101 + 0.1
         self.energy = int(hash[32:], 16) % 101 + 1
@@ -92,6 +96,12 @@ class Creature:
         self.layer_system.creature_move(self.position, target_pos, self)
         # Update the creature's position to the target position
         self.position = target_pos
+
+    def generate_hash(self, to_hash):
+        hasher = hashlib.sha256()
+        hasher.update(to_hash.encode())
+        hash = hasher.hexdigest()
+        return hash
 
     @property
     def grid_pos(self):
