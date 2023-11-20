@@ -3,3 +3,10 @@
 {% block content %}
 <h1>About Section </h1>
 {% endblock %}
+
+{% block script %}
+<script
+type = "text/javascript"
+src = "{{ url_for('static', filename='temp.js') }}"
+></script>
+{% endblock %}

@@ -13,6 +13,7 @@ class SimulationGrid{
     constructor(width){
         //Set SimulationGrid Width
         this.width = width;
+        this.creatureRef = {};
         //Create NxN Array to store Cell objects
         this.cells = new Array(this.width * this.width);
         //Visually create a NxN container
@@ -105,8 +106,9 @@ class SimulationGrid{
          var isWall = data["isWall"];
          var temp = data["temperature"];
          var lightLevel = data["light"];
+         var creatureImages = data["creatureImages"];
          var cell = this.cells[this.width * position[0] + position[1]];
-         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
+         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel, creatureImages);
     }
     //Request simulation grid data from server every 0.500 seconds
     runSimulation(){

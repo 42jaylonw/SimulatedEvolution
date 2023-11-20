@@ -31,9 +31,9 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
 
-    # Add Wall
-    for i in range(sim.grid_size[0]):
-        sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
+    # # Add Wall
+    # for i in range(sim.grid_size[0]):
+    #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
     # Instantiate emitters(sim, pos, e_range, e_val)
     emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
                 HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 5, 25),

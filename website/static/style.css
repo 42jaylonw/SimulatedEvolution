@@ -22,8 +22,8 @@ body{
 /* Style for Cells */
 .cell-item {
   border: 0;
-  min-width: 18px;
-  min-height: 18px;
+  width: 18px;
+  height: 18px;
   position: relative;
 }
 

@@ -20,6 +20,8 @@ class Cell{
         this.numProducers = 0;
         this.temperature = 0;
         this.isWall = false;
+        this.temp;
+        this.visuals = [];
         // document.addEventListener("DOMContentLoaded", () =>{
         this.analysisContainer = document.querySelector('.analysis-container');
         // });
@@ -29,7 +31,6 @@ class Cell{
         this.createInfoDisplay();     
         this.createCellOverlay();   
     }
-
   
     /**
      * Create HTMl Element for Cell object
@@ -118,6 +119,12 @@ class Cell{
     }
 
     generateCreatureText(creatureCLass, creatures){
+        if (creatureCLass == "CONSUMERS"){
+            for(var creature of creatures){
+                console.log(creature["image_data"]);
+            }
+            console.log("Consumer1.refId =? Consumer2.refId: " + `${"<sim.creatures.comsumer.Consumer object at 0x0000024EED7EB590>" == "<sim.creatures.comsumer.Consumer object at 0x0000024EED7E8F10>"}`);
+        }
         var creatureText = creatureCLass
         for(let creature of creatures){
             creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
@@ -136,13 +143,17 @@ class Cell{
      * @property {bool} Cell.isWall Is this Cell a wall?
      * @property {Element} Cell.infoDisplay.innerHTML The HTML text associated with the Cell.infoDisplay container
      */
-    updateProperties(numConsumer, numProducer, isWall=false, temp=0, lightLevel=0){
+    updateProperties(numConsumer, numProducer, isWall=false, temp=0, lightLevel=0, creatureImages){
         this.numConsumers = numConsumer;
         this.numProducers = numProducer;
         this.temperature = temp;
         this.lightLevel = lightLevel;
         //Check if this Cell is a Wall
         this.isWall = isWall;
+        for(var visual of this.visuals){
+            this.element.removeChild(visual);
+        }
+        this.visuals = [];
         //Display different based on whether the Cell is a Wall
         if(this.isWall){
             this.infoDisplay.innerHTML = "Wall";
@@ -152,6 +163,7 @@ class Cell{
         //No Creatures present
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
+            
         }
         //ESTABLISH PRIORITY
         //Consumers are on top of Producers
@@ -161,8 +173,11 @@ class Cell{
         }
         //Set color to Consumer
         if(this.numConsumers > 0){
-            
-            this.setCellColor(`rgb(${(0.96 *255)}, ${(0.5 * 255)}, ${(0)})`);
+            // this.setCellColor(`rgb(${(0.96 *255)}, ${(0.5 * 255)}, ${(0)})`);
+            for(var creatureImage of creatureImages){
+                this.createCreatureImage(creatureImage);
+            }
+          
         }
         //Update display information for this cell
         this.infoDisplay.innerHTML = `Temperature: ${this.temperature}<br>Light-level ${this.lightLevel}` + '<br>' + `Consumers: ${this.numConsumers}` + 
@@ -173,6 +188,36 @@ class Cell{
         this.updateCellOverlay(); 
     }
 
+    createCreatureImage(imageData){
+        console.log(imageData);
+        this.idk = document.createElement('canvas');
+        var context = this.idk.getContext('2d');
+        var scaleFactor = 2;
+        // Set var image dimensions based on the image data
+        var rows = imageData.length;
+        var cols = imageData[0].length;
+        this.idk.width = cols * scaleFactor;
+        this.idk.height = rows * scaleFactor;
+        // Scale the var image context
+        context.scale(scaleFactor, scaleFactor);
+        // Iterate through the image data and draw pixels on the var image
+        for (var i = 0; i < rows; i++) {
+            for (var j = 0; j < cols; j++) {
+                var pixel = imageData[i][j];
+                
+                var color = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3]})`;
+
+                context.fillStyle = color;
+                context.fillRect(j, i, 1, 1);
+            }
+        }
+        this.element.appendChild(this.idk);
+        this.idk.style.width = "100%";
+        this.idk.style.height = "100%";
+        this.idk.style.position = 'absolute';
+        this.visuals.push(this.idk);
+    
+    }
     /**
      * Create HTML container called 'info-display' that displays
      * general information about a Cell when the user hover's over the Cell.
@@ -194,6 +239,7 @@ class Cell{
     createCellOverlay(){
         this.overlay = document.createElement('div');
         this.overlay.classList.add('cell-overlay');
+        this.overlay.id = "cell-overlay";
         this.element.appendChild(this.overlay);
         this.toggleCellOverlay(false);
     }
