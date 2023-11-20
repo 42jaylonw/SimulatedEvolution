@@ -1,4 +1,3 @@
-import string
 from dataclasses import dataclass
 
 from sim.creatures import Creature
@@ -6,4 +5,3 @@ from sim.creatures import Creature
 class Pheremone:
     strength: float
     source: Creature
-    genome: [string] # WIP - maybe not this type of string
