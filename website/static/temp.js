@@ -1,4 +1,4 @@
-
+let myDict = {};
 var scaleFactor = 5;
 // Your image data
 var imageData = [[[137, 83, 78], [137, 83, 78], [0, 0, 0], [137, 83, 78], [137, 83, 78]],
@@ -42,9 +42,19 @@ for (var i = 0; i < rows; i++) {
         context.fillRect(j, i, 1, 1);
     }
 }
+myDict["A"] = canvas;
+myDict["B"] = canvas;
 
+function addToBody(elt){
+    document.body.appendChild(myDict[elt]);
+    document.body.appendChild(myDict["B"]);
+}
+
+function removeFromBody(elt){
+    document.body.removeChild(myDict[elt]);
+}
 // Append the canvas to the document body
-document.body.appendChild(canvas);
+
 
 
 

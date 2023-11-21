@@ -44,7 +44,7 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     return sim
 
 
-def get_sim_state(simulator):
+def get_sim_state(simulator, includeImageData=False):
     """
     Retrieves and jsonifies information about each grid space in a simulator
     
@@ -60,7 +60,7 @@ def get_sim_state(simulator):
     for i in range(simWidth):
         for j in range(simWidth):
            # access and append each gridspaces' properties
-           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
+           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties(includeImageData))
     # return information of all gridspaces
     return jsonify(gridspacesInformation)
 

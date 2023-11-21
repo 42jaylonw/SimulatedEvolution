@@ -2,6 +2,10 @@
 
 {% block content %}
 <h1>About Section </h1>
+<p id="demo">Click "Remove", and this paragraph will be removed from the DOM.</p>
+<button onclick="addToBody('A')">ADD</button>
+<p id="demo">Click "Remove", and this paragraph will be removed from the DOM.</p>
+<button onclick="removeFromBody('A')">Remove</button>
 {% endblock %}
 
 {% block script %}

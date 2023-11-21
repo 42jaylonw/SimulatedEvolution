@@ -370,12 +370,20 @@ class GridSpace():
                 self.pheremones.remove(p)
 
     # Returns a dictionary of the properties (WIP - this does not return all properties yet) at this GridSpace
-    def get_properties(self):
-
+    def get_properties(self, includeImages=False):
+        if includeImages:
+             return  {"position": self.position,
+                "consumerCount": self.get_num_consumers(),
+                "producerCount": self.get_num_producers(),
+                "isWall": self.has_a_wall,
+                "temperature": np.int16(self.temperature_val).item(),
+                "light": np.int16(self.light_val).item(),
+                "creatureImages": [(x.ref_id, x.image_data.tolist())  for x in self.get_consumers()]}
         return  {"position": self.position,
                 "consumerCount": self.get_num_consumers(),
                 "producerCount": self.get_num_producers(),
                 "isWall": self.has_a_wall,
                 "temperature": np.int16(self.temperature_val).item(),
                 "light": np.int16(self.light_val).item(),
-                "creatureImages": [x.image_data.tolist()  for x in self.get_consumers()]}
+                "creatureImages": [x.ref_id  for x in self.get_consumers()]}
+                # "creatureImages": [x.image_data.tolist()  for x in self.get_consumers()]}

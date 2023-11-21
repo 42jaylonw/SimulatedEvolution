@@ -13,7 +13,7 @@ class SimulationGrid{
     constructor(width){
         //Set SimulationGrid Width
         this.width = width;
-        this.creatureRef = {};
+        this.creatureImages = {};
         //Create NxN Array to store Cell objects
         this.cells = new Array(this.width * this.width);
         //Visually create a NxN container
@@ -45,7 +45,8 @@ class SimulationGrid{
         .then((packet) => {
             //"position, numConsumer, numProduc, isWall, temperature)"
             for(let data of packet){
-                this.handleData(data);
+
+                this.handleInitialData(data);
             } 
         })
         .catch((error) =>{
@@ -74,20 +75,25 @@ class SimulationGrid{
         {
             let curCell = this.cells[i];
             curCell.setCellColor("white");
+            curCell.newClearCreatures();
+            
         }
+        this.creatureImages = {};
     }
 
     //Create a new simulation
     newSimulation(){
         //Clear any information of an old simulation
         this.clearSimulation();
+        console.log("Creating new Grid");
         //Create GET request for new simluation information
         fetch('/new_grid')
         .then((response) => response.json())
         //Request SUCCESS
         .then((packet) => {
+           
             for(let data of packet){
-                this.handleData(data);
+                this.handleInitialData(data);
             }
             console.log("Created new Grid!");
             
@@ -98,7 +104,52 @@ class SimulationGrid{
         });
     }
     
-    
+    handleInitialData(data){
+        var position = data["position"];
+        var numConsumer = data["consumerCount"];
+        var numProducer = data["producerCount"];
+        var isWall = data["isWall"];
+        var temp = data["temperature"];
+        var lightLevel = data["light"];
+        var creatureImages = data["creatureImages"];
+        var cell = this.cells[this.width * position[0] + position[1]];
+        //Create image dictionary and add visual to Cell
+        for(var creatureImage of creatureImages){
+           this.createCreatureImage(creatureImage[0], creatureImage[1]);
+           cell.newAddCreature(this.creatureImages[creatureImage[0]]);
+        }
+       
+        cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
+   }
+
+   createCreatureImage(refId, imageData){
+        let creatureImage = document.createElement('canvas');
+        var context = creatureImage.getContext('2d');
+        var scaleFactor = 2;
+        // Set var image dimensions based on the image data
+        var rows = imageData.length;
+        var cols = imageData[0].length;
+        creatureImage.width = cols * scaleFactor;
+        creatureImage.height = rows * scaleFactor;
+        // Scale the var image context
+        context.scale(scaleFactor, scaleFactor);
+        // Iterate through the image data and draw pixels on the var image
+        for (var i = 0; i < rows; i++) {
+            for (var j = 0; j < cols; j++) {
+                var pixel = imageData[i][j];
+                
+                var color = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]}, ${pixel[3]})`;
+
+                context.fillStyle = color;
+                context.fillRect(j, i, 1, 1);
+            }
+        }
+        creatureImage.style.width = "100%";
+        creatureImage.style.height = "100%";
+        creatureImage.style.position = 'absolute';
+        this.creatureImages[refId] = creatureImage;
+
+    }
     handleData(data){
          var position = data["position"];
          var numConsumer = data["consumerCount"];
@@ -106,13 +157,16 @@ class SimulationGrid{
          var isWall = data["isWall"];
          var temp = data["temperature"];
          var lightLevel = data["light"];
-         var creatureImages = data["creatureImages"];
+         var creatureImageReferences = data["creatureImages"];
          var cell = this.cells[this.width * position[0] + position[1]];
-         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel, creatureImages);
+         for(var reference of creatureImageReferences){
+            cell.newAddCreature(this.creatureImages[reference]);
+         }
+         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
     }
     //Request simulation grid data from server every 0.500 seconds
     runSimulation(){
-        this.simulationID = setInterval(() => {this.getGridData()}, 500);
+        this.simulationID = setInterval(() => {this.getGridData()}, 550);
     }
 
     //Stop sending simulation grid data requests

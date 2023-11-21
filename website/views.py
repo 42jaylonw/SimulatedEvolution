@@ -58,7 +58,7 @@ def new_set_grid():
     if simulator is None:
         print("creating grid")
         simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, gridSize)
-    return sim_to_front.get_sim_state(simulator)
+    return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
 
 
@@ -68,7 +68,7 @@ def new_grid():
     global simulator
     global size
     simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, size)
-    return sim_to_front.get_sim_state(simulator)
+    return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
 
 # Update the state of the simulation grid and send it to the webpage

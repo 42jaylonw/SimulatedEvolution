@@ -42,6 +42,7 @@ class Creature:
 
     def _init_properties(self):
         self.image_data = None
+        self.ref_id = str(self)
         if 'num_species' in self._cfg:
             self.species_id = np.random.randint(self._cfg['num_species'])
         else:
