@@ -118,12 +118,6 @@ class Cell{
     }
 
     generateCreatureText(creatureCLass, creatures){
-        // if (creatureCLass == "CONSUMERS"){
-        //     for(var creature of creatures){
-        //         console.log(creature["image_data"]);
-        //     }
-        //     console.log("Consumer1.refId =? Consumer2.refId: " + `${"<sim.creatures.comsumer.Consumer object at 0x0000024EED7EB590>" == "<sim.creatures.comsumer.Consumer object at 0x0000024EED7E8F10>"}`);
-        // }
         var creatureText = creatureCLass
         for(let creature of creatures){
             creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
@@ -147,7 +141,6 @@ class Cell{
         this.numProducers = numProducer;
         this.temperature = temp;
         this.lightLevel = lightLevel;
-        //Check if this Cell is a Wall
         this.isWall = isWall;
         //Display different based on whether the Cell is a Wall
         if(this.isWall){
@@ -159,8 +152,6 @@ class Cell{
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
         }
-        //ESTABLISH PRIORITY
-        //Consumers are on top of Producers
         //Set color to Producer
         if(this.numProducers > 0){
             this.setCellColor(`rgb(${(0.5*255)}, ${(0.96 * 255)}, ${(0)})`);
@@ -171,25 +162,38 @@ class Cell{
             '<p class="text-center" class="details-text">click for details</p>';
         
         //Update the overlay at this Cell
-        this.updateCellOverlay(); 
+        // this.updateCellOverlay(); 
     }
-    newAddCreature(creature){
+
+    /**
+     * Add Creature Visual to Cell 
+     * @param {Canvas} creature <canvas> element containing 8-bit visual of a creature 
+     */
+    addCreatureVisual(creature){
         if(creature === undefined){
             return;
         }
+        // Add element to Cell and store it in a list
         this.element.appendChild(creature);
         this.creatureList.push(creature);
     }
    
-    newClearCreatures(){
+    /**
+     * Clear local list of Creature visuals(8-bit images)
+     * And remove their associated <canvas> elements from Cell
+     */
+    clearCreatureVisuals(){
+        // Remove elements
         for(var elt of this.creatureList){
             if(this.element.contains(elt)){
                 this.element.removeChild(elt);
             }
             
         }
+        // Clear local list
         this.creatureList = Array();
     }
+
     /**
      * Create HTML container called 'info-display' that displays
      * general information about a Cell when the user hover's over the Cell.
@@ -205,7 +209,7 @@ class Cell{
 
     /**
      * Create HTML container called 'cell-overlay' that displays
-     * a color associated with its temperature property
+     * a color associated with its properties such as temperature or light-level
      * @property {Element} this.overlay  HTML container that displays general Cell information
      */
     createCellOverlay(){
@@ -221,9 +225,7 @@ class Cell{
      * @property {Element} this.overlay  HTML container that displays general Cell information
      */
     toggleCellOverlay(showOverlay, mode){
-        if(mode == "lightmap"){
-            this.updateCellOverlay(mode);
-        }
+        this.updateCellOverlay(mode);
         if(showOverlay){
             this.overlay.style.display = 'block';
         }
@@ -234,7 +236,7 @@ class Cell{
     }
 
      /**
-     * Change Cell overlay based on temperature value
+     * Change Cell overlay based on mode
      * @property {Element} this.overlay  HTML container that displays general Cell information
      * @property {int | float} this.temperature Temperature at Cell
      */
@@ -269,9 +271,9 @@ class Cell{
         this.overlay.style.backgroundColor = color;
     }
 
-        //USED FOR DEBUGGING
+    //USED FOR DEBUGGING
     print(){
         console.log("CONSUMERS:" + this.numConsumers + " PRODUCERS: " + this.numProducers + " At position: " + this.position);
-        }
+    }
 }
 

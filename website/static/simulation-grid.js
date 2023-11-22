@@ -75,7 +75,7 @@ class SimulationGrid{
         {
             let curCell = this.cells[i];
             curCell.setCellColor("white");
-            curCell.newClearCreatures();
+            curCell.clearCreatureVisuals();
             
         }
         this.creatureImages = {};
@@ -116,7 +116,7 @@ class SimulationGrid{
         //Create image dictionary and add visual to Cell
         for(var creatureImage of creatureImages){
            this.createCreatureImage(creatureImage[0], creatureImage[1]);
-           cell.newAddCreature(this.creatureImages[creatureImage[0]]);
+           cell.addCreatureVisual(this.creatureImages[creatureImage[0]]);
         }
        
         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
@@ -160,7 +160,7 @@ class SimulationGrid{
          var creatureImageReferences = data["creatureImages"];
          var cell = this.cells[this.width * position[0] + position[1]];
          for(var reference of creatureImageReferences){
-            cell.newAddCreature(this.creatureImages[reference]);
+            cell.addCreatureVisual(this.creatureImages[reference]);
          }
          cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
     }
