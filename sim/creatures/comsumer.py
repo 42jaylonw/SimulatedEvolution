@@ -1,19 +1,14 @@
 import numpy as np
 from . import Creature
-from sim.GridUtils import get_circle_coord_dist_pairs
-from sim.pheremone import Pheremone
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
-PHEREMONE_EMIT_RANGE = 8 # WIP - arbitrary constant for now -
-PHEREMONE_EMIT_STRENGTH = 80 # WIP - arbitrary constant for now -
 
 class Consumer(Creature):
     name = 'Consumer'
 
     def __init__(self, sim, genome=None):
         super().__init__(sim, genome)
-
         self.speed = sim.cfg['Consumer']['init_speed']
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]
@@ -30,13 +25,11 @@ class Consumer(Creature):
             self.die()
 
     def die(self):
-        super().die(self)
-        pass
-        # NOTE - this has been moved to the parent class
-        #if self in self.sim.creatures:
-        #    self.sim.creatures.remove(self)
-        #
-        #self.layer_system.creature_exit(self.position, self)
+        # self.sim.creatures -= this
+        if self in self.sim.creatures:
+            self.sim.creatures.remove(self)
+
+        self.layer_system.creature_exit(self.position, self)
 
     def get_observation(self):
 
@@ -144,11 +137,18 @@ class Consumer(Creature):
 
     def senseNearest(self):
         """
-        Senses the nearest of a specified object using square "rings".
-        Returns None if there are no creatures within the sensory range,
-        and returns the location of the nearest creature(s) otherwise.
+        Senses the location of the nearest of a specified object using 
+        square "rings". Returns None if there are no creatures 
+        within the sensory range, and returns the location of the 
+        nearest creature(s) otherwise.
         """
+        # TODO: NOTE: Right now, this only checks for the nearest producer. Need to implement functionality
+        # where it can instead specify the type of creature or object it wants to find, esp. with regards to which species are edible to it.
         closest_locations = []
+
+        # Check first if there is a producer on same square
+        if self.layer_system.get_num_producers(self.position) > 0:
+            return self.position
 
         for radius in range(1, self.sensory_range + 1):
             for dx in range(-radius, radius + 1):
@@ -157,7 +157,7 @@ class Consumer(Creature):
                     checked_pos[0] = checked_pos[0] + dx
                     checked_pos[1] = checked_pos[1] + dy
                     if not self.layer_system.out_of_bounds(checked_pos):
-                        if self.layer_system.get_num_consumers(checked_pos) > 0:
+                        if self.layer_system.get_num_producers(checked_pos) > 0:
                             if len(closest_locations) == 0:
                                 closest_locations.append(checked_pos)
                             elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
@@ -171,9 +171,21 @@ class Consumer(Creature):
                     checked_pos[0] = checked_pos[0] + dx
                     checked_pos[1] = checked_pos[1] + dy
                     if not self.layer_system.out_of_bounds(checked_pos):
-                        if self.layer_system.get_num_consumers(checked_pos) > 0:
+                        if self.layer_system.get_num_producers(checked_pos) > 0:
                             if len(closest_locations) == 0:
                                 closest_locations.append(checked_pos)
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                                closest_locations = [checked_pos]
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                                closest_locations.append(checked_pos)
+
+            if len(closest_locations) > 0:
+                # return np.random.choice(closest_locations)
+                # random.choice is not used to provide for more "consistent"
+                # behavior when it comes to the nearest object.
+                # This results in "preferred" directions when there is a tie
+                # in distance.
+                return closest_locations[0]
                             elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
                                 closest_locations = [checked_pos]
                             elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
@@ -269,25 +281,11 @@ class Consumer(Creature):
         target_pos = self.position
         target_pos[0] -= last_act[1]
         target_pos[1] += last_act[0]
-        return self.check_empty(target_pos)
+        # TODO: NOTE: this does not check for producers/consumers that "block" this consumer, and these checks might need to be added back
 
-    def blockedRight(self):
-        """
-        Returns if the creature's relative right direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
-        Orientation based on last moved direction.
-        """
-
-        last_act = self.last_action
-        target_pos = self.position
-        target_pos[0] += last_act[1]
-        target_pos[1] -= last_act[0]
-        return self.check_empty(target_pos)
-
-    def check_empty(self, target_pos):
-        return int((not self.layer_system.out_of_bounds(target_pos)) and (not self.layer_system.has_wall(target_pos))
-                and (not self.layer_system.get_num_consumers(target_pos) == 0) and
-                   (not self.layer_system.get_num_producers(target_pos) == 0))
-
+        #return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
+        #                    for layer in ["Wall", "Producer", "Consumer"]]))
+    
     def metabolize(self, activity=0.0, climate=0.0):
         """
         Subtract Consumer's energy by the sum of activity, climate, and 10% of its size\n
@@ -297,6 +295,7 @@ class Consumer(Creature):
             climate = added energy cost based on the climate layer that the creature resides in
         """
         self.energy -= (self.size * 0.1) + activity + (climate * 0.5)
+        # NOTE: Functionality already in self.energy_bar.consume_energy(act)
 
     def consume(self, energy=0):
         """
@@ -309,25 +308,60 @@ class Consumer(Creature):
         if energy < 0: 
             raise Exception(f"Cannot Consume {energy} energy")
         self.energy += energy
+        # 
     
     def is_edible(self, creature):
         """
         Checks to see if a creature underneath is edible. (exists within edible tags)
         """
+        # TODO: Need to check how to access
+        return True
 
-    def action_hunt(self, target_creature):
+    def action_hunt(self):
         """
         Hunts a creature down. Follows manhattan distance if a creature
         is detected. Follows nearest pheromone if pheromone is present 
         and no creature is detected, or if walls are detected.
+
+        While hunting, if it moves onto the square of a creature it may eat
+        it gains energy and the creature on that square dies.
         """
+        # TODO: NOTE: Because senseNearest only returns the location of the nearest
+        # producer, the action_hunt behavior does not currently include pheromone
+        # tracking, as producers are completely stationary and do not use
+        # pheromones.
+        senseLocation = self.senseNearest()
+        if senseLocation is not None:
+            distToLoc_x = np.abs(senseLocation[0] - self.position[0])
+            distToLoc_y = np.abs(senseLocation[1] - self.position[1])
+            if distToLoc_x == 0 and distToLoc_y == 0:
+                self.eat_on_square()
+            elif distToLoc_x >= distToLoc_y:
+                move along manhattan x
+            elif distToLoc_x < distToLoc_y:
+                move along manhattan y
+        
  
     def eat_on_square(self):
         """
-        Eats a creature at a position. 
+        Eats a producer (should be expanded to all edible creatures)
+        on the same square as the calling creature.
         If there is no creature to eat here, then does nothing.
         """
-        self.sim
+        # TODO: NOTE: I don't know anything about the "edible creatures" tag system
+        # that's been floating around, so I'll hold off on implementing the 'eat edible creature'
+        # check and make this function only consume a producer.
+        yummy_produce = self.layer_system.get_producers(self.position)
+        if len(yummy_produce) > 0:
+            chosen_to_eat = np.random.choice(yummy_produce)
+            energy_gain_base = chosen_to_eat.energy_bar.current_energy * 0.10
+
+            # a bonus to energy gain from consumption based on the size of the prey creature and the eating creature
+            # this value is never greater than the eating creature's size
+            energy_gain_sizeBonus = max((1.2 * chosen_to_eat.size), self.size)
+            self.energy_bar.replenish_energy(energy_gain_base + energy_gain_sizeBonus)
+            chosen_to_eat.die()
+
     def reproduce(self, child_starting_energy=30):
         """
         Create a new creature at a space nearby.
