@@ -22,15 +22,15 @@ body{
 /* Style for Cells */
 .cell-item {
   border: 0;
-  min-width: 18px;
-  min-height: 18px;
+  width: 18px;
+  height: 18px;
   position: relative;
 }
 
 /* Style for Cell-overlay */
 .cell-overlay{
-  min-width: inherit;
-  min-height: inherit;
+  width: inherit;
+  height: inherit;
   position: absolute;
   pointer-events: none;
 }

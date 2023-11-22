@@ -49,6 +49,7 @@ def home_page():
 def about_page():
     return render_template("about.html")
 
+# Create a simulation based on specified parameters
 @views.route('/new_setup_grid', methods=["POST"])
 def new_set_grid():
     """Initialize SimSpace"""
@@ -58,17 +59,17 @@ def new_set_grid():
     if simulator is None:
         print("creating grid")
         simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, gridSize)
-    return sim_to_front.get_sim_state(simulator)
+    return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
 
-
+# Create a new simulation with the same parameters
 @views.route('/new_grid', methods=["GET"])
 def new_grid():
     """Create a new grid on backend then send it to front"""
     global simulator
     global size
     simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, size)
-    return sim_to_front.get_sim_state(simulator)
+    return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
 
 # Update the state of the simulation grid and send it to the webpage
@@ -78,11 +79,13 @@ def get_grid_data():
     simulator.step()
     return sim_to_front.get_sim_state(simulator)
 
+# Retrieve detailed information at specified grid space
 @views.route('/get_creatures_at_grid_space', methods=["POST"])
 def get_creatures_at_grid_space():
     position = json.loads(request.data)["position"]
     return sim_to_front.get_creatures_wrapper(simulator, position)
 
+# Create a new simulation with different properties
 @views.route('/reset_simulator', methods=["POST"])
 def test():
     global size
