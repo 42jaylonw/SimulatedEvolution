@@ -104,7 +104,12 @@ class SimulationGrid{
         });
     }
     
+    /**
+     * Update front-end elements based on information received from the back-end
+     * @param {JSON} data Information from back-end simulation 
+     */
     handleInitialData(data){
+        // Extract information
         var position = data["position"];
         var numConsumer = data["consumerCount"];
         var numProducer = data["producerCount"];
@@ -113,22 +118,31 @@ class SimulationGrid{
         var lightLevel = data["light"];
         var creatureImages = data["creatureImages"];
         var cell = this.cells[this.width * position[0] + position[1]];
-        //Create image dictionary and add visual to Cell
+        // Create image dictionary and add visual to Cell
         for(var creatureImage of creatureImages){
-           this.createCreatureImage(creatureImage[0], creatureImage[1]);
+           var refId = creatureImage[0];
+           var imageData = creatureImage[1];
+           this.createCreatureImage(refId, imageData);
            cell.addCreatureVisual(this.creatureImages[creatureImage[0]]);
         }
-       
+        // Update Cell based on extracted information
         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
    }
 
+   /**
+    * Create a <canvas> element based on imageData, then add it to the simulation grid's image dictionary
+    * using (refId, imageData) format
+    * @param {string} refId The key associated with <canvas> element
+    * @param {number[][]} imageData RGB data required to create a <canvas> element
+    */
    createCreatureImage(refId, imageData){
+        // Create <canvas>
         let creatureImage = document.createElement('canvas');
         var context = creatureImage.getContext('2d');
         var scaleFactor = 2;
         // Set var image dimensions based on the image data
         var rows = imageData.length;
-        var cols = imageData[0].length;
+        var cols = imageData.length;
         creatureImage.width = cols * scaleFactor;
         creatureImage.height = rows * scaleFactor;
         // Scale the var image context
@@ -147,10 +161,17 @@ class SimulationGrid{
         creatureImage.style.width = "100%";
         creatureImage.style.height = "100%";
         creatureImage.style.position = 'absolute';
+        // Add <canvas> element to image dictionary
         this.creatureImages[refId] = creatureImage;
 
     }
+
+    /**
+     * Update front-end elements based on information received from the back-end
+     * @param {JSON} data Information from back-end simulation 
+     */
     handleData(data){
+        // Extract information
          var position = data["position"];
          var numConsumer = data["consumerCount"];
          var numProducer = data["producerCount"];
@@ -164,20 +185,24 @@ class SimulationGrid{
          }
          cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
     }
-    //Request simulation grid data from server every 0.500 seconds
+
+    // Request simulation grid data from server every 0.500 seconds
     runSimulation(){
         this.simulationID = setInterval(() => {this.getGridData()}, 550);
     }
 
-    //Stop sending simulation grid data requests
+    // Stop sending simulation grid data requests
     pauseSimulation(){
         console.log("stopping calls..");
         clearInterval(this.simulationID);
     }
 
-    //Display/hid heatmap information for each cell
-    toggleHeatmapDisplay(isDisplayed, mode){
-        console.log(mode);
+    /**
+     * Display specified Overlay for Simulation Grid
+     * @param {bool} isDisplayed Display overlay?
+     * @param {string} mode overlay mode, heatmap or lightmap
+     */
+    toggleOverlayDisplay(isDisplayed, mode){
         for(let cell of this.cells){
             cell.toggleCellOverlay(isDisplayed, mode);
         }

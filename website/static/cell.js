@@ -103,9 +103,6 @@ class Cell{
         .then((response) => response.json())
         //Post Request SUCCESS, Perform operations on response(cellLayerData)
         .then((payload) => {
-            if(this.analysisContainer == null){
-                console.log("PRODUCERS NULL");
-            }
             var producers = payload["producers"];
             var consumers = payload["consumers"];
             this.analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${this.position}</h2> ` + 
@@ -117,8 +114,14 @@ class Cell{
         });
     }
 
-    generateCreatureText(creatureCLass, creatures){
-        var creatureText = creatureCLass
+    /**
+     * 
+     * @param {string} creatureClass name of type of creature 
+     * @param {*} creatures Creature along with its properties
+     * @returns {string} formatted string that contains a creature's properties
+     */
+    generateCreatureText(creatureClass, creatures){
+        var creatureText = creatureClass
         for(let creature of creatures){
             creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
         }

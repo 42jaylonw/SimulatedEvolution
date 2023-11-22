@@ -1,3 +1,4 @@
+//NOTE: used about.html for testing front-end functions
 let myDict = {};
 var scaleFactor = 5;
 // Your image data
