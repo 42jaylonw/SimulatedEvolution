@@ -29,8 +29,8 @@ body{
 
 /* Style for Cell-overlay */
 .cell-overlay{
-  min-width: inherit;
-  min-height: inherit;
+  width: inherit;
+  height: inherit;
   position: absolute;
   pointer-events: none;
 }

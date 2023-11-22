@@ -118,12 +118,12 @@ class Cell{
     }
 
     generateCreatureText(creatureCLass, creatures){
-        if (creatureCLass == "CONSUMERS"){
-            for(var creature of creatures){
-                console.log(creature["image_data"]);
-            }
-            console.log("Consumer1.refId =? Consumer2.refId: " + `${"<sim.creatures.comsumer.Consumer object at 0x0000024EED7EB590>" == "<sim.creatures.comsumer.Consumer object at 0x0000024EED7E8F10>"}`);
-        }
+        // if (creatureCLass == "CONSUMERS"){
+        //     for(var creature of creatures){
+        //         console.log(creature["image_data"]);
+        //     }
+        //     console.log("Consumer1.refId =? Consumer2.refId: " + `${"<sim.creatures.comsumer.Consumer object at 0x0000024EED7EB590>" == "<sim.creatures.comsumer.Consumer object at 0x0000024EED7E8F10>"}`);
+        // }
         var creatureText = creatureCLass
         for(let creature of creatures){
             creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
@@ -171,7 +171,7 @@ class Cell{
             '<p class="text-center" class="details-text">click for details</p>';
         
         //Update the overlay at this Cell
-        this.updateCellOverlay("heat"); 
+        this.updateCellOverlay(); 
     }
     newAddCreature(creature){
         if(creature === undefined){
@@ -240,11 +240,11 @@ class Cell{
      */
     updateCellOverlay(mode){
         let color;
-        // if(mode == "lightmap"){
-        //     color = `rgb(${this.lightLevel},${this.lightLevel},${this.lightLevel}, 0.5)`;
-        //     this.overlay.style.backgroundColor = color;
-        //     return;
-        // }
+        if(mode == "lightmap"){
+            color = `rgb(${this.lightLevel},${this.lightLevel},${this.lightLevel}, 0.5)`;
+            this.overlay.style.backgroundColor = color;
+            return;
+        }
         if (this.temperature < 20) 
         {
             color = `rgb(0,0,255, 0.3)`;
