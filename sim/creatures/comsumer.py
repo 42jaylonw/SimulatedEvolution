@@ -59,6 +59,7 @@ class Consumer(Creature):
         observation[14] = self.currLocSouth()
         # current location west
         observation[15] = self.currLocWest()
+        # observation[16] = self.energy_bar.is_satiated()
 
         return observation
 
@@ -135,11 +136,46 @@ class Consumer(Creature):
         return num_consumers
 
     def senseNearest(self):
-        pass
-        # TODO: check if this function is/will be used anywhere
-        # WIP - uncomment this when needed
-        #move_dir = np.random.randint(0, 4)
-        #self.action_move(move_dir)
+        """
+        Senses the nearest of a specified object using square "rings".
+        Returns None if there are no creatures within the sensory range,
+        and returns the location of the nearest creature(s) otherwise.
+        """
+        closest_locations = []
+
+        for radius in range(1, self.sensory_range + 1):
+            for dx in range(-radius, radius + 1):
+                for dy in [-radius, radius]:
+                    checked_pos = self.position
+                    checked_pos[0] = checked_pos[0] + dx
+                    checked_pos[1] = checked_pos[1] + dy
+                    if not self.layer_system.out_of_bounds(checked_pos):
+                        if self.layer_system.get_num_consumers(checked_pos) > 0:
+                            if len(closest_locations) == 0:
+                                closest_locations.append(checked_pos)
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                                closest_locations = [checked_pos]
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                                closest_locations.append(checked_pos)
+                                
+            for dy in range(-radius + 1, radius):
+                for dx in [-radius, radius]:
+                    checked_pos = self.position
+                    checked_pos[0] = checked_pos[0] + dx
+                    checked_pos[1] = checked_pos[1] + dy
+                    if not self.layer_system.out_of_bounds(checked_pos):
+                        if self.layer_system.get_num_consumers(checked_pos) > 0:
+                            if len(closest_locations) == 0:
+                                closest_locations.append(checked_pos)
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                                closest_locations = [checked_pos]
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                                closest_locations.append(checked_pos)
+
+            if len(closest_locations) > 0:
+                return np.random.choice(closest_locations)
+        return None
+
 
     def action_move(self, action: int):
         """
@@ -259,7 +295,19 @@ class Consumer(Creature):
         if energy < 0: 
             raise Exception(f"Cannot Consume {energy} energy")
         self.energy += energy
+    
+    def is_edible(self, creature):
+        """
+        Checks to see if a creature underneath is edible. (exists within edible tags)
+        """
 
+    def action_hunt(self, target_creature):
+        """
+        Hunts a creature down. Follows manhattan distance if a creature
+        is detected. Follows nearest pheromone if pheromone is present 
+        and no creature is detected, or if walls are detected.
+        """
+ 
     def eat_on_square(self):
         """
         Eats a creature at a position. 
