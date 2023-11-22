@@ -6,7 +6,6 @@ from sim.creatures.producer import Producer
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
 
-
 def create_sim(num_producers=1, num_consumers=1, width=50):
     """
     Create a SimSpace object
@@ -21,10 +20,10 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
         sim(SimSpace): NxN SimSpace with specified features from parameters
     """
     # Change TOML gridsize
-    with open("games/sprint_0_random/config.toml", 'r') as f:
+    with open("games/sprint_2_survival/config.toml", 'r') as f:
         config = toml.load(f)
     config['SimSpace']['grid_size'] = [width, width]
-    with open('games/sprint_0_random/config.toml', 'w') as f:
+    with open('games/sprint_2_survival/config.toml', 'w') as f:
         toml.dump(config, f)
     # Create SimSpace
     sim = SimSpace(config)
@@ -32,20 +31,20 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
 
-    # Add Wall
-    for i in range(sim.grid_size[0]):
-        sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
-        
-    # Instantiate emitters
-    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 10),
-                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, -5)]
+    # # Add Wall
+    # for i in range(sim.grid_size[0]):
+    #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
+    # Instantiate emitters(sim, pos, e_range, e_val)
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
+                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 5, 25),
+                LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)] 
     
     # add all instantiated objects to SimSpace
     sim.reset(producers + consumers, emitters)
     return sim
 
 
-def get_sim_state(simulator):
+def get_sim_state(simulator, includeImageData=False):
     """
     Retrieves and jsonifies information about each grid space in a simulator
     
@@ -61,6 +60,17 @@ def get_sim_state(simulator):
     for i in range(simWidth):
         for j in range(simWidth):
            # access and append each gridspaces' properties
-           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties())
+           gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties(includeImageData))
     # return information of all gridspaces
     return jsonify(gridspacesInformation)
+
+# Get the information of all creatures at specified location
+def get_creatures_wrapper(sim, position):
+    creature_data = {"producers" : list(), "consumers" : list()}
+    producers = sim.layer_system.get_producers(position)
+    for producer in producers:
+        creature_data["producers"].append(producer.creature_info)
+    consumers = sim.layer_system.get_consumers(position)
+    for consumer in consumers:
+        creature_data["consumers"].append(consumer.creature_info)
+    return jsonify(creature_data)

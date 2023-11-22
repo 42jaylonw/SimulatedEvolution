@@ -3,6 +3,8 @@ import hashlib
 import numpy as np
 from algorithm.genetic_algorithm import GeneticAlgorithm
 from sim.energy import EnergyBar
+from sim.visualization.appearance import rgb_mutation
+from sim.visualization.random_ship_generator import InvaderCreator
 
 
 class Creature:
@@ -15,6 +17,7 @@ class Creature:
     energy_bar: EnergyBar
 
     # properties
+    species_id: int
     energy: float
     size: float
 
@@ -22,34 +25,50 @@ class Creature:
         self.cfg = sim.cfg
         self._cfg = sim.cfg[self.name]
         self.sim = sim
-        self.layer_system = sim.layer_system #EXPERIMENTAL
+        self.layer_system = sim.layer_system  # EXPERIMENTAL
         self.position = None
-
-        self.behavior_system = GeneticAlgorithm(
-            num_observations=self._cfg['num_observations'],
-            num_actions=self._cfg['num_actions'],
-            genome=genome,
-            num_neurons=self._cfg['num_neurons'],
-            reproduce_mode=self._cfg['reproduce_mode'],
-            mutation_rate=self._cfg['mutation_rate'])
-        
+        if self.name == 'Consumer':
+            self.behavior_system = GeneticAlgorithm(
+                num_observations=self._cfg['num_observations'],
+                num_actions=self._cfg['num_actions'],
+                genome=genome,
+                num_neurons=self._cfg['num_neurons'],
+                reproduce_mode=self._cfg['reproduce_mode'],
+                mutation_rate=self._cfg['mutation_rate'])
+            self.genome = self.behavior_system.genome
+        elif self.name == 'Producer':
+            self.genome = self.generate_producer_genome()
+            self.mutation_rate=self._cfg['mutation_rate']
         self._init_properties()
-        #EXPERIMENTAL
+        # EXPERIMENTAL
         # self.layer_system.creature_enter(self.position, self)
 
     def _init_properties(self):
-        self.rgb = self._cfg['rgb']
+        self.image_data = None
+        self.ref_id = str(self)
+        if 'num_species' in self._cfg:
+            self.species_id = np.random.randint(self._cfg['num_species'])
+        else:
+            self.species_id = 0
+        self.rgb = rgb_mutation(self._cfg['rgb'], self.species_id, self._cfg['num_species'])
+        if self.name == 'Consumer':
+            self.appearance = InvaderCreator(img_size=5).get_an_invader(5)
+            self.appearance_mask = (self.appearance.sum(2) != 0).astype(np.uint8)
+            # consolidate appearance and mask data into single representation
+            mask = np.expand_dims(self.appearance_mask, axis=2)
+            self.image_data = np.concatenate((self.appearance, mask), axis=2)
 
         if self.position is None:
             self.position = np.random.randint(self.sim.grid_size)
             self.layer_system.creature_enter(self.position, self)
-        
-        #self.sim.increment_pos_layer(self.name, self.position, 1)
+
+        # self.sim.increment_pos_layer(self.name, self.position, 1)
 
         # Compute a unique hash based on the 4th byte of creature's genome
-        hasher = hashlib.sha256()
-        hasher.update(self.behavior_system.genome[3].encode())
-        hash = hasher.hexdigest()
+        if self.name == 'Consumer':
+            hash = self.generate_hash(self.genome[3])
+        else:
+            hash = self.generate_hash(self.genome)
         # Assign size and energy properties based on the hash
         self.size = int(hash[:32], 16) % 101 + 0.1
         self.energy = int(hash[32:], 16) % 101 + 1
@@ -67,13 +86,45 @@ class Creature:
         Handles death. A creature that dies should remove itself from sim.creatures
         and update the layer's grid position value.
         """
+        if self in self.sim.creatures:
+            self.sim.creatures.remove(self)
+
+        self.layer_system.creature_exit(self.position, self)
         pass
+
+    # NOTE: This assumes that the creature has already been spawned.
+    def set_position(self, target_pos):
+        assert self.position is not None
+        target_pos[0] = np.clip(target_pos[0], 0, self.sim.grid_size[0] - 1)
+        target_pos[1] = np.clip(target_pos[1], 0, self.sim.grid_size[1] - 1)
+        # Update the Layer System
+        self.layer_system.creature_move(self.position, target_pos, self)
+        # Update the creature's position to the target position
+        self.position = target_pos
+
+    def generate_hash(self, to_hash):
+        hasher = hashlib.sha256()
+        hasher.update(to_hash.encode())
+        hash = hasher.hexdigest()
+        return hash
 
     @property
     def grid_pos(self):
         assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
         # return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
         return int(self.position[0]), int(self.position[1])
+
+    @property
+    def creature_info(self):
+        if self.image_data is not None:
+            return {"genome": self.genome,
+                    "size": self.size,
+                    "energy": self.energy,
+                    "refId" : str(self),
+                    "image_data": self.image_data.tolist()}
+        return {"genome": self.genome,
+                "size": self.size,
+                "energy": self.energy}
 
 
 class Corpse:

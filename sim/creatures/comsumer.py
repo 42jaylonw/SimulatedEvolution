@@ -1,14 +1,19 @@
 import numpy as np
 from . import Creature
+from sim.GridUtils import get_circle_coord_dist_pairs
+from sim.pheremone import Pheremone
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
+PHEREMONE_EMIT_RANGE = 8 # WIP - arbitrary constant for now -
+PHEREMONE_EMIT_STRENGTH = 80 # WIP - arbitrary constant for now -
 
 class Consumer(Creature):
     name = 'Consumer'
 
     def __init__(self, sim, genome=None):
         super().__init__(sim, genome)
+
         self.speed = sim.cfg['Consumer']['init_speed']
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]
@@ -25,11 +30,13 @@ class Consumer(Creature):
             self.die()
 
     def die(self):
-        # self.sim.creatures -= this
-        if self in self.sim.creatures:
-            self.sim.creatures.remove(self)
-
-        self.layer_system.creature_exit(self.position, self)
+        super().die(self)
+        pass
+        # NOTE - this has been moved to the parent class
+        #if self in self.sim.creatures:
+        #    self.sim.creatures.remove(self)
+        #
+        #self.layer_system.creature_exit(self.position, self)
 
     def get_observation(self):
 
@@ -214,11 +221,22 @@ class Consumer(Creature):
             # Space is blocked: no change in position can be made in this direction
             d_x, d_y = 0, 0
             target_pos = self.position
+        
+        self.set_position(target_pos)
 
         # Update the Layer System
-        self.layer_system.creature_move(self.position, target_pos, self)
+        #self.layer_system.creature_move(self.position, target_pos, self) # WIP
         # Update the creature's position to the target position
-        self.position = target_pos
+        #self.position = target_pos #WIP
+
+    # TODO: finalize + test this implementation
+    # WIP - consumer acts like an emitter onto the pheremone layer
+    # Emit range + strength are defined by arbitrary constants for now
+    def emit_pheremones(self):
+        pheremone = Pheremone(PHEREMONE_EMIT_STRENGTH, self)
+        emit_positions = get_circle_coord_dist_pairs(self.layer_system, self.position, PHEREMONE_EMIT_RANGE)
+        for emit_pos in emit_positions:
+            self.layer_system.add_pheremone(emit_pos, pheremone)
 
     def blockedFwd(self):
         """
@@ -266,14 +284,10 @@ class Consumer(Creature):
         return self.check_empty(target_pos)
 
     def check_empty(self, target_pos):
+        return int((not self.layer_system.out_of_bounds(target_pos)) and (not self.layer_system.has_wall(target_pos))
+                and (not self.layer_system.get_num_consumers(target_pos) == 0) and
+                   (not self.layer_system.get_num_producers(target_pos) == 0))
 
-        return int((not self.layer_system.out_of_bounds(target_pos)) and (not self.layer_system.has_wall(target_pos)))
-        # WIP - this replaces the old implementation (commented out below) which relied on the old layer system
-        # TODO: NOTE: this does not check for producers/consumers that "block" this consumer, and these checks might need to be added back
-
-        #return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
-        #                    for layer in ["Wall", "Producer", "Consumer"]]))
-    
     def metabolize(self, activity=0.0, climate=0.0):
         """
         Subtract Consumer's energy by the sum of activity, climate, and 10% of its size\n

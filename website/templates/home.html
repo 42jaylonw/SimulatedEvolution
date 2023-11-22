@@ -16,29 +16,74 @@
         </p>
         <h5 class="text-center">Or use the buttons below<br>
             <button id="simulateButton" type="button">Play Simulation</button>
-            <button id="toggleClimateButton" type="button">Show Heatmap</button>
-            <button id="newSimulationButton" type="button">New Simulation</button> 
+            <button id="toggleClimateButton" type="button">Show Overlay</button>
+            <button id="newSimulationButton" type="button">New Simulation</button>
         </h5>
+        <!--Simulation parameters -->
+        {# Displayed when user first visits page or wants to reset the simulation #}
+        {% if not simulator %}
+        <form method="POST">
+            <div class="sim-form">
+                <label for="gridSize">Grid Size</label>
+                <input 
+                    type="gridSize" 
+                    class="form-control" 
+                    id="gridSize" 
+                    name="gridSize" 
+                    placeholder="Enter grid size"
+                />
+                <label for="numConsumers">Consumer Count</label>
+                <input 
+                    type="numConsumers" 
+                    class="form-control" 
+                    id="numConsumers" 
+                    name="numConsumers" 
+                    placeholder="number of consumers"
+                />
+                 <label for="numProducers">Producer Count</label>
+                <input 
+                    type="numProducers" 
+                    class="form-control" 
+                    id="numProducers" 
+                    name="numProducers" 
+                    placeholder="number of producers"
+                />
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        {% else %}
+            <form method="POST" action='/reset_simulator'>
+                <button type="submit" class="btn btn-danger">Reset Simulator</button>
+            </form>
+        {% endif %}
     </div>
     <!-- Simulation Area(center of screen)-->
     <div class="col-6">
-        <div class="square-container">
             <div class="sim-container">
+                {% if grid_size %}
+                 <script>
+                  document.addEventListener("DOMContentLoaded", function(){
+                     simSpace = new SimulationGrid({{ grid_size }});
+                  });
+                 </script>
+                 <script
+                    type = "text/javascript"
+                    src = "{{ url_for('static', filename='simulation-controls.js') }}"
+                 ></script>
+                {% endif %}
             </div>
-        </div>
     </div>
     <!--Descriptive information of selected simulation cell(right of screen)-->
-    {# <div class="col-3 sidenav">
-        <div class="analysis-container">
+    <div class="col-3 sidenav right-window analysis-container">
         </div>
-    </div> #}
+    </div>
 </div>
 {% endblock %}
 
 <!-- Scripts -->
 {% block script %}
 <!-- Grid functions -->
-
 <script
 type = "text/javascript"
 src = "{{ url_for('static', filename='simulation-grid.js') }}"
@@ -46,13 +91,5 @@ src = "{{ url_for('static', filename='simulation-grid.js') }}"
 <script
 type = "text/javascript"
 src = "{{ url_for('static', filename='cell.js') }}"
-></script>
-<script
-type = "text/javascript"
-src = "{{ url_for('static', filename='frontend-main.js') }}"
-></script>
-<script
-type = "text/javascript"
-src = "{{ url_for('static', filename='simulation-controls.js') }}"
 ></script>
 {% endblock script %}

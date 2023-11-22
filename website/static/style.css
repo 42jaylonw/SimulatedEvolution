@@ -9,49 +9,34 @@ body{
     font-size: 18px;
 }
 
-.creature{
-  border: 0;
-  min-width: 16px;
-  min-height: 16px;
-}
 
-/* Style for simulation */
-.square-container{
+/* container for simulation */
+.sim-container {
   display: flex;
   justify-content: center;
   max-width: 900vw;
   max-height: 900vh;
-  margin: 0;
-}
-
-/* container for simulation */
-.sim-container {
-  width: 100%;
-  height: 100%;
   display: grid;
-  justify-content: center;
   /* grid-template-columns: repeat(50, 18px); */
 }
 /* Style for Cells */
 .cell-item {
   border: 0;
-  min-width: 18px;
-  min-height: 18px;
+  width: 18px;
+  height: 18px;
   position: relative;
 }
 
 /* Style for Cell-overlay */
 .cell-overlay{
-  min-width: inherit;
-  min-height: inherit;
+  width: inherit;
+  height: inherit;
   position: absolute;
   pointer-events: none;
 }
 
 .analysis-container{
-  background-color: grey;
-  width: 100px;
-  height: 100px;
+  background-color: beige;
 }
 
 
@@ -60,6 +45,7 @@ body{
   
 }
 
+/* Visual displayed when user's mouse hovers over Cell */
 .info-display{
   background-color: grey;
   width: 140px;
