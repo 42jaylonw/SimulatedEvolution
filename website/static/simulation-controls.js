@@ -31,7 +31,7 @@ toggleClimateButton = document.getElementById('toggleClimateButton');
 
 //Change simulation view to heatmap view
 toggleClimateButton.addEventListener('click', function(){
-   toggleOverlay("heatmap");
+   toggleHeatmap();
 });
 
 //Start/Pause Simulation button
