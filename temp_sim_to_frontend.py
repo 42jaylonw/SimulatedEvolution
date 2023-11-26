@@ -36,7 +36,6 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
     # Instantiate emitters(sim, pos, e_range, e_val)
     emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
-                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 5, 25),
                 LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)] 
     
     # add all instantiated objects to SimSpace

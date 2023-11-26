@@ -6,6 +6,15 @@
  
 <!--Layout for Home page-->
 <div class="row content">
+    
+    {% if sim_edit_menu %}
+        <div class="col-3 placing-stuff">
+            <h5 class="text-center">Or use the buttons below<br>
+                <button id="AAAAAA" type="button">Play Simulation</button>
+            </h5>
+        </div>
+    {% endif %}
+
     <!-- Simulator Control Binding Information(left side of screen) -->
     <div class="col-3 sidenav left-window">
         <h1 class="text-center">Quick Controls</h1>
@@ -83,6 +92,13 @@
 
 <!-- Scripts -->
 {% block script %}
+
+<script
+    type = "text/javascript"
+    src = "{{ url_for('static', filename='sim-edit-menu.js') }}"
+></script>
+
+
 <!-- Grid functions -->
 <script
 type = "text/javascript"

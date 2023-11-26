@@ -56,3 +56,11 @@ body{
   transform: translate(15px, -10px);
   z-index: 1;
 }
+
+.placing-stuff{
+  background-color: rgb(236, 190, 236);
+}
+
+.addWallElement{
+  background-color: burlywood;
+}

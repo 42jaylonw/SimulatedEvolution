@@ -40,7 +40,7 @@ def home_page():
         else:
             flash(res, category="error")
     # display the current state of the grid every time the user visits home page
-    return render_template("home.html", grid_size=size, simulator=simulator)  
+    return render_template("home.html", grid_size=size, simulator=simulator, sim_edit_menu=True)  
 
 
 
