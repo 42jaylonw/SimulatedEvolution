@@ -7,30 +7,20 @@
 <!--Layout for Home page-->
 <div class="row content">
     
-    {% if sim_edit_menu %}
-        <div class="col-3 placing-stuff">
-            <h5 class="text-center">Or use the buttons below<br>
-                <button id="AAAAAA" type="button">Play Simulation</button>
-            </h5>
-        </div>
-    {% endif %}
+  
 
     <!-- Simulator Control Binding Information(left side of screen) -->
     <div class="col-3 sidenav left-window">
-        <h1 class="text-center">Quick Controls</h1>
-        <h5 class="text-center">Use these neat bindings!</h5>
-        <p class="text-left">Pause/Play Simulation: SPACE<br>
-        Create New Simulation: SHIFT + N<br>
-        Toggle Heatmap: TAB
-        </p>
-        <h5 class="text-center">Or use the buttons below<br>
-            <button id="simulateButton" type="button">Play Simulation</button>
-            <button id="toggleClimateButton" type="button">Show Overlay</button>
-            <button id="newSimulationButton" type="button">New Simulation</button>
-        </h5>
         <!--Simulation parameters -->
         {# Displayed when user first visits page or wants to reset the simulation #}
         {% if not simulator %}
+            {% if sim_edit_menu %}
+            <div class="col-3 placing-stuff">
+                <h5 class="text-center">ToolBox<br>
+                    <button id="AAAAAA" type="button">Play Simulation</button>
+                </h5>
+            </div>
+            {% endif %}
         <form method="POST">
             <div class="sim-form">
                 <label for="gridSize">Grid Size</label>
@@ -49,7 +39,7 @@
                     name="numConsumers" 
                     placeholder="number of consumers"
                 />
-                 <label for="numProducers">Producer Count</label>
+                <label for="numProducers">Producer Count</label>
                 <input 
                     type="numProducers" 
                     class="form-control" 
@@ -62,6 +52,17 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         {% else %}
+            <h1 class="text-center">Quick Controls</h1>
+            <h5 class="text-center">Use these neat bindings!</h5>
+            <p class="text-left">Pause/Play Simulation: SPACE<br>
+            Create New Simulation: SHIFT + N<br>
+            Toggle Heatmap: TAB
+            </p>
+            <h5 class="text-center">Or use the buttons below<br>
+                <button id="simulateButton" type="button">Play Simulation</button>
+                <button id="toggleClimateButton" type="button">Show Overlay</button>
+                <button id="newSimulationButton" type="button">New Simulation</button>
+            </h5>
             <form method="POST" action='/reset_simulator'>
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
             </form>
@@ -69,6 +70,7 @@
     </div>
     <!-- Simulation Area(center of screen)-->
     <div class="col-6">
+         
             <div class="sim-container">
                 {% if grid_size %}
                  <script>

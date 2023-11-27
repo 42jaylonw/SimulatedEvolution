@@ -62,5 +62,7 @@ body{
 }
 
 .addWallElement{
-  background-color: burlywood;
+  background-color: rgb(135, 144, 222);
+  width: inherit;
+  height: 10%;
 }
