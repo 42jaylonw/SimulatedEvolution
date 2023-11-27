@@ -59,6 +59,7 @@ body{
 
 .placing-stuff{
   background-color: rgb(236, 190, 236);
+  width: fit-content;
 }
 
 .addWallElement{

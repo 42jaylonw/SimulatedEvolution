@@ -1,11 +1,25 @@
 
+let placementButtons = [];
+
 document.addEventListener("DOMContentLoaded", function (){
-    var add_wall = document.createElement('div')
 
-    add_wall.classList.add('addWallElement');
-    const placing_stuff_parent = document.querySelector('.placing-stuff');
-    placing_stuff_parent.appendChild(add_wall);
+    var placeWallButton = document.getElementById('addWallButton');
+    var placeLightSourceButton = document.getElementById('addLightSourceButton');
+    var placeHeatSourceButton = document.getElementById('addHeatSourceButton');
 
-    var add_light_source;
-    var add_heat_source;
+    placeWallButton.addEventListener("click", function(){placeButtonClicked(placeWallButton.id)});
+    placeLightSourceButton.addEventListener("click", function(){placeButtonClicked(placeLightSourceButton.id)});
+    placeHeatSourceButton.addEventListener("click", function(){placeButtonClicked(placeHeatSourceButton.id)});
+
+    placementButtons.push(placeWallButton);
+    placementButtons.push(placeLightSourceButton);
+    placementButtons.push(placeHeatSourceButton);
+
+    console.log(placementButtons);
+    
+    function placeButtonClicked(buttonID) {
+        for(var pButton of placementButtons){
+            pButton.disabled = pButton.id == buttonID;
+        }
+    }
 });
