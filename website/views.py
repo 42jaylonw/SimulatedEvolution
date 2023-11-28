@@ -32,10 +32,10 @@ def home_page():
         res = validation.validateSimulationParameters(user_size, user_consumers, user_producers)
         # Create simulation if user entered valid input
         if res == 'OK':
-            NUMCONSUMERS = int(user_consumers)
-            NUMPRODUCERS = int(user_producers)
+            NUMCONSUMERS = 0#int(user_consumers)
+            NUMPRODUCERS = 0#int(user_producers)
             size = int(user_size)
-            return render_template("home.html", grid_size=size, simulator=True)
+            return render_template("home.html", grid_size=size, simulator=True, sim_edit_menu=True)
         # otherwise flash error message
         else:
             flash(res, category="error")
