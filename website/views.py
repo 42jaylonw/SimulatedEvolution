@@ -30,7 +30,9 @@ def home_page():
     global NUMPRODUCERS
     # Received user input
     if request.method == "POST":
+        print("creating grid")
         if isSetup:
+            print("now active")
             isActive = True
             isSetup = False
             return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)
@@ -52,6 +54,7 @@ def home_page():
         else:
             flash(res, category="error")
     # display the current state of the grid every time the user visits home page
+    print("regular, isSteup:", isSetup, " isActive: ", isActive)
     return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)  
 
 
@@ -102,6 +105,10 @@ def get_creatures_at_grid_space():
 def test():
     global size
     global simulator
+    global isActive
+    global isSetup
     simulator = None
     size = None
+    isSetup = False
+    isActive = False
     return redirect('/')

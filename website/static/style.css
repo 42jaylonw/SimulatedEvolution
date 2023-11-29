@@ -95,3 +95,9 @@ body{
   opacity: 1;
   visibility: visible;
 }
+
+.menuButton{
+  width: 50px;
+  text-align: center;
+  
+}

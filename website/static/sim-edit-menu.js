@@ -2,7 +2,6 @@
 let placementButtons = [];
 
 document.addEventListener("DOMContentLoaded", function (){
-
     var selectButton = document.getElementById('selectButton');
     selectButton.disabled = true;
     var placeWallButton = document.getElementById('addWallButton');
@@ -30,10 +29,35 @@ document.addEventListener("DOMContentLoaded", function (){
     placementButtons.push(eraserButton);
 
     console.log(placementButtons);
-    
+    let mode = selectButton.id;
+    // Disable a selected button using it's ID
     function placeButtonClicked(buttonID) {
         for(var pButton of placementButtons){
+            
             pButton.disabled = pButton.id == buttonID;
         }
+        // Change the default function to be called when pressing left click
+        mode = buttonID;
+
     }
+
+    // Call menu method based on selected mode
+    function handleUserClick(ev){
+        if(ev == null || ev.target.id == ''){
+            return;
+        }
+        if(mode == placeWallButton.id){
+            AddWall(ev.target.id);
+        }
+        
+    }
+    document.addEventListener('click', handleUserClick);
+
 });
+//Cell-row-col
+function AddWall(element){
+    elementStuff = element.split("-")
+    console.log(temp);
+}
+
+
