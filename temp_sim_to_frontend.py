@@ -76,6 +76,7 @@ def get_creatures_wrapper(sim, position):
 
 # Place a wall in the simulation at the specified location
 def user_place_wall(sim, position):
+    user_erase_space(sim, position)
     sim.layer_system.wall_add(position)
 
 # Place a LightSource in the simulation at the specified location.
