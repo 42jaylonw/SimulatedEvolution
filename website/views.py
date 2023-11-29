@@ -16,6 +16,7 @@ simulator = None
 size = None
 NUMCONSUMERS = 1
 NUMPRODUCERS = 1
+# {#  (1)InitialSimulationParameters (2-3)simulationSetup, (4)ActiveSimulation #}
 # Home Page
 @views.route('/', methods=["GET", "POST"])
 def home_page():
@@ -35,12 +36,12 @@ def home_page():
             NUMCONSUMERS = 0#int(user_consumers)
             NUMPRODUCERS = 0#int(user_producers)
             size = int(user_size)
-            return render_template("home.html", grid_size=size, simulator=True, sim_edit_menu=True)
+            return render_template("home.html", grid_size=size, initSimParameters=True, simulationSetup=True)
         # otherwise flash error message
         else:
             flash(res, category="error")
     # display the current state of the grid every time the user visits home page
-    return render_template("home.html", grid_size=size, simulator=simulator, sim_edit_menu=True)  
+    return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=True)  
 
 
 

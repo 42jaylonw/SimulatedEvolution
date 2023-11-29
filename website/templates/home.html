@@ -13,7 +13,8 @@
     <div class="col-3 sidenav left-window">
         <!--Simulation parameters -->
         <!-- {# Displayed when user first visits page or wants to reset the simulation #} -->
-        {% if not simulator %}
+        {#  (1)initSimParameters (2-3)simulationSetup, (4)ActiveSimulation #}
+        {% if not initSimParameters %}
           
         <form method="POST">
             <div class="sim-form">
@@ -47,7 +48,7 @@
         </form>
         {% else %}
 
-            {% if sim_edit_menu %}
+            {% if simulationSetup %}
             <div class="col-3 placing-stuff">
                 <h5 class="text-center">ToolBox<br>
                     <button id="addWallButton" type="button">Add Wall</button>
@@ -56,7 +57,8 @@
 
                 </h5>
             </div>
-            {% endif %}
+            <button id="startSimulation" type="button">Start Simulation</button>
+            {% elif activeSimulation %}
             <h1 class="text-center">Quick Controls</h1>
             <h5 class="text-center">Use these neat bindings!</h5>
             <p class="text-left">Pause/Play Simulation: SPACE<br>
@@ -68,10 +70,13 @@
                 <button id="toggleClimateButton" type="button">Show Overlay</button>
                 <button id="newSimulationButton" type="button">New Simulation</button>
             </h5>
+           
+            {% endif %}
             <form method="POST" action='/reset_simulator'>
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
             </form>
-        {% endif %}
+        {%endif%}
+    
     </div>
     <!-- Simulation Area(center of screen)-->
     <div class="col-6">
