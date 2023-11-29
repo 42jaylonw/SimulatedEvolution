@@ -13,6 +13,8 @@ views = Blueprint('views', __name__)
 # simulator information for user session
 # TODO: make mini class to remove use of 'global' keyword
 simulator = None
+isSetup = False
+isActive = False
 size = None
 NUMCONSUMERS = 1
 NUMPRODUCERS = 1
@@ -22,10 +24,18 @@ NUMPRODUCERS = 1
 def home_page():
     global simulator
     global size
+    global isSetup
+    global isActive
     global NUMCONSUMERS
     global NUMPRODUCERS
     # Received user input
     if request.method == "POST":
+        if isSetup:
+            isActive = True
+            isSetup = False
+            return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)
+        isSetup = True
+        isActive = False
         user_size = request.form.get("gridSize")
         user_consumers = request.form.get("numConsumers")
         user_producers = request.form.get("numProducers")
@@ -33,15 +43,16 @@ def home_page():
         res = validation.validateSimulationParameters(user_size, user_consumers, user_producers)
         # Create simulation if user entered valid input
         if res == 'OK':
-            NUMCONSUMERS = 0#int(user_consumers)
-            NUMPRODUCERS = 0#int(user_producers)
+            NUMCONSUMERS = 3#int(user_consumers)
+            NUMPRODUCERS = 1#int(user_producers)
             size = int(user_size)
-            return render_template("home.html", grid_size=size, initSimParameters=True, simulationSetup=True)
+            print("ACTIVESIMULATION,", isActive)
+            return render_template("home.html", grid_size=size, initSimParameters=True, simulationSetup=isSetup, activeSimulation=isActive)
         # otherwise flash error message
         else:
             flash(res, category="error")
     # display the current state of the grid every time the user visits home page
-    return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=True)  
+    return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)  
 
 
 

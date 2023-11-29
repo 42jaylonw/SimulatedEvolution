@@ -54,6 +54,10 @@ class SimulationGrid{
         });
     }
 
+    makeSimulation(){
+        fetch('/setup_data');
+    }
+
     //Request state of simulation grid from server, then apply these changes on the frontend
     getGridData(){
         //Request simulation grid data

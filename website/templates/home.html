@@ -60,8 +60,11 @@
                     <button id="eraserButton" type="button">Erase</button>
                 </h5>
             </div>
-            <button id="startSimulation" type="button">Start Simulation</button>
-            {% elif activeSimulation %}
+            <form method="POST">
+            <button id="startSimulation" type="submit">Start Simulation</button>
+            </form>
+            {% endif %}
+            {% if activeSimulation %}
             <h1 class="text-center">Quick Controls</h1>
             <h5 class="text-center">Use these neat bindings!</h5>
             <p class="text-left">Pause/Play Simulation: SPACE<br>
