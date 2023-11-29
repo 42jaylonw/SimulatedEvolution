@@ -6,13 +6,13 @@ class EnergyBar:
         self.size = size
         self.age_rate = age_rate
 
-    def consume_energy(self, movement_cost=0):
+    def consume_energy(self, additional_cost=0):
         """
         Called on a time step.
-        Lowers energy level based on metabolism and movement cost.
+        Lowers energy level based on metabolism and an additional cost, such as movement cost or light level.
         """
         energy_consumption = float(self.size * 0.10)
-        self.current_energy -= energy_consumption + movement_cost
+        self.current_energy -= energy_consumption + additional_cost
         if self.current_energy < 0:
             self.current_energy = 0
 
