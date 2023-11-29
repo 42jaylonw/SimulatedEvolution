@@ -73,3 +73,18 @@ def get_creatures_wrapper(sim, position):
     for consumer in consumers:
         creature_data["consumers"].append(consumer.creature_info)
     return jsonify(creature_data)
+
+# Place a wall in the simulation at the specified location
+def user_place_wall(sim, position):
+    sim.layer_system.wall_add(position)
+
+# Place a LightSource in the simulation at the specified location.
+# If there is a wall there, no emitter will be placed
+# Currently a preset for the strength/range of the emitter
+def user_place_lightsource(sim, position):
+    if not sim.layer_system.has_wall(position):
+        new_light_source = LightSource(sim, position, 20, 100)
+        new_emitter_list = sim.emitters
+        new_emitter_list.append(new_light_source)
+        sim.reset(sim.creatures, new_emitter_list)
+
