@@ -70,7 +70,6 @@ body{
 
 .selectHoverText {
   position: relative;
-  border-bottom: 1px dotted black;
 }
 
 .selectHoverText:before {
