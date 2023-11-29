@@ -1,5 +1,6 @@
 import numpy as np
 from . import Creature
+from sim import GridUtils
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
@@ -18,10 +19,14 @@ class Consumer(Creature):
     def step(self):
         obs = self.get_observation()
         action = np.argmax(self.behavior_system.predict(obs))
-        self.action_move(action)
+        # self.die()
+        print(f"{self.species_id} has {self.energy_bar.current_energy} left")
+        # self.action_move(action)
+        self.action_hunt(action)
         self.energy_bar.consume_energy(self.move_cost)
         self.energy_bar.age_tick()
         if self.energy_bar.is_empty():
+            print(f"A creature of {self.species_id} has died")
             self.die()
 
     def die(self):
@@ -184,17 +189,24 @@ class Consumer(Creature):
                 # random.choice is not used to provide for more "consistent"
                 # behavior when it comes to the nearest object.
                 # This results in "preferred" directions when there is a tie
-                # in distance.
+                # in distance
+                print(f"closest location to {self.species_id} at {self.position} is {closest_locations[0]}")
                 return closest_locations[0]
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
-                                closest_locations = [checked_pos]
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
-                                closest_locations.append(checked_pos)
 
             if len(closest_locations) > 0:
                 return np.random.choice(closest_locations)
         return None
 
+    def senseWithinRange(self):
+        positions_to_check = GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, self.sensory_range)
+        producer_positions = []
+        for pos in positions_to_check:
+            if self.layer_system.get_num_producers(pos[0]) > 0:
+                producer_positions.append(pos)
+        if len(producer_positions) <= 0:
+            return None
+        closest_pos = min(producer_positions, key=lambda x: x[1])
+        return closest_pos[0]
 
     def action_move(self, action: int):
         """
@@ -224,16 +236,16 @@ class Consumer(Creature):
         self.curr_action = [d_x, d_y]
         
         self.move_cost = 0.0
-        # TO-DO -- grab elevation from sim space on layer
-        current_elevation = 0.0
-        target_elevation = 0.0
-        self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
 
         if self.layer_system.out_of_bounds(target_pos) or self.layer_system.has_wall(target_pos):
             # Space is blocked: no change in position can be made in this direction
             d_x, d_y = 0, 0
             target_pos = self.position
         
+        current_elevation = self.layer_system.get_elevation(self.position)
+        target_elevation = self.layer_system.get_elevation(target_pos)
+        self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
+
         self.set_position(target_pos)
 
         # Update the Layer System
@@ -252,39 +264,67 @@ class Consumer(Creature):
 
     def blockedFwd(self):
         """
-        Returns 1 if the creature's forward direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
+        Returns 1 if the creature's forward direction is blocked by a wall or is out of bounds. Returns 0 if free.
         Orientation based on last moved direction.
         """
         last_act = self.last_action
         target_pos = self.position
         target_pos[0] += last_act[0]
         target_pos[1] += last_act[1]
-        return self.check_empty(target_pos)
+        if not self.layer_system.out_of_bounds(target_pos):
+            if self.layer_system.has_wall(target_pos):
+                return 1
+            else:
+                return 0
+        else:
+            return 1
 
     def blockedBack(self):
         """
-        Returns if the creature's backward direction is blocked by any creature of a wall or is out of bounds. Returns 0 if free.
+        Returns if the creature's backward direction is blocked by a wall or is out of bounds. Returns 0 if free.
         Orientation based on last moved direction.
         """
         last_act = self.last_action
         target_pos = self.position
         target_pos[0] -= last_act[0]
         target_pos[1] -= last_act[1]
-        return self.check_empty(target_pos)
+        if not self.layer_system.out_of_bounds(target_pos):
+            if self.layer_system.has_wall(target_pos):
+                return 1
+            else:
+                return 0
+        else:
+            return 1
 
     def blockedLeft(self):
         """
-        Returns if the creature's relative left direction is blocked by any creature or a wall or is out of bounds. Returns 0 if free.
+        Returns if the creature's relative left direction is blocked by a wall or is out of bounds. Returns 0 if free.
         Orientation based on last moved direction.
         """
         last_act = self.last_action
         target_pos = self.position
         target_pos[0] -= last_act[1]
         target_pos[1] += last_act[0]
-        # TODO: NOTE: this does not check for producers/consumers that "block" this consumer, and these checks might need to be added back
+        if not self.layer_system.out_of_bounds(target_pos):
+            if self.layer_system.has_wall(target_pos):
+                return 1
+            else:
+                return 0
+        else:
+            return 1
 
-        #return int(not all([self.sim.is_pos_layer_empty(layer, target_pos)
-        #                    for layer in ["Wall", "Producer", "Consumer"]]))
+    def blockedRight(self):
+        last_act = self.last_action
+        target_pos = self.position
+        target_pos[0] += last_act[1]
+        target_pos[1] -= last_act[0]
+        if not self.layer_system.out_of_bounds(target_pos):
+            if self.layer_system.has_wall(target_pos):
+                return 1
+            else:
+                return 0
+        else:
+            return 1
     
     def metabolize(self, activity=0.0, climate=0.0):
         """
@@ -317,7 +357,9 @@ class Consumer(Creature):
         # TODO: Need to check how to access
         return True
 
-    def action_hunt(self):
+    
+    # NOTE: temporarily adding the "otherwise" param to do a regular action-move if a creature is not detected
+    def action_hunt(self, otherwise):
         """
         Hunts a creature down. Follows manhattan distance if a creature
         is detected. Follows nearest pheromone if pheromone is present 
@@ -330,16 +372,31 @@ class Consumer(Creature):
         # producer, the action_hunt behavior does not currently include pheromone
         # tracking, as producers are completely stationary and do not use
         # pheromones.
-        senseLocation = self.senseNearest()
+        # senseLocation = self.senseNearest()
+        senseLocation = self.senseWithinRange()
         if senseLocation is not None:
-            distToLoc_x = np.abs(senseLocation[0] - self.position[0])
-            distToLoc_y = np.abs(senseLocation[1] - self.position[1])
+            raw_x = senseLocation[0] - self.position[0]
+            raw_y = senseLocation[1] - self.position[1]
+            distToLoc_x = np.abs(raw_x)
+            distToLoc_y = np.abs(raw_y)
             if distToLoc_x == 0 and distToLoc_y == 0:
                 self.eat_on_square()
+                print(f"a creature of {self.species_id} consumed food and its energy is now {self.energy_bar.current_energy}")
             elif distToLoc_x >= distToLoc_y:
-                move along manhattan x
+                if raw_x > 0:
+                    self.action_move(1)
+                elif raw_x < 0:
+                    self.action_move(3)
             elif distToLoc_x < distToLoc_y:
-                move along manhattan y
+                if raw_y > 0:
+                    self.action_move(0)
+                elif raw_y < 0:
+                    self.action_move(2)
+        else:
+            self.action_move(otherwise)
+        # else:
+            # get pheromones of tile above, below, to the right, and to the left (if not out of bounds)
+            # go to tile with strongest pheromone from edible-tagged species
         
  
     def eat_on_square(self):
@@ -354,16 +411,22 @@ class Consumer(Creature):
         yummy_produce = self.layer_system.get_producers(self.position)
         if len(yummy_produce) > 0:
             chosen_to_eat = np.random.choice(yummy_produce)
+            print(f"{self.species_id} has chosen to eat {chosen_to_eat.species_id}, whose current energy is {chosen_to_eat.energy_bar.current_energy}")
             energy_gain_base = chosen_to_eat.energy_bar.current_energy * 0.10
 
             # a bonus to energy gain from consumption based on the size of the prey creature and the eating creature
             # this value is never greater than the eating creature's size
-            energy_gain_sizeBonus = max((1.2 * chosen_to_eat.size), self.size)
+            energy_gain_sizeBonus = max((1.75 * chosen_to_eat.size), self.size)
             self.energy_bar.replenish_energy(energy_gain_base + energy_gain_sizeBonus)
             chosen_to_eat.die()
+        else:
+            print(f"a creature of (self.species_id) ate nothing")
 
     def reproduce(self, child_starting_energy=30):
         """
         Create a new creature at a space nearby.
         Also updates the parent's max energy. 
         """
+        # senseLocation = self.senseNearest()
+        # if senseLocation is not None:
+

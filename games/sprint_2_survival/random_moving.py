@@ -8,7 +8,7 @@ from sim.emitter import LightSource, HeatSource
 GRIDSIZE = 50
 def step(sim):
     assert sim.creatures is not None, "Reset first!"
-
+    print("i am running")
     # Refresh emitter layer values
     sim.layer_system.step()
 
@@ -74,14 +74,16 @@ class RandMoveConsumer(Consumer):
 
 
 def run_random_moving():
-    num_producers = 10
-    num_consumers = 300
+    num_producers = 500
+    num_consumers = 2
     # create simulation space
-    config = toml.load("games/sprint_0_random/config.toml")
+    config = toml.load("games/sprint_2_survival/config.toml")
     sim = SimSpace(config)
     # create list of producers and consumers
     producers = [Producer(sim) for _ in range(num_producers)]
-    consumers = [RandMoveConsumer(sim) for _ in range(num_consumers)]
+    # consumers = [RandMoveConsumer(sim) for _ in range(num_consumers)]
+    consumers = [Consumer(sim) for _ in range(num_consumers)]
+    print(consumers)
     # add organisms to simulation space
     # sim.reset(producers + consumers)
 
