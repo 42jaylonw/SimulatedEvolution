@@ -2,7 +2,7 @@ import toml
 from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
-
+import numpy as np
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
 
@@ -63,6 +63,10 @@ def get_sim_state(simulator, includeImageData=False):
     # return information of all gridspaces
     return jsonify(gridspacesInformation)
 
+def get_gridspace_state(simulator, position):
+    return jsonify(simulator.layer_system.get_gridspace(position).get_properties())
+    
+
 # Get the information of all creatures at specified location
 def get_creatures_wrapper(sim, position):
     creature_data = {"producers" : list(), "consumers" : list()}
@@ -76,6 +80,7 @@ def get_creatures_wrapper(sim, position):
 
 # Place a wall in the simulation at the specified location
 def user_place_wall(sim, position):
+    print(f'Adding wall at {position}')
     user_erase_space(sim, position)
     sim.layer_system.wall_add(position)
 
@@ -126,11 +131,11 @@ def user_erase_space(sim, position):
     sim.layer_system.wall_remove(position)
 
     for creature in sim.creatures:
-        if creature.position == position:
+        if creature.position[0] == position[0] and creature.position[1] == position[1]:
             creature.remove()
     
     for emitter in sim.emitters:
-        if emitter.position == position:
+        if emitter.position[0] == position[0] and  emitter.position[1] == position[1]:
             emitter.remove()
 
 # EXPERIMENTAL

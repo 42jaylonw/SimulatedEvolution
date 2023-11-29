@@ -3,7 +3,7 @@ import games.sprint_0_random.random_moving as random_moving
 import random
 import json
 from website import validation
-
+import numpy as np
 #TEMP
 import temp_sim_to_frontend as sim_to_front
 #END TEMP
@@ -30,9 +30,7 @@ def home_page():
     global NUMPRODUCERS
     # Received user input
     if request.method == "POST":
-        print("creating grid")
         if isSetup:
-            print("now active")
             isActive = True
             isSetup = False
             return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)
@@ -48,13 +46,11 @@ def home_page():
             NUMCONSUMERS = 3#int(user_consumers)
             NUMPRODUCERS = 1#int(user_producers)
             size = int(user_size)
-            print("ACTIVESIMULATION,", isActive)
             return render_template("home.html", grid_size=size, initSimParameters=True, simulationSetup=isSetup, activeSimulation=isActive)
         # otherwise flash error message
         else:
             flash(res, category="error")
     # display the current state of the grid every time the user visits home page
-    print("regular, isSteup:", isSetup, " isActive: ", isActive)
     return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)  
 
 
@@ -112,3 +108,16 @@ def test():
     isSetup = False
     isActive = False
     return redirect('/')
+
+@views.route('/add_wall', methods=["POST"])
+def add_wall():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    print("AWIUDWABD: ", position)
+    sim_to_front.user_place_wall(simulator, position)
+    
+    return sim_to_front.get_gridspace_state(simulator, position)
+
+@views.route('/visual_update', methods=["GET"])
+def visual_update():
+    return sim_to_front.get_gridspace_state(simulator)

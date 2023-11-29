@@ -46,8 +46,13 @@ document.addEventListener("DOMContentLoaded", function (){
         if(ev == null || ev.target.id == ''){
             return;
         }
-        if(mode == placeWallButton.id){
-            AddWall(ev.target.id);
+        switch(mode){
+            case placeWallButton.id:
+                AddWall(ev.target.id);
+                break;
+            case selectButton.id:
+                break;
+
         }
         
     }
@@ -56,8 +61,18 @@ document.addEventListener("DOMContentLoaded", function (){
 });
 //Cell-row-col
 function AddWall(element){
-    elementStuff = element.split("-")
-    console.log(temp);
+    cellInformation = element.split("-")
+    console.log(cellInformation[1] + cellInformation[2]);
+    const data = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
+    fetch('/add_wall', {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(data)})
+    .then((response) => response.json())
+    .then((data) => {
+        simSpace.visualUpdate(data);
+    })
+    .catch((error) =>{
+        console.error('Error:', error);
+    });
+    // simSpace.visualUpdate();
 }
 
 

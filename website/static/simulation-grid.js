@@ -73,6 +73,9 @@ class SimulationGrid{
         });
     }
 
+    visualUpdate(data){
+       this.handleData(data);
+    }
     //Visually clear the simulation grid
     clearSimulation(){   
         for(let i = 0; i < this.width * this.width; i++)
