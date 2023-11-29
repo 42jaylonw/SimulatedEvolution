@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function (){
 
     // Call menu method based on selected mode
     function handleUserClick(ev){
-        if(ev == null || ev.target.id == ''){
+        if(ev == null || ev.target.id == '' || !ev.target.id.includes("cell")){
             return;
         }
         switch(mode){
