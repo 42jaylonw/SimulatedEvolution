@@ -4,6 +4,7 @@ let placementButtons = [];
 document.addEventListener("DOMContentLoaded", function (){
 
     var selectButton = document.getElementById('selectButton');
+    selectButton.disabled = true;
     var placeWallButton = document.getElementById('addWallButton');
     var placeLightSourceButton = document.getElementById('addLightSourceButton');
     var placeHeatSourceButton = document.getElementById('addHeatSourceButton');

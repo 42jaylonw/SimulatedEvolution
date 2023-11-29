@@ -246,7 +246,7 @@ class Cell{
     updateCellOverlay(mode){
         let color;
         if(mode == "lightmap"){
-            color = `rgb(${this.lightLevel},${this.lightLevel},${this.lightLevel}, 0.5)`;
+            color = `rgb(0,0,0, ${(100 - this.lightLevel) / 100})`;
             this.overlay.style.backgroundColor = color;
             return;
         }
