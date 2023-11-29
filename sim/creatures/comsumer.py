@@ -11,8 +11,8 @@ PHEREMONE_EMIT_STRENGTH = 80 # WIP - arbitrary constant for now -
 class Consumer(Creature):
     name = 'Consumer'
 
-    def __init__(self, sim, genome=None):
-        super().__init__(sim, genome)
+    def __init__(self, sim, genome=None, spawn_pos=None):
+        super().__init__(sim, genome, spawn_pos)
 
         self.speed = sim.cfg['Consumer']['init_speed']
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
