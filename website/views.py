@@ -1,3 +1,5 @@
+from crypt import methods
+from turtle import position
 from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
 import games.sprint_0_random.random_moving as random_moving
 import random
@@ -43,7 +45,7 @@ def home_page():
         res = validation.validateSimulationParameters(user_size, user_consumers, user_producers)
         # Create simulation if user entered valid input
         if res == 'OK':
-            NUMCONSUMERS = 3#int(user_consumers)
+            NUMCONSUMERS = 1#int(user_consumers)
             NUMPRODUCERS = 1#int(user_producers)
             size = int(user_size)
             return render_template("home.html", grid_size=size, initSimParameters=True, simulationSetup=isSetup, activeSimulation=isActive)
@@ -116,6 +118,12 @@ def add_wall():
     print("AWIUDWABD: ", position)
     sim_to_front.user_place_wall(simulator, position)
     
+    return sim_to_front.get_gridspace_state(simulator, position)
+@views.route('erase_space', methods=["POST"])
+def erase_space():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    sim_to_front.user_erase_space(simulator, position)
     return sim_to_front.get_gridspace_state(simulator, position)
 
 @views.route('/visual_update', methods=["GET"])
