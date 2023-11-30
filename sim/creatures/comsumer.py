@@ -1,6 +1,10 @@
 import numpy as np
 from . import Creature
 from sim import GridUtils
+from sim.pheremone import Pheremone
+
+PHEREMONE_EMIT_RANGE = 8 # WIP - arbitrary constant for now -
+PHEREMONE_EMIT_STRENGTH = 80 # WIP - arbitrary constant for now -
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
@@ -23,7 +27,7 @@ class Consumer(Creature):
         # if energy is sufficient to reproduce
         action = self.reproduction_protocol()
         # if reproduction protocol not active
-        if action == 0:
+        if action == -1:
             action = np.argmax(self.behavior_system.predict(obs))
         # self.die()
         self.action_hunt(action)
@@ -51,14 +55,14 @@ class Consumer(Creature):
             if (len(potential_partners) == 0):
                 # emit pheromone and predict regularly
                 self.emit_pheremones()
-                return 0
+                return -1
             else:
                 for consumer in potential_partners:
                     if consumer.energy_bar.current_energy >= reproduce_thresh:
                         # move towards partner
                         action = np.argmax(self.move_towards(self.position, consumer.position))
                         return action
-        return 0
+        return -1
 
     # move_towards takes in a starting point and ending point
     # returns the direction needed to move closest to target
@@ -339,7 +343,7 @@ class Consumer(Creature):
     # Emit range + strength are defined by arbitrary constants for now
     def emit_pheremones(self):
         pheremone = Pheremone(PHEREMONE_EMIT_STRENGTH, self)
-        emit_positions = get_circle_coord_dist_pairs(self.layer_system, self.position, PHEREMONE_EMIT_RANGE)
+        emit_positions = GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, PHEREMONE_EMIT_RANGE)
         for emit_pos in emit_positions:
             self.layer_system.add_pheremone(emit_pos[0], pheremone)
 
