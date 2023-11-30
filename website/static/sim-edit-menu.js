@@ -67,18 +67,6 @@ document.addEventListener("DOMContentLoaded", function (){
 //Cell-row-col
 function addWall(element){
     performGridSpaceOperation(element, '/add_wall');
-    // cellInformation = element.split("-")
-    // console.log(cellInformation[1] + cellInformation[2]);
-    // const data = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
-    // fetch('/add_wall', {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(data)})
-    // .then((response) => response.json())
-    // .then((data) => {
-    //     simSpace.visualUpdate(data);
-    // })
-    // .catch((error) =>{
-    //     console.error('Error:', error);
-    // });
-    // simSpace.visualUpdate();
 }
 
 function eraseSpace(element){
@@ -90,6 +78,7 @@ function selectSpace(element){
 }
 
 function placeConsumer(element){
+    console.log("adding consumer");
     performGridSpaceOperation(element, '/add_creature_consumer');
 }
 function performGridSpaceOperation(element, route){
@@ -103,7 +92,7 @@ function performGridSpaceOperation(element, route){
             var producers = data["producers"];
             var consumers = data["consumers"];
             var analysisContainer = document.querySelector('.analysis-container');
-            analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${cellInformation[0]}, ${cellInformation[1]}</h2> ` + 
+            analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${cellInformation[1]}, ${cellInformation[2]}</h2> ` + 
             generateCreatureText("CONSUMERS", consumers) + "<br>" + generateCreatureText("PRODUCERS", producers);
             return;
         }
@@ -117,7 +106,7 @@ function performGridSpaceOperation(element, route){
   /**
      * 
      * @param {string} creatureClass name of type of creature 
-     * @param {*} creatures Creature along with its properties
+     * @param {Element[]} creatures Creature along with its properties
      * @returns {string} formatted string that contains a creature's properties
      */
 function generateCreatureText(creatureClass, creatures){

@@ -68,7 +68,6 @@ def new_set_grid():
     global simulator
     gridSize = json.loads(request.data)["size"]
     if simulator is None:
-        print("creating grid")
         simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, gridSize)
     return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
@@ -113,7 +112,6 @@ def test():
 def add_wall():
     position = json.loads(request.data)["position"]
     position = np.array(position)
-    print("AWIUDWABD: ", position)
     sim_to_front.user_place_wall(simulator, position)
     
     return sim_to_front.get_gridspace_state(simulator, position)

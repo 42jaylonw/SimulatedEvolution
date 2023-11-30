@@ -64,6 +64,7 @@ def get_sim_state(simulator, includeImageData=False):
     return jsonify(gridspacesInformation)
 
 def get_gridspace_state(simulator, position):
+    print(simulator.layer_system.get_gridspace(position).get_properties())
     return jsonify(simulator.layer_system.get_gridspace(position).get_properties())
     
 
@@ -80,7 +81,6 @@ def get_creatures_wrapper(sim, position):
 
 # Place a wall in the simulation at the specified location
 def user_place_wall(sim, position):
-    print(f'Adding wall at {position}')
     user_erase_space(sim, position)
     sim.layer_system.wall_add(position)
 

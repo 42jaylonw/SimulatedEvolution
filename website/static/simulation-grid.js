@@ -74,7 +74,7 @@ class SimulationGrid{
     }
 
     visualUpdate(data){
-       this.handleInitialData(data, true);
+       this.handleInitialData(data);
     }
     //Visually clear the simulation grid
     clearSimulation(){   
@@ -115,7 +115,8 @@ class SimulationGrid{
      * Update front-end elements based on information received from the back-end
      * @param {JSON} data Information from back-end simulation 
      */
-    handleInitialData(data, clearCell=false){
+    handleInitialData(data){
+        console.log(data);
         // Extract information
         var position = data["position"];
         var numConsumer = data["consumerCount"];
