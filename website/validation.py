@@ -1,7 +1,11 @@
 
 
 # validate the user input
-def validateSimulationParameters(grid_size, num_consumers, num_producers):
+def validateSimulationParameters(grid_size, num_consumers=0, num_producers=0):
+        if num_consumers is None:
+             num_consumers = 0
+        if num_producers is None:
+             num_producers = 0
         print(f'VALIDATING gridSize: {grid_size}, consumers: {num_consumers}, producers: {num_producers}')
         if not is_numeric(grid_size) or not is_numeric(num_consumers) or not is_numeric(num_producers):
              return 'Non-numerals'
@@ -18,6 +22,8 @@ def validateSimulationParameters(grid_size, num_consumers, num_producers):
         return 'OK'
 
 def is_numeric(val):
+      if val is None:
+           return False
       try:
         int(val)
         return True

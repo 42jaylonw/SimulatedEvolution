@@ -29,6 +29,7 @@ simButton = document.getElementById('simulateButton');
 newSimButton = document.getElementById('newSimulationButton');
 toggleClimateButton = document.getElementById('toggleClimateButton');
 
+
 //Change simulation view to heatmap view
 toggleClimateButton.addEventListener('click', function(){
    toggleHeatmap();

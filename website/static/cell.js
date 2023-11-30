@@ -52,7 +52,7 @@ class Cell{
         //Unmark cell when user no longer hovers over it
         this.element.onmouseleave = () => {this.restoreCellOpactiy()};
         //Display detailed information about Cell when user clicks on it
-        this.element.onclick = () => {this.displayCellInfo()};
+        // this.element.onclick = () => {this.displayCellInfo()};
     }
 
 
@@ -149,11 +149,13 @@ class Cell{
         if(this.isWall){
             this.infoDisplay.innerHTML = "Wall";
             this.setCellColor(`rgb(${(0)}, ${(0)}, ${(0)})`);
+            this.clearCreatureVisuals();
             return;
         }
         //No Creatures present
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
+            this.clearCreatureVisuals();
         }
         //Set color to Producer
         if(this.numProducers > 0){
@@ -177,7 +179,7 @@ class Cell{
             return;
         }
         // Add element to Cell and store it in a list
-        this.element.appendChild(creature);
+        this.element.append(creature);
         this.creatureList.push(creature);
     }
    
@@ -246,7 +248,7 @@ class Cell{
     updateCellOverlay(mode){
         let color;
         if(mode == "lightmap"){
-            color = `rgb(${this.lightLevel},${this.lightLevel},${this.lightLevel}, 0.5)`;
+            color = `rgb(0,0,0, ${(100 - this.lightLevel) / 100})`; // WIP - magic numbers should be replaced later
             this.overlay.style.backgroundColor = color;
             return;
         }

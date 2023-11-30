@@ -3,7 +3,7 @@ import games.sprint_0_random.random_moving as random_moving
 import random
 import json
 from website import validation
-
+import numpy as np
 #TEMP
 import temp_sim_to_frontend as sim_to_front
 #END TEMP
@@ -13,18 +13,29 @@ views = Blueprint('views', __name__)
 # simulator information for user session
 # TODO: make mini class to remove use of 'global' keyword
 simulator = None
+isSetup = False
+isActive = False
 size = None
 NUMCONSUMERS = 1
 NUMPRODUCERS = 1
+# {#  (1)InitialSimulationParameters (2-3)simulationSetup, (4)ActiveSimulation #}
 # Home Page
 @views.route('/', methods=["GET", "POST"])
 def home_page():
     global simulator
     global size
+    global isSetup
+    global isActive
     global NUMCONSUMERS
     global NUMPRODUCERS
     # Received user input
     if request.method == "POST":
+        if isSetup:
+            isActive = True
+            isSetup = False
+            return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)
+        isSetup = True
+        isActive = False
         user_size = request.form.get("gridSize")
         user_consumers = request.form.get("numConsumers")
         user_producers = request.form.get("numProducers")
@@ -32,15 +43,15 @@ def home_page():
         res = validation.validateSimulationParameters(user_size, user_consumers, user_producers)
         # Create simulation if user entered valid input
         if res == 'OK':
-            NUMCONSUMERS = int(user_consumers)
-            NUMPRODUCERS = int(user_producers)
+            NUMCONSUMERS = 1#int(user_consumers)
+            NUMPRODUCERS = 1#int(user_producers)
             size = int(user_size)
-            return render_template("home.html", grid_size=size, simulator=True)
+            return render_template("home.html", grid_size=size, initSimParameters=True, simulationSetup=isSetup, activeSimulation=isActive)
         # otherwise flash error message
         else:
             flash(res, category="error")
     # display the current state of the grid every time the user visits home page
-    return render_template("home.html", grid_size=size, simulator=simulator)  
+    return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)  
 
 
 
@@ -90,6 +101,36 @@ def get_creatures_at_grid_space():
 def test():
     global size
     global simulator
+    global isActive
+    global isSetup
     simulator = None
     size = None
+    isSetup = False
+    isActive = False
     return redirect('/')
+
+@views.route('/add_wall', methods=["POST"])
+def add_wall():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    print("AWIUDWABD: ", position)
+    sim_to_front.user_place_wall(simulator, position)
+    
+    return sim_to_front.get_gridspace_state(simulator, position)
+@views.route('/erase_space', methods=["POST"])
+def erase_space():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    sim_to_front.user_erase_space(simulator, position)
+    return sim_to_front.get_gridspace_state(simulator, position)
+
+@views.route('/add_creature_consumer', methods=["POST"])
+def add_consumer():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    sim_to_front.user_place_consumer(simulator, position)
+    return sim_to_front.get_gridspace_state(simulator, position)
+
+@views.route('/visual_update', methods=["GET"])
+def visual_update():
+    return sim_to_front.get_gridspace_state(simulator)

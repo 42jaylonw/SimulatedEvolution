@@ -54,6 +54,10 @@ class LayerSystem():
     def get_gridspace(self, pos):
         assert not self.out_of_bounds(pos)
         return self.grid_spaces[pos[0]][pos[1]]
+    
+    # Returns the dimensions of the SimSpace
+    def get_dimensions(self):
+        return self.dimensions
 
     # Returns the light value at the specified position
     # Output type: float

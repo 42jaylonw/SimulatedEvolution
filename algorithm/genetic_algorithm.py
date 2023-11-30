@@ -7,12 +7,12 @@ sensory inputs
 01 - blocked forward    02 - blocked back   03 - blocked left   04 - blocked right  05 - population density
 06 - last movement was x    07 - last movement was y    08 - border distance north  09 - border distance east
 0A - border distance south  0B - border distance west   0C - nearest border distance    0D - current loc. north
-0E - current loc. east  0F - current loc. south     10 - current loc. west
+0E - current loc. east  0F - current loc. south     10 - current loc. west          11 - detect pheromone
 
 internal neurons
-11 - n_1    12 - n_2    13 - n_3
+12 - n_1    13 - n_2    14 - n_3
 
-first byte of genome ranges from 01 to 13 (mod 19 + 1)
+first byte of genome ranges from 01 to 14 (mod 20 + 1)
 
 reserve 00 for detects food, which will have special connections to move towards the food.
 
@@ -23,8 +23,9 @@ internal neurons
 action outputs
 04 - move forward   05 - move random     06 - move backwards    07 - move left
 08 - move right     09 - move north     0A - move east      0b - move south     0C - move west
+0D - emit pheromone
 
-second byte ranges from 01 to 0C (mod 12 + 1)
+second byte ranges from 01 to 0D (mod 13 + 1)
 
 reserve 00 for move to food, which is reserved for special sensory input
 
@@ -80,8 +81,8 @@ def extract_hex_sub(input_string, start_index, end_index):
 
 def generate_genome():
     # change numbers as program expands
-    num_inputs = 16
-    num_outputs = 9
+    num_inputs = 17
+    num_outputs = 10
     num_int_neurons = 3
 
     genome = ""
@@ -99,7 +100,12 @@ def generate_genome():
     return genome
 
 
-def sensor_switch_handler(properties, sensor):
+# movement_cost_handler is used to add the energy level of the creature to its decision making
+# can be adjusted later
+def movement_cost_handler():
+    return (self.creature.energy / 101.0)
+
+def sensor_switch_handler(creature, properties, sensor):
     match sensor:
         # blocked forwards
         case 1:
@@ -174,17 +180,34 @@ def sensor_switch_handler(properties, sensor):
             grid_height = 50
             dist_west = grid_height - properties[0]
             return (dist_west / grid_height) * (dist_west / grid_height)
+        # detect pheromone
+        case 17:
+            # return function based on energy levels and pheromone str
+            pheromones = creature.sim.layer_system.get_pheremones(creature.position)
+            pherom_level = 0
+            for pheromone in pheromones:
+                if pheromone.source.species_id == creature.species_id:
+                    pherom_level = pheromone.strength
+            # assess energy level
+            if creature.energy > 80:
+                if (pherom_level > 0):
+                    return 0.9 * pherom_level
+            elif creature.energy > 60:
+                if (pherom_level > 0):
+                    return 0.3 * pherom_level
+            # creature does not have the energy to reproduce
+            return 0.0
         case _:
             print("sensor_switch_handler defaulting")
 
 
-def if_neuron_triggers(properties, input_sensors):
-    num_inputs = 16
+def if_neuron_triggers(properties, input_sensors, creature):
+    num_inputs = 17
     # make array to be returned
     ret = [0.0] * (num_inputs + 1)
 
     for sensor in input_sensors:
-        ret[sensor] = sensor_switch_handler(properties, sensor)
+        ret[sensor] = sensor_switch_handler(creature, properties, sensor)
 
     return ret
 
@@ -213,8 +236,7 @@ def create_active_map(genome):
     return ret
 
 
-def movement_output(output_sensors, properties):
-    output_index = np.array(output_sensors).argmax()
+def movement_output(output_index, properties, creature):
     output_array = [0, 0, 0, 0]
     match output_index:
         # move forward
@@ -254,6 +276,12 @@ def movement_output(output_sensors, properties):
         case 9:
             output_array[3] = 1
             return output_array
+        # emit pheromone
+        case 10:
+            # TODO: detect pheromone is added to input space
+            # add emitting pheromone to output space
+            creature.emit_pheremones()
+            return output_array
         # default case (move forward)
         case _:
             output_array[properties[2]] = 1
@@ -262,8 +290,8 @@ def movement_output(output_sensors, properties):
 
 def clean_genome(genome):
     # change numbers as program expands
-    num_inputs = 16
-    num_outputs = 9
+    num_inputs = 17
+    num_outputs = 10
     num_internal_neurons = 3
 
     ret = []
@@ -360,15 +388,16 @@ class GeneticAlgorithm:
                  num_genomes=4,
                  num_neurons=4,
                  reproduce_mode=1,
-                 mutation_rate=0.2):
+                 mutation_rate=0.2,
+                 creature=None):
         self.num_observations = num_observations
         self.num_actions = num_actions
         self.num_genomes = num_genomes
         self.num_neurons = num_neurons
         self.reproduce_mode = reproduce_mode
         self.mutation_rate = mutation_rate
+        self.creature = creature
 
-        self.neurons = np.zeros(self.num_neurons + 1)
         if genome is None:
             self.genome = [generate_genome() for _ in range(self.num_genomes)]
         else:
@@ -384,12 +413,12 @@ class GeneticAlgorithm:
                 # sensory neuron can trigger a connection, add to list
                 active_sensors.append(temp)
 
-        input_sensors = if_neuron_triggers(obs, active_sensors)
+        input_sensors = if_neuron_triggers(obs, active_sensors, self.creature)
         active_map = create_active_map(self.genome)
         active_map = sorted(active_map.items())
 
         # sort so internal neurons are processed last
-
+        inter_neurons = np.zeros(self.num_neurons + 1)
         # use active_map and input_sensors to calculate sensory input in neural network
         out_vec = np.zeros(self.num_actions + 1)
         for input_index, output_list in active_map:
@@ -397,18 +426,19 @@ class GeneticAlgorithm:
                 # split based on internal or output
                 if key <= self.num_neurons:  # output is internal
                     if input_index < self.num_observations:
-                        self.neurons[key - 1] += (input_sensors[input_index] * conn_str)  # add signal to internal
+                        inter_neurons[key - 1] += (input_sensors[input_index] * conn_str)  # add signal to internal
                     else:
-                        self.neurons[key - 1] += (self.neurons[input_index - self.num_observations - 1] * conn_str)
+                        inter_neurons[key - 1] += (inter_neurons[input_index - self.num_observations - 1] * conn_str)
                 else:  # output is action
                     if input_index < self.num_observations:
                         out_vec[key - self.num_neurons] += (input_sensors[input_index] * conn_str)
                     else:
                         out_vec[key - self.num_neurons] += (
-                                self.neurons[input_index - self.num_observations] * conn_str)
+                                inter_neurons[input_index - self.num_observations] * conn_str)
 
         out_vec = np.tanh(out_vec)
-        action = np.array(movement_output(out_vec, np.int64(obs)))
+        output_index = np.array(out_vec).argmax()
+        action = np.array(movement_output(output_index, np.int64(obs), self.creature))
         return action
 
     def reproduce_genome(self, other):
@@ -425,8 +455,8 @@ class GeneticAlgorithm:
 
 if __name__ == '__main__':
     state = [22, 24, 2, 0, 1, 0, 1, 1]
-    gen = GeneticAlgorithm(num_observations=16,
-                           num_actions=9,
+    gen = GeneticAlgorithm(num_observations=17,
+                           num_actions=10,
                            num_neurons=3)
 
     for _ in range(100):

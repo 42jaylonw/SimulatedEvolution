@@ -54,6 +54,10 @@ class SimulationGrid{
         });
     }
 
+    makeSimulation(){
+        fetch('/setup_data');
+    }
+
     //Request state of simulation grid from server, then apply these changes on the frontend
     getGridData(){
         //Request simulation grid data
@@ -69,6 +73,9 @@ class SimulationGrid{
         });
     }
 
+    visualUpdate(data){
+       this.handleInitialData(data, true);
+    }
     //Visually clear the simulation grid
     clearSimulation(){   
         for(let i = 0; i < this.width * this.width; i++)
@@ -108,7 +115,7 @@ class SimulationGrid{
      * Update front-end elements based on information received from the back-end
      * @param {JSON} data Information from back-end simulation 
      */
-    handleInitialData(data){
+    handleInitialData(data, clearCell=false){
         // Extract information
         var position = data["position"];
         var numConsumer = data["consumerCount"];
@@ -161,6 +168,7 @@ class SimulationGrid{
         creatureImage.style.width = "100%";
         creatureImage.style.height = "100%";
         creatureImage.style.position = 'absolute';
+        creatureImage.classList.add("creature");
         // Add <canvas> element to image dictionary
         this.creatureImages[refId] = creatureImage;
 
