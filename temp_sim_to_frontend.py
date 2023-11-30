@@ -2,7 +2,7 @@ import toml
 from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
-
+import numpy as np
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
 
@@ -36,7 +36,6 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
     # Instantiate emitters(sim, pos, e_range, e_val)
     emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
-                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 5, 25),
                 LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)] 
     
     # add all instantiated objects to SimSpace
@@ -64,6 +63,10 @@ def get_sim_state(simulator, includeImageData=False):
     # return information of all gridspaces
     return jsonify(gridspacesInformation)
 
+def get_gridspace_state(simulator, position):
+    return jsonify(simulator.layer_system.get_gridspace(position).get_properties())
+    
+
 # Get the information of all creatures at specified location
 def get_creatures_wrapper(sim, position):
     creature_data = {"producers" : list(), "consumers" : list()}
@@ -74,3 +77,70 @@ def get_creatures_wrapper(sim, position):
     for consumer in consumers:
         creature_data["consumers"].append(consumer.creature_info)
     return jsonify(creature_data)
+
+# Place a wall in the simulation at the specified location
+def user_place_wall(sim, position):
+    print(f'Adding wall at {position}')
+    user_erase_space(sim, position)
+    sim.layer_system.wall_add(position)
+
+# Place a LightSource in the simulation at the specified location.
+# If there is a wall there, no emitter will be placed
+# Currently a preset for the strength/range of the emitter
+def user_place_lightsource(sim, position):
+    if not sim.layer_system.has_wall(position):
+        new_light_source = LightSource(sim, position, 20, 100)
+        new_emitter_list = sim.emitters
+        new_emitter_list.append(new_light_source)
+        sim.reset(sim.creatures, new_emitter_list)
+
+# Place a HeatSource in the simulation at the specified location.
+# If there is a wall there, no emitter will be placed
+# Currently a preset for the strength/range of the emitter
+def user_place_heatsource(sim, position):
+    if not sim.layer_system.has_wall(position):
+        new_heat_source = HeatSource(sim, position, 20, 100)
+        new_emitter_list = sim.emitters
+        new_emitter_list.append(new_heat_source)
+        sim.reset(sim.creatures, new_emitter_list)
+
+# Place a Consumer in the simulation at the specified location.
+# If there is a wall there, no consumer will be placed
+# Currently the genome is random
+def user_place_consumer(sim, position):
+    if not sim.layer_system.has_wall(position):
+        new_creature = Consumer(sim, spawn_pos=position)
+        new_creature_list = sim.creatures
+        new_creature_list.append(new_creature)
+        sim.reset(new_creature_list, sim.emitters)
+
+
+# Place a Prodcuer in the simulation at the specified location.
+# If there is a wall there, no producer will be placed
+# Currently the genome is random
+def user_place_producer(sim, position):
+    if not sim.layer_system.has_wall(position):
+        new_creature = Producer(sim, spawn_pos=position)
+        new_creature_list = sim.creatures
+        new_creature_list.append(new_creature)
+        sim.reset(new_creature_list, sim.emitters)
+
+
+# Erase EVERYTHING (Creatures, Wall, Emitters) at the specified location.
+def user_erase_space(sim, position):
+    sim.layer_system.wall_remove(position)
+
+    for creature in sim.creatures:
+        if creature.position[0] == position[0] and creature.position[1] == position[1]:
+            creature.remove()
+    
+    for emitter in sim.emitters:
+        if emitter.position[0] == position[0] and  emitter.position[1] == position[1]:
+            emitter.remove()
+
+# EXPERIMENTAL
+# Erase EVERYTHING in the simulation at ALL POSITIONS.
+def user_clear_simulation(sim):
+    for x in range(sim.layer_system.get_dimensions()[0]):
+        for y in range(sim.layer_system.get_dimensions()[1]):
+            user_erase_space(sim, [x, y])

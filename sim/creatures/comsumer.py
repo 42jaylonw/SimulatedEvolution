@@ -12,8 +12,9 @@ MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 class Consumer(Creature):
     name = 'Consumer'
 
-    def __init__(self, sim, genome=None):
-        super().__init__(sim, genome)
+Functional-Development
+    def __init__(self, sim, genome=None, spawn_pos=None):
+        super().__init__(sim, genome, spawn_pos)
         self.speed = sim.cfg['Consumer']['init_speed']
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]

@@ -21,12 +21,16 @@ class Creature:
     energy: float
     size: float
 
-    def __init__(self, sim, genome=None):
+    def __init__(self, sim, genome=None, spawn_pos=None):
         self.cfg = sim.cfg
         self._cfg = sim.cfg[self.name]
         self.sim = sim
         self.layer_system = sim.layer_system  # EXPERIMENTAL
-        self.position = None
+        #self.position = None
+        self.position = spawn_pos
+        if self.position is not None:
+            self.layer_system.creature_enter(self.position, self)
+
         if self.name == 'Consumer':
             self.behavior_system = GeneticAlgorithm(
                 num_observations=self._cfg['num_observations'],
@@ -41,8 +45,6 @@ class Creature:
             self.genome = self.generate_producer_genome()
             self.mutation_rate=self._cfg['mutation_rate']
         self._init_properties()
-        # EXPERIMENTAL
-        # self.layer_system.creature_enter(self.position, self)
 
     def _init_properties(self):
         self.image_data = None
@@ -80,6 +82,18 @@ class Creature:
         self._init_properties()
 
     def step(self):
+        pass
+
+    def remove(self):
+        """
+        Removes the creature from the SimSpace. Removes itself from sim.creatures
+        and updates the list stored at that position in the layer system.
+        Different from die() in that no additional simulation logic is attached.
+        """
+        if self in self.sim.creatures:
+            self.sim.creatures.remove(self)
+
+        self.layer_system.creature_exit(self.position, self)
         pass
 
     def die(self):

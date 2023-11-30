@@ -15,8 +15,8 @@ class Food():
 class Producer(Creature):
     name = 'Producer'
 
-    def __init__(self, sim, genome=None):
-        super().__init__(sim, genome)
+    def __init__(self, sim, genome=None, spawn_pos=None):
+        super().__init__(sim, genome, spawn_pos)
 
         if (self.genome == None):
             self.genome = self.generate_genome()
