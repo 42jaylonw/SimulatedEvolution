@@ -105,7 +105,9 @@ class Producer(Creature):
 
         size_penalty = .1
         light_penalty = .02
-        self.energy -= (self.current_size * size_penalty) + (light * light_penalty)
+        # self.energy -= (self.current_size * size_penalty) + (light * light_penalty)
+        light_cost = light * light_penalty
+        self.energy_bar.consume_energy(light_cost)
 
     # producer_growth handles growth of a plant that is not max size
     def producer_growth(self):
@@ -245,7 +247,7 @@ class Producer(Creature):
         self.producer_metabolize()
 
         # check if dead
-        if self.energy <= 0.0:
+        if self.energy_bar.is_empty():
             self.die()
 
                     

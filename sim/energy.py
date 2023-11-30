@@ -1,19 +1,40 @@
 class EnergyBar:
 
-    def __init__(self, initial_energy=50.0, max_energy=100.0, satiation_level=85.0, size=1.0):
+    def __init__(self, initial_energy=50.0, max_energy=100.0, satiation_level=85.0, size=1.0, age_rate=0.02):
         self.current_energy = initial_energy
         self.max_energy = max_energy
         self.size = size
+        self.age_rate = age_rate
+        self.satiation_level = satiation_level
 
-    def consume_energy(self, movement_cost=0):
+    def consume_energy(self, additional_cost=0):
         """
         Called on a time step.
-        Lowers energy level based on metabolism and movement cost.
+        Lowers energy level based on metabolism and an additional cost, such as movement cost or light level.
         """
         energy_consumption = float(self.size * 0.10)
-        self.current_energy -= energy_consumption + movement_cost
+        self.current_energy -= energy_consumption + additional_cost
         if self.current_energy < 0:
             self.current_energy = 0
+
+    def adjust_max_energy(self, value):
+        """
+        Adds the value to the max energy. 
+        If the energy is higher than the max after this adjustment, set energy to max energy.
+        """
+        self.max_energy = self.max_energy + value
+        if self.max_energy < 0:
+            self.max_energy = 0
+        if self.current_energy > self.max_energy:
+            self.current_energy = self.max_energy
+
+    def age_tick(self):
+        """
+        Reduces a creature's max energy by the aging rate.
+        At the default rate, the creature loses 1 max energy per 50 time steps.
+        """
+        neg_age_rate = self.age_rate * -1
+        self.adjust_max_energy(neg_age_rate)
 
     def replenish_energy(self, energy):
         """

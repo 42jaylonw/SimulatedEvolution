@@ -38,7 +38,8 @@ class Creature:
                 genome=genome,
                 num_neurons=self._cfg['num_neurons'],
                 reproduce_mode=self._cfg['reproduce_mode'],
-                mutation_rate=self._cfg['mutation_rate'])
+                mutation_rate=self._cfg['mutation_rate'],
+                creature=self)
             self.genome = self.behavior_system.genome
         elif self.name == 'Producer':
             self.genome = self.generate_producer_genome()
@@ -74,7 +75,7 @@ class Creature:
         # Assign size and energy properties based on the hash
         self.size = int(hash[:32], 16) % 101 + 0.1
         self.energy = int(hash[32:], 16) % 101 + 1
-        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size)
+        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size, age_rate=0.02)
         # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
     def reset(self):
