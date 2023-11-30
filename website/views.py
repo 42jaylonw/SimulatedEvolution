@@ -129,6 +129,27 @@ def add_consumer():
     sim_to_front.user_place_consumer(simulator, position)
     return sim_to_front.get_gridspace_state(simulator, position)
 
+@views.route('/add_creature_producer', methods=["POST"])
+def add_producer():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    sim_to_front.user_place_producer(simulator, position)
+    return sim_to_front.get_gridspace_state(simulator, position)
+
+@views.route('/add_lightsource', methods=["POST"])
+def add_lightsource():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    sim_to_front.user_place_lightsource(simulator, position)
+    return sim_to_front.get_gridspace_state(simulator, position)
+
+@views.route('/add_heatsource', methods=["POST"])
+def add_heatsource():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    sim_to_front.user_place_heatsource(simulator, position)
+    return sim_to_front.get_gridspace_state(simulator, position)
+
 @views.route('/visual_update', methods=["GET"])
 def visual_update():
     return sim_to_front.get_gridspace_state(simulator)

@@ -323,6 +323,9 @@ class GridSpace():
         self.elevation_val = np.clip(self.elevation_val + inc, MIN_ELEVATION, MAX_ELEVATION)
 
     def creature_enter(self, creature):
+        if creature is None:
+            return
+
         # Handles the specific type (Consumer/Producer) internally
         self.creatures.append(creature)
         if type(creature) == Consumer:
@@ -333,6 +336,9 @@ class GridSpace():
     def creature_exit(self, creature):
         # If the creature has not yet been assigned to a position, do not perform exit
         # Note: this may cause issues if the creature position is not perfectly mapped to the layer system (which should not happen)
+        if creature is None:
+            return
+
         if creature.position is None:
             return
 

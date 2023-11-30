@@ -58,6 +58,17 @@ document.addEventListener("DOMContentLoaded", function (){
                 break;
             case placeConsumerButton.id:
                 placeConsumer(ev.target.id);
+                break;
+            case placeProducerButton.id:
+                placeProducer(ev.target.id);
+                break;
+            case placeLightSourceButton.id:
+                placeLightSource(ev.target.id);
+                break;
+            case placeHeatSourceButton.id:
+                placeHeatSource(ev.target.id);
+                break;
+            
         }
         
     }
@@ -81,6 +92,22 @@ function placeConsumer(element){
     console.log("adding consumer");
     performGridSpaceOperation(element, '/add_creature_consumer');
 }
+
+function placeProducer(element){
+    console.log("adding producer");
+    performGridSpaceOperation(element, '/add_creature_producer');
+}
+
+function placeLightSource(element){
+    console.log("adding light source");
+    performGridSpaceOperation(element, '/add_lightsource');
+}
+
+function placeHeatSource(element){
+    console.log("adding heat source");
+    performGridSpaceOperation(element, '/add_heatsource');
+}
+
 function performGridSpaceOperation(element, route){
     cellInformation = element.split("-")
     console.log(cellInformation[1] + "," + cellInformation[2]);
