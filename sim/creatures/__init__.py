@@ -34,7 +34,8 @@ class Creature:
                 genome=genome,
                 num_neurons=self._cfg['num_neurons'],
                 reproduce_mode=self._cfg['reproduce_mode'],
-                mutation_rate=self._cfg['mutation_rate'])
+                mutation_rate=self._cfg['mutation_rate'],
+                creature=self)
             self.genome = self.behavior_system.genome
         elif self.name == 'Producer':
             self.genome = self.generate_producer_genome()
@@ -44,6 +45,7 @@ class Creature:
         # self.layer_system.creature_enter(self.position, self)
 
     def _init_properties(self):
+
         if 'num_species' in self._cfg:
             self.species_id = np.random.randint(self._cfg['num_species'])
         else:

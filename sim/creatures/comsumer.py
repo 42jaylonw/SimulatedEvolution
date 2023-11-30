@@ -19,14 +19,72 @@ class Consumer(Creature):
         self.curr_action = [0, 0]
         self.last_action = [0, 0]
         self.move_cost = 0.0
+        self.edible_consumers = sim.predation_table[self.species_id][0]
+        self.edible_producers = sim.predation_table[self.species_id][1]
 
     def step(self):
         obs = self.get_observation()
-        action = np.argmax(self.behavior_system.predict(obs))
+        # if energy is sufficient to reproduce
+        action = self.reproduction_protocol()
+        # if reproduction protocol not active
+        if action == 0:
+            action = np.argmax(self.behavior_system.predict(obs))
         self.action_move(action)
         # self.energy_bar.consume_energy(self.move_cost)
         # if self.energy_bar.is_empty():
         #     self.die()
+
+    
+    def reproduction_protocol(self):
+        reproduce_thresh = 40
+        if (self.energy >= reproduce_thresh):
+            # if another creature on current space that is compatible
+            for creature in self.sim.layer_system.get_consumers(self.position):
+                if creature == self:
+                    continue
+                if creature.species_id == self.species_id and creature != self:
+                    if creature.energy >= reproduce_thresh:
+                        # reproduce
+                        # TODO: make actual reproduction function
+                        pass
+            # else check for compatible creatures in sensory range
+            potential_partners = self.sensePartners()
+            if (len(potential_partners) == 0):
+                # emit pheromone and predict regularly
+                self.emit_pheremones()
+                return 0
+            else:
+                for consumer in potential_partners:
+                    if consumer.energy >= reproduce_thresh:
+                        # move towards partner
+                        action = np.argmax(self.move_towards(self.position, consumer.position))
+                        return action
+        return 0
+
+    # move_towards takes in a starting point and ending point
+    # returns the direction needed to move closest to target
+    def move_towards(self, start, end):
+        temp = start
+        temp_n = [temp[0] - 1, temp[1]]
+        move_n = [[1, 0, 0, 0], temp_n]
+        temp_e = [temp[0], temp[1] + 1]
+        move_e = [[0, 1, 0, 0], temp_e]
+        temp_s = [temp[0] + 1, temp[1]]
+        move_s = [[0, 0, 1, 0], temp_s]
+        temp_w = [temp[0], temp[1] - 1]
+        move_w = [[0, 0, 0, 1], temp_w]
+
+        moves = [move_n, move_e, move_s, move_w]
+        min_dist = 999
+        min_dir = [0, 0, 0, 0]
+        for move in moves:
+            dist = np.linalg.norm(end - move[1])
+            if dist < min_dist:
+                min_dir = move[0]
+                min_dist = dist
+
+        return min_dir
+
 
     def die(self):
         super().die(self)
@@ -140,6 +198,32 @@ class Consumer(Creature):
 
         return num_consumers
 
+    def sensePartners(self):
+        """ Obtains population count (of potential mates) within sensory range. """
+
+        center = self.position
+        length = self.sensory_range
+        species = self.species_id
+        start_x = np.clip(center[0] - length, 0, self.sim.grid_size[0])
+        end_x = np.clip(center[0] + length, 0, self.sim.grid_size[0])
+        start_y = np.clip(center[1] - length, 0, self.sim.grid_size[1])
+        end_y = np.clip(center[1] + length, 0, self.sim.grid_size[1])
+
+        # potential_mates stores a list of creatures that share a species ID
+        # format is [creature, dist]
+        potential_mates = []
+
+        for x_pos in range(start_x, end_x):
+            for y_pos in range(start_y, end_y):
+                consumers = self.layer_system.get_consumers([x_pos, y_pos])
+                for consumer in consumers:
+                    if consumer == self:
+                        continue
+                    if consumer.species_id == species and consumer != self:
+                        potential_mates = potential_mates + [consumer]
+        return potential_mates
+        # ---------
+
     def senseNearest(self):
         pass
         # TODO: check if this function is/will be used anywhere
@@ -199,7 +283,7 @@ class Consumer(Creature):
         pheremone = Pheremone(PHEREMONE_EMIT_STRENGTH, self)
         emit_positions = get_circle_coord_dist_pairs(self.layer_system, self.position, PHEREMONE_EMIT_RANGE)
         for emit_pos in emit_positions:
-            self.layer_system.add_pheremone(emit_pos, pheremone)
+            self.layer_system.add_pheremone(emit_pos[0], pheremone)
 
     def blockedFwd(self):
         """
