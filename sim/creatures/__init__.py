@@ -45,7 +45,8 @@ class Creature:
         # self.layer_system.creature_enter(self.position, self)
 
     def _init_properties(self):
-
+        self.image_data = None
+        self.ref_id = str(self)
         if 'num_species' in self._cfg:
             self.species_id = np.random.randint(self._cfg['num_species'])
         else:
@@ -54,6 +55,9 @@ class Creature:
         if self.name == 'Consumer':
             self.appearance = InvaderCreator(img_size=5).get_an_invader(5)
             self.appearance_mask = (self.appearance.sum(2) != 0).astype(np.uint8)
+            # consolidate appearance and mask data into single representation
+            mask = np.expand_dims(self.appearance_mask, axis=2)
+            self.image_data = np.concatenate((self.appearance, mask), axis=2)
 
         if self.position is None:
             self.position = np.random.randint(self.sim.grid_size)
@@ -69,7 +73,7 @@ class Creature:
         # Assign size and energy properties based on the hash
         self.size = int(hash[:32], 16) % 101 + 0.1
         self.energy = int(hash[32:], 16) % 101 + 1
-        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size)
+        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size, age_rate=0.02)
         # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
     def reset(self):
@@ -113,6 +117,12 @@ class Creature:
 
     @property
     def creature_info(self):
+        if self.image_data is not None:
+            return {"genome": self.genome,
+                    "size": self.size,
+                    "energy": self.energy,
+                    "refId" : str(self),
+                    "image_data": self.image_data.tolist()}
         return {"genome": self.genome,
                 "size": self.size,
                 "energy": self.energy}

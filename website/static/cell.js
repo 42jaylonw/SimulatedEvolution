@@ -29,7 +29,6 @@ class Cell{
         this.createInfoDisplay();     
         this.createCellOverlay();   
     }
-
   
     /**
      * Create HTMl Element for Cell object
@@ -41,6 +40,7 @@ class Cell{
         //Create html element
         this.element = document.createElement('div');
         this.position = position;
+        this.creatureList = Array();
         // Cell element id is 'cell-<row>-<col>'
         this.element.id = 'cell-' + this.position[0] + '-' + this.position[1];
         //Add style classification for cell
@@ -103,9 +103,6 @@ class Cell{
         .then((response) => response.json())
         //Post Request SUCCESS, Perform operations on response(cellLayerData)
         .then((payload) => {
-            if(this.analysisContainer == null){
-                console.log("PRODUCERS NULL");
-            }
             var producers = payload["producers"];
             var consumers = payload["consumers"];
             this.analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${this.position}</h2> ` + 
@@ -117,8 +114,14 @@ class Cell{
         });
     }
 
-    generateCreatureText(creatureCLass, creatures){
-        var creatureText = creatureCLass
+    /**
+     * 
+     * @param {string} creatureClass name of type of creature 
+     * @param {*} creatures Creature along with its properties
+     * @returns {string} formatted string that contains a creature's properties
+     */
+    generateCreatureText(creatureClass, creatures){
+        var creatureText = creatureClass
         for(let creature of creatures){
             creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
         }
@@ -141,7 +144,6 @@ class Cell{
         this.numProducers = numProducer;
         this.temperature = temp;
         this.lightLevel = lightLevel;
-        //Check if this Cell is a Wall
         this.isWall = isWall;
         //Display different based on whether the Cell is a Wall
         if(this.isWall){
@@ -153,16 +155,9 @@ class Cell{
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
         }
-        //ESTABLISH PRIORITY
-        //Consumers are on top of Producers
         //Set color to Producer
         if(this.numProducers > 0){
             this.setCellColor(`rgb(${(0.5*255)}, ${(0.96 * 255)}, ${(0)})`);
-        }
-        //Set color to Consumer
-        if(this.numConsumers > 0){
-            
-            this.setCellColor(`rgb(${(0.96 *255)}, ${(0.5 * 255)}, ${(0)})`);
         }
         //Update display information for this cell
         this.infoDisplay.innerHTML = `Temperature: ${this.temperature}<br>Light-level ${this.lightLevel}` + '<br>' + `Consumers: ${this.numConsumers}` + 
@@ -170,7 +165,36 @@ class Cell{
             '<p class="text-center" class="details-text">click for details</p>';
         
         //Update the overlay at this Cell
-        this.updateCellOverlay(); 
+        // this.updateCellOverlay(); 
+    }
+
+    /**
+     * Add Creature Visual to Cell 
+     * @param {Canvas} creature <canvas> element containing 8-bit visual of a creature 
+     */
+    addCreatureVisual(creature){
+        if(creature === undefined){
+            return;
+        }
+        // Add element to Cell and store it in a list
+        this.element.appendChild(creature);
+        this.creatureList.push(creature);
+    }
+   
+    /**
+     * Clear local list of Creature visuals(8-bit images)
+     * And remove their associated <canvas> elements from Cell
+     */
+    clearCreatureVisuals(){
+        // Remove elements
+        for(var elt of this.creatureList){
+            if(this.element.contains(elt)){
+                this.element.removeChild(elt);
+            }
+            
+        }
+        // Clear local list
+        this.creatureList = Array();
     }
 
     /**
@@ -188,12 +212,13 @@ class Cell{
 
     /**
      * Create HTML container called 'cell-overlay' that displays
-     * a color associated with its temperature property
+     * a color associated with its properties such as temperature or light-level
      * @property {Element} this.overlay  HTML container that displays general Cell information
      */
     createCellOverlay(){
         this.overlay = document.createElement('div');
         this.overlay.classList.add('cell-overlay');
+        this.overlay.id = "cell-overlay";
         this.element.appendChild(this.overlay);
         this.toggleCellOverlay(false);
     }
@@ -203,9 +228,7 @@ class Cell{
      * @property {Element} this.overlay  HTML container that displays general Cell information
      */
     toggleCellOverlay(showOverlay, mode){
-        if(mode == "lightmap"){
-            this.updateCellOverlay(mode);
-        }
+        this.updateCellOverlay(mode);
         if(showOverlay){
             this.overlay.style.display = 'block';
         }
@@ -216,7 +239,7 @@ class Cell{
     }
 
      /**
-     * Change Cell overlay based on temperature value
+     * Change Cell overlay based on mode
      * @property {Element} this.overlay  HTML container that displays general Cell information
      * @property {int | float} this.temperature Temperature at Cell
      */
@@ -251,9 +274,9 @@ class Cell{
         this.overlay.style.backgroundColor = color;
     }
 
-        //USED FOR DEBUGGING
+    //USED FOR DEBUGGING
     print(){
         console.log("CONSUMERS:" + this.numConsumers + " PRODUCERS: " + this.numProducers + " At position: " + this.position);
-        }
+    }
 }
 

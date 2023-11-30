@@ -17,10 +17,10 @@ document.addEventListener('keydown', function (e) {
     //Press Tab to toggle heatmap
     if(e.code === 'Tab'){
         e.preventDefault();
-        toggleHeatmap("heatmap");
+        toggleOverlay("heatmap");
     }
     if(e.shiftKey && e.code ==='KeyM'){
-        toggleHeatmap("lightmap")
+        toggleOverlay("lightmap");
     }
 });
 
@@ -31,7 +31,7 @@ toggleClimateButton = document.getElementById('toggleClimateButton');
 
 //Change simulation view to heatmap view
 toggleClimateButton.addEventListener('click', function(){
-   toggleHeatmap();
+   toggleOverlay("heatmap");
 });
 
 //Start/Pause Simulation button
@@ -61,19 +61,23 @@ function changeSimulationMode()
     isSimRunning = !isSimRunning;
 }
 
-//Display/hide heatmap based on last state of heatmap
-function toggleHeatmap(mode)
+/**
+ * Toggle Simulation overlay based on specified mode.
+ * Currently, heatmap and light-level map are supported
+ * @param {string} mode specified overlay to display.
+ */
+function toggleOverlay(mode)
 {
     //Change state
     heatMapdisplayed = !heatMapdisplayed;
     //Change text on toggle button
     if(heatMapdisplayed){
-        toggleClimateButton.textContent = "Hide Heatmap"
+        toggleClimateButton.textContent = "Hide Overlay"
     }
     else{
-      toggleClimateButton.textContent = "Show Heatmap"
+      toggleClimateButton.textContent = "Show Overlay"
     }
     //toggle heatmap
-    simSpace.toggleHeatmapDisplay(heatMapdisplayed, mode);
+    simSpace.toggleOverlayDisplay(heatMapdisplayed, mode);
     
 }

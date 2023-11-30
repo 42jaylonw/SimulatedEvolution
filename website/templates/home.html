@@ -16,7 +16,7 @@
         </p>
         <h5 class="text-center">Or use the buttons below<br>
             <button id="simulateButton" type="button">Play Simulation</button>
-            <button id="toggleClimateButton" type="button">Show Heatmap</button>
+            <button id="toggleClimateButton" type="button">Show Overlay</button>
             <button id="newSimulationButton" type="button">New Simulation</button>
         </h5>
         <!--Simulation parameters -->
@@ -64,7 +64,7 @@
                 {% if grid_size %}
                  <script>
                   document.addEventListener("DOMContentLoaded", function(){
-                     simSpace = new SimulationGrid({{grid_size}});
+                     simSpace = new SimulationGrid({{ grid_size }});
                   });
                  </script>
                  <script
@@ -92,9 +92,4 @@ src = "{{ url_for('static', filename='simulation-grid.js') }}"
 type = "text/javascript"
 src = "{{ url_for('static', filename='cell.js') }}"
 ></script>
-<script
-type = "text/javascript"
-src = "{{ url_for('static', filename='frontend-main.js') }}"
-></script>
-
 {% endblock script %}
