@@ -12,7 +12,6 @@ MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 class Consumer(Creature):
     name = 'Consumer'
 
-Functional-Development
     def __init__(self, sim, genome=None, spawn_pos=None):
         super().__init__(sim, genome, spawn_pos)
         self.speed = sim.cfg['Consumer']['init_speed']
