@@ -51,10 +51,13 @@ document.addEventListener("DOMContentLoaded", function (){
                 addWall(ev.target.id);
                 break;
             case selectButton.id:
+                selectSpace(ev.target.id);
                 break;
             case eraserButton.id:
                 eraseSpace(ev.target.id);
                 break;
+            case placeConsumerButton.id:
+                placeConsumer(ev.target.id);
         }
         
     }
@@ -81,17 +84,46 @@ function addWall(element){
 function eraseSpace(element){
     performGridSpaceOperation(element, '/erase_space');
 }
+
+function selectSpace(element){
+    performGridSpaceOperation(element, '/get_creatures_at_grid_space');
+}
+
+function placeConsumer(element){
+    performGridSpaceOperation(element, '/add_creature_consumer');
+}
 function performGridSpaceOperation(element, route){
     cellInformation = element.split("-")
-    console.log(cellInformation[1] + cellInformation[2]);
+    console.log(cellInformation[1] + "," + cellInformation[2]);
     const data = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
     fetch(route, {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(data)})
     .then((response) => response.json())
     .then((data) => {
+        if(route == '/get_creatures_at_grid_space'){
+            var producers = data["producers"];
+            var consumers = data["consumers"];
+            var analysisContainer = document.querySelector('.analysis-container');
+            analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${cellInformation[0]}, ${cellInformation[1]}</h2> ` + 
+            generateCreatureText("CONSUMERS", consumers) + "<br>" + generateCreatureText("PRODUCERS", producers);
+            return;
+        }
         // update the visual grid based on function associated with route
         simSpace.visualUpdate(data);
     })
     .catch((error) =>{
         console.error('Error:', error);
     });
+}
+  /**
+     * 
+     * @param {string} creatureClass name of type of creature 
+     * @param {*} creatures Creature along with its properties
+     * @returns {string} formatted string that contains a creature's properties
+     */
+function generateCreatureText(creatureClass, creatures){
+    var creatureText = creatureClass
+    for(let creature of creatures){
+        creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
+    }
+    return creatureText
 }

@@ -1,5 +1,3 @@
-from crypt import methods
-from turtle import position
 from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
 import games.sprint_0_random.random_moving as random_moving
 import random
@@ -119,11 +117,18 @@ def add_wall():
     sim_to_front.user_place_wall(simulator, position)
     
     return sim_to_front.get_gridspace_state(simulator, position)
-@views.route('erase_space', methods=["POST"])
+@views.route('/erase_space', methods=["POST"])
 def erase_space():
     position = json.loads(request.data)["position"]
     position = np.array(position)
     sim_to_front.user_erase_space(simulator, position)
+    return sim_to_front.get_gridspace_state(simulator, position)
+
+@views.route('/add_creature_consumer', methods=["POST"])
+def add_consumer():
+    position = json.loads(request.data)["position"]
+    position = np.array(position)
+    sim_to_front.user_place_consumer(simulator, position)
     return sim_to_front.get_gridspace_state(simulator, position)
 
 @views.route('/visual_update', methods=["GET"])

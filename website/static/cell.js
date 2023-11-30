@@ -52,7 +52,7 @@ class Cell{
         //Unmark cell when user no longer hovers over it
         this.element.onmouseleave = () => {this.restoreCellOpactiy()};
         //Display detailed information about Cell when user clicks on it
-        this.element.onclick = () => {this.displayCellInfo()};
+        // this.element.onclick = () => {this.displayCellInfo()};
     }
 
 
@@ -149,11 +149,13 @@ class Cell{
         if(this.isWall){
             this.infoDisplay.innerHTML = "Wall";
             this.setCellColor(`rgb(${(0)}, ${(0)}, ${(0)})`);
+            this.clearCreatureVisuals();
             return;
         }
         //No Creatures present
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
+            this.clearCreatureVisuals();
         }
         //Set color to Producer
         if(this.numProducers > 0){
@@ -177,7 +179,7 @@ class Cell{
             return;
         }
         // Add element to Cell and store it in a list
-        this.element.appendChild(creature);
+        this.element.append(creature);
         this.creatureList.push(creature);
     }
    
