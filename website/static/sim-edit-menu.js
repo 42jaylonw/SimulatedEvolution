@@ -118,11 +118,19 @@ function performGridSpaceOperation(element, route){
         if(route == '/get_creatures_at_grid_space'){
             var producers = data["producers"];
             var consumers = data["consumers"];
+            var emitters = data["emitters"];
             var analysisContainer = document.querySelector('.analysis-container');
+            analysisContainer.innerHTML += `<br>` + generateEmitterText("EMITTERS", emitters);
             analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${cellInformation[1]}, ${cellInformation[2]}</h2> ` + 
             generateCreatureText("CONSUMERS", consumers) + "<br>" + generateCreatureText("PRODUCERS", producers);
             return;
         }
+        // if(route == '/add_heatsource' || route == '/add_lightsource'){
+        //     var emitters = data["emitters"];
+        //     var analysisContainer = document.querySelector('.analysis-container');
+        //     analysisContainer += `<br>` + generateEmitterText("EMITTERS", emitters);
+        //     return;
+        // }
         // update the visual grid based on function associated with route
         simSpace.visualUpdate(data);
     })
@@ -142,4 +150,12 @@ function generateCreatureText(creatureClass, creatures){
         creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
     }
     return creatureText
+}
+
+function generateEmitterText(emitterClass, emitters){
+    var emitterText = emitterClass
+    for(let emitter of emitters){
+        emitterText += `<p>Emit Range: ${emitter["range"]} <br>Emit Strength: ${emitter["strength"]}`;
+    }
+    return emitterText
 }

@@ -70,13 +70,16 @@ def get_gridspace_state(simulator, position):
 
 # Get the information of all creatures at specified location
 def get_creatures_wrapper(sim, position):
-    creature_data = {"producers" : list(), "consumers" : list()}
+    creature_data = {"producers" : list(), "consumers" : list(), "emitters": list()}
     producers = sim.layer_system.get_producers(position)
     for producer in producers:
         creature_data["producers"].append(producer.creature_info)
     consumers = sim.layer_system.get_consumers(position)
     for consumer in consumers:
         creature_data["consumers"].append(consumer.creature_info)
+    emitters = sim.layer_system.get_emitters(position)
+    for emitter in emitters:
+        creature_data["emitters"].append({"range":emitter.emit_range, "strength":emitter.emit_value})
     return jsonify(creature_data)
 
 # Place a wall in the simulation at the specified location
