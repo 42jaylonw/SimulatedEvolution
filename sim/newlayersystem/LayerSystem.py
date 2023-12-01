@@ -27,9 +27,11 @@ class LayerSystem():
         self.grid_spaces = [[GridSpace(self, [x, y]) for y in range(sim_dim[0])] for x in range(sim_dim[1])]
 
     # step() function gets called every SimSpace step
-    def step(self):
+    def step(self, decayPheromones=True):
         # Clear/update layer values
         self.clear_emitter_values()
+        if decayPheromones:
+            self.decay_pheromones()
 
     # Called every step() to refresh / update temperature and light values, decay pheremone values
     def clear_emitter_values(self):
@@ -37,6 +39,10 @@ class LayerSystem():
             for y in range(self.dimensions[1]):
                 self.grid_spaces[x][y].set_light_level(0)
                 self.grid_spaces[x][y].set_temperature(0)
+    
+    def decay_pheromones(self):
+          for x in range(self.dimensions[0]):
+            for y in range(self.dimensions[1]):
                 self.grid_spaces[x][y].decay_pheremones()
 
     def add_pheremone(self, pos, pheremone):

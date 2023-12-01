@@ -35,11 +35,11 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     # for i in range(sim.grid_size[0]):
     #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
     # Instantiate emitters(sim, pos, e_range, e_val)
-    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
-                LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)] 
+    # emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
+    #             LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)] 
     
     # add all instantiated objects to SimSpace
-    sim.reset(producers + consumers, emitters)
+    sim.reset(producers + consumers, emitters=[])
     return sim
 
 
@@ -92,10 +92,9 @@ def user_place_wall(sim, position):
 def user_place_lightsource(sim, position):
     if not sim.layer_system.has_wall(position):
         new_light_source = LightSource(sim, position, 20, 100)
-        new_emitter_list = sim.emitters
-        new_emitter_list.append(new_light_source)
         # sim.reset(sim.creatures, new_emitter_list)
-        sim.add_emitter(new_emitter_list)
+        sim.add_emitter(new_light_source)
+        user_place_emitter_visual_helper(sim)
 
 # Place a HeatSource in the simulation at the specified location.
 # If there is a wall there, no emitter will be placed
@@ -105,6 +104,12 @@ def user_place_heatsource(sim, position):
         new_heat_source = HeatSource(sim, position, 20, 100)
         # sim.reset(sim.creatures, new_emitter_list)
         sim.add_emitter(new_heat_source)
+        user_place_emitter_visual_helper(sim)
+
+def user_place_emitter_visual_helper(sim):
+    sim.layer_system.step(decayPheromones=False)
+    for emitter in sim.emitters:
+        emitter.step()
 
 # Place a Consumer in the simulation at the specified location.
 # If there is a wall there, no consumer will be placed
