@@ -341,7 +341,8 @@ class GridSpace():
 
         if creature.position is None:
             return
-
+        if creature not in self.creatures:
+            return
         # Handles the specific type (Consumer/Producer) internally
         self.creatures.remove(creature)
         if type(creature) == Consumer:

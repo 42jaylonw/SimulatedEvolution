@@ -131,15 +131,16 @@ class Creature:
 
     @property
     def creature_info(self):
+        print(self.energy_bar)
         if self.image_data is not None:
             return {"genome": self.genome,
                     "size": self.size,
-                    "energy": self.energy,
+                    "energy": self.energy_bar.current_energy,
                     "refId" : str(self),
                     "image_data": self.image_data.tolist()}
         return {"genome": self.genome,
                 "size": self.size,
-                "energy": self.energy}
+                "energy": self.energy_bar.current_energy}
 
 
 class Corpse:

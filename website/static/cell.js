@@ -55,6 +55,10 @@ class Cell{
         // this.element.onclick = () => {this.displayCellInfo()};
     }
 
+    addDisplayCellInfo(){
+        this.element.onclick = () => {this.displayCellInfo()};
+    }
+
 
     /**
      * Sets the background color of a cell element

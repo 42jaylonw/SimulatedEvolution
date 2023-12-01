@@ -1,7 +1,6 @@
-
 let heatMapdisplayed = false;
 let isSimRunning = false;
-
+let hasSimStarted = false;
 //Event listener for entire window
 document.addEventListener('keydown', function (e) {
     //Press space to start or pause simulation
@@ -23,7 +22,6 @@ document.addEventListener('keydown', function (e) {
         toggleOverlay("lightmap");
     }
 });
-
 //Assign functions for each button
 simButton = document.getElementById('simulateButton');
 newSimButton = document.getElementById('newSimulationButton');
@@ -32,7 +30,8 @@ toggleClimateButton = document.getElementById('toggleClimateButton');
 
 //Change simulation view to heatmap view
 toggleClimateButton.addEventListener('click', function(){
-   toggleHeatmap();
+   heatMapdisplayed = !heatMapdisplayed;
+   simSpace.toggleOverlayDisplay(heatMapdisplayed, "heatmap");
 });
 
 //Start/Pause Simulation button
@@ -46,9 +45,16 @@ newSimButton.addEventListener('click', function()
     simSpace.newSimulation();
 });
 
+
+
 //Start or Pause the simulation
 function changeSimulationMode()
 {
+    if(!hasSimStarted){
+        hasSimStarted = true;
+        addLayers();
+    }
+
     if(!isSimRunning)
     {
         simSpace.runSimulation();
@@ -62,6 +68,9 @@ function changeSimulationMode()
     isSimRunning = !isSimRunning;
 }
 
+function addLayers(){
+    simSpace.addCellListener();
+}
 /**
  * Toggle Simulation overlay based on specified mode.
  * Currently, heatmap and light-level map are supported

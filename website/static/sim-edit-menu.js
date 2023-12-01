@@ -105,14 +105,16 @@ function placeLightSource(element){
 
 function placeHeatSource(element){
     console.log("adding heat source");
+    
     performGridSpaceOperation(element, '/add_heatsource');
+    simSpace.toggleOverlayDisplay(true, "heatmap");
 }
 
 function performGridSpaceOperation(element, route){
-    cellInformation = element.split("-")
+    cellInformation = element.split("-") 
     console.log(cellInformation[1] + "," + cellInformation[2]);
-    const data = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
-    fetch(route, {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(data)})
+    const dataToSend = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
+    fetch(route, {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(dataToSend)})
     .then((response) => response.json())
     .then((data) => {
         if(route == '/get_creatures_at_grid_space'){
@@ -122,15 +124,14 @@ function performGridSpaceOperation(element, route){
             var analysisContainer = document.querySelector('.analysis-container');
             analysisContainer.innerHTML += `<br>` + generateEmitterText("EMITTERS", emitters);
             analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${cellInformation[1]}, ${cellInformation[2]}</h2> ` + 
-            generateCreatureText("CONSUMERS", consumers) + "<br>" + generateCreatureText("PRODUCERS", producers);
+            generateCreatureText("CONSUMERS", consumers) + "<br>" + generateCreatureText("PRODUCERS", producers) + "<br>" + generateEmitterText("EMITTERS", emitters);
             return;
         }
-        // if(route == '/add_heatsource' || route == '/add_lightsource'){
-        //     var emitters = data["emitters"];
-        //     var analysisContainer = document.querySelector('.analysis-container');
-        //     analysisContainer += `<br>` + generateEmitterText("EMITTERS", emitters);
-        //     return;
-        // }
+        if(route == '/add_heatsource')
+        {
+            simSpace.visualUpdate(data, isBatch=true);
+            return;
+        }
         // update the visual grid based on function associated with route
         simSpace.visualUpdate(data);
     })
@@ -145,11 +146,11 @@ function performGridSpaceOperation(element, route){
      * @returns {string} formatted string that contains a creature's properties
      */
 function generateCreatureText(creatureClass, creatures){
-    var creatureText = creatureClass
+    var creatureText = creatureClass;
     for(let creature of creatures){
         creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
     }
-    return creatureText
+    return creatureText;
 }
 
 function generateEmitterText(emitterClass, emitters){

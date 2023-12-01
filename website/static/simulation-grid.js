@@ -73,11 +73,20 @@ class SimulationGrid{
         });
     }
 
-    visualUpdate(data){
+    visualUpdate(data, isBatch=false){
+        console.log(data);
+        if(isBatch){
+            for(let packet of data){
+
+                this.handleData(packet);
+            }
+            return; 
+        }
        this.handleInitialData(data);
     }
     //Visually clear the simulation grid
     clearSimulation(){   
+        console.log("clearing simulation");
         for(let i = 0; i < this.width * this.width; i++)
         {
             let curCell = this.cells[i];
@@ -116,7 +125,6 @@ class SimulationGrid{
      * @param {JSON} data Information from back-end simulation 
      */
     handleInitialData(data){
-        console.log(data);
         // Extract information
         var position = data["position"];
         var numConsumer = data["consumerCount"];
@@ -130,8 +138,11 @@ class SimulationGrid{
         for(var creatureImage of creatureImages){
            var refId = creatureImage[0];
            var imageData = creatureImage[1];
-           this.createCreatureImage(refId, imageData);
-           cell.addCreatureVisual(this.creatureImages[creatureImage[0]]);
+           if(this.creatureImages.refId == undefined){
+                this.createCreatureImage(refId, imageData);
+                cell.addCreatureVisual(this.creatureImages[creatureImage[0]]);
+           }
+           
         }
         // Update Cell based on extracted information
         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
@@ -217,6 +228,12 @@ class SimulationGrid{
         }
     }
     
+    addCellListener(){
+        console.log("adding listeners");
+        for(let cell of this.cells){
+            cell.addDisplayCellInfo();
+        }
+    }
 
     //USED FOR DEBUGGING
     print(){

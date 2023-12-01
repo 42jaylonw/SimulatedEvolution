@@ -36,6 +36,13 @@ class SimSpace:
         for creature in self.creatures:
             creature.reset()
 
+    # Directly add a creature to the simulation
+    def add_creature(self, creature):
+        self.creatures.append(creature)
+
+    def add_emitter(self, emitter):
+        self.emitters.append(emitter)
+
     def step(self):
         assert self.creatures is not None, "Reset first!"
 

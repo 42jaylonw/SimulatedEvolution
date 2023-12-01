@@ -200,7 +200,7 @@ class Producer(Creature):
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
-        self.sim.layer_system.creature_exit(self.position, self)
+        # self.sim.layer_system.creature_exit(self.position, self)
 
     # expansion_possible checks if the producer can expand into that tile
     def expansion_possible(self, pos):

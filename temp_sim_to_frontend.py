@@ -64,8 +64,7 @@ def get_sim_state(simulator, includeImageData=False):
     return jsonify(gridspacesInformation)
 
 def get_gridspace_state(simulator, position):
-    print(simulator.layer_system.get_gridspace(position).get_properties())
-    return jsonify(simulator.layer_system.get_gridspace(position).get_properties())
+    return jsonify(simulator.layer_system.get_gridspace(position).get_properties(True))
     
 
 # Get the information of all creatures at specified location
@@ -95,7 +94,8 @@ def user_place_lightsource(sim, position):
         new_light_source = LightSource(sim, position, 20, 100)
         new_emitter_list = sim.emitters
         new_emitter_list.append(new_light_source)
-        sim.reset(sim.creatures, new_emitter_list)
+        # sim.reset(sim.creatures, new_emitter_list)
+        sim.add_emitter(new_emitter_list)
 
 # Place a HeatSource in the simulation at the specified location.
 # If there is a wall there, no emitter will be placed
@@ -103,9 +103,8 @@ def user_place_lightsource(sim, position):
 def user_place_heatsource(sim, position):
     if not sim.layer_system.has_wall(position):
         new_heat_source = HeatSource(sim, position, 20, 100)
-        new_emitter_list = sim.emitters
-        new_emitter_list.append(new_heat_source)
-        sim.reset(sim.creatures, new_emitter_list)
+        # sim.reset(sim.creatures, new_emitter_list)
+        sim.add_emitter(new_heat_source)
 
 # Place a Consumer in the simulation at the specified location.
 # If there is a wall there, no consumer will be placed
@@ -115,7 +114,7 @@ def user_place_consumer(sim, position):
         new_creature = Consumer(sim, spawn_pos=position)
         new_creature_list = sim.creatures
         new_creature_list.append(new_creature)
-        sim.reset(new_creature_list, sim.emitters)
+        sim.add_creature(new_creature)
 
 
 # Place a Prodcuer in the simulation at the specified location.
@@ -126,7 +125,8 @@ def user_place_producer(sim, position):
         new_creature = Producer(sim, spawn_pos=position)
         new_creature_list = sim.creatures
         new_creature_list.append(new_creature)
-        sim.reset(new_creature_list, sim.emitters)
+        sim.add_creature(new_creature)
+        # sim.reset(new_creature_list, sim.emitters)
 
 
 # Erase EVERYTHING (Creatures, Wall, Emitters) at the specified location.
