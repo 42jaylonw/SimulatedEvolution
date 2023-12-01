@@ -19,12 +19,18 @@ class Consumer(Creature):
         self.curr_action = [0, 0]
         self.last_action = [0, 0]
         self.move_cost = 0.0
+
+        # reprod_cooldown is generated from the genome and determines how long a creature waits before reprod
+        hash = self.generate_hash(self.genome[3])
+        self.reprod_cooldown = int(hash[:32], 16) % 50 + 5
+        # reprod_countdown ranges from 0 to reprod_cooldown and ticks down
+        self.reprod_countdown = 0
         self.edible_consumers = sim.predation_table[self.species_id][0]
         self.edible_producers = sim.predation_table[self.species_id][1]
 
     def step(self):
         obs = self.get_observation()
-        # if energy is sufficient to reproduce
+        # if energy and cooldown is sufficient to reproduce
         action = self.reproduction_protocol()
         # if reproduction protocol not active
         if action == -1:
@@ -40,16 +46,31 @@ class Consumer(Creature):
     
     def reproduction_protocol(self):
         reproduce_thresh = 40
-        if (self.energy_bar.current_energy >= reproduce_thresh):
+        if (self.reprod_countdown > 0):
+            self.reprod_countdown = self.reprod_countdown - 1
+            return -1
+        if (self.energy_bar.current_energy >= reproduce_thresh and self.reprod_countdown == 0):
             # if another creature on current space that is compatible
             for creature in self.sim.layer_system.get_consumers(self.position):
                 if creature == self:
                     continue
                 if creature.species_id == self.species_id and creature != self:
-                    if creature.energy_bar.current_energy >= reproduce_thresh:
+                    if creature.energy_bar.current_energy >= reproduce_thresh and creature.reprod_countdown == 0:
                         # reproduce
                         # TODO: make actual reproduction function
-                        pass
+                        child_genome = self.behavior_system.reproduce_genome(creature.behavior_system)
+                        # remove energy from parents and put cooldown on reproduce
+                        self.energy_bar.current_energy = self.energy_bar.current_energy * 0.3
+                        creature.energy_bar.current_energy = creature.energy_bar.current_energy * 0.3
+                        self.reprod_countdown = self.reprod_cooldown
+                        creature.reprod_countdown = creature.reprod_cooldown
+
+                        # initialize creature and add to sim
+                        child_creature = Consumer(self.sim, child_genome, self.position)
+                        child_creature.species_id = self.species_id
+                        self.sim.add_creature(child_creature)
+                        # print("child added at location", child_creature.position)
+                        return -1
             # else check for compatible creatures in sensory range
             potential_partners = self.sensePartners()
             if (len(potential_partners) == 0):
@@ -466,7 +487,7 @@ class Consumer(Creature):
             distToLoc_y = np.abs(raw_y)
             if distToLoc_x == 0 and distToLoc_y == 0:
                 self.eat_on_square()
-                print(f"a creature of {self.species_id} consumed food and its energy is now {self.energy_bar.current_energy}")
+                # print(f"a creature of {self.species_id} consumed food and its energy is now {self.energy_bar.current_energy}")
             elif distToLoc_x >= distToLoc_y:
                 if raw_x > 0:
                     self.action_move(1)
@@ -496,7 +517,7 @@ class Consumer(Creature):
         yummy_produce = self.layer_system.get_producers(self.position)
         if len(yummy_produce) > 0:
             chosen_to_eat = np.random.choice(yummy_produce)
-            print(f"{self.species_id} has chosen to eat {chosen_to_eat.species_id}, whose current energy is {chosen_to_eat.energy_bar.current_energy}")
+            # print(f"{self.species_id} has chosen to eat {chosen_to_eat.species_id}, whose current energy is {chosen_to_eat.energy_bar.current_energy}")
             energy_gain_base = chosen_to_eat.energy_bar.current_energy * 0.10
 
             # a bonus to energy gain from consumption based on the size of the prey creature and the eating creature
