@@ -31,7 +31,8 @@ document.addEventListener("DOMContentLoaded", function (){
 
     console.log(placementButtons);
     let mode = selectButton.id;
-    let menu;
+    let curMenu;
+
     // Disable a selected button using it's ID
     function placeButtonClicked(buttonID) {
         for(var pButton of placementButtons){
@@ -170,23 +171,40 @@ document.addEventListener("DOMContentLoaded", function (){
             case placeHeatSourceButton.id:
                 menuToAdd = createEmitterMenu();
                 break;
+            case placeLightSourceButton.id:
+                menuToAdd = createEmitterMenu();
+                break;
             case placeConsumerButton.id:
                 menuToAdd = createCreatureMenu();
                 break;
+            default:
+                menuToAdd = null;
         }
-        analysisContainer.append(menuToAdd);
+
+        if(curMenu != null){
+            analysisContainer.removeChild(curMenu);
+        }
+        
+        if (menuToAdd != null){
+            
+            analysisContainer.append(menuToAdd);
+        }
+        
+        curMenu = menuToAdd;
     }
 
 
     function createEmitterMenu(){
         var emitterMenu = document.createElement("div");
         emitterMenu.classList.add("emitter-menu");
+        emitterMenu.innerHTML = `Emitter Menu`;
         return emitterMenu;
     }
 
     function createCreatureMenu(){
         var creatureMenu = document.createElement("div");
         creatureMenu.classList.add("creature-menu");
+        creatureMenu.innerHTML = `Consumer Menu`;
         return creatureMenu;
     }
 });

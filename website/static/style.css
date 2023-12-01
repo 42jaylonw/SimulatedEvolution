@@ -108,5 +108,10 @@ body{
   pointer-events: none;
 }
 
-/* .emitter-menu{
-} */
+.emitter-menu{
+  color:black;
+}
+
+.creature-menu{
+  color:black;
+}
