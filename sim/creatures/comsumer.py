@@ -22,9 +22,9 @@ class Consumer(Creature):
 
         # reprod_cooldown is generated from the genome and determines how long a creature waits before reprod
         hash = self.generate_hash(self.genome[3])
-        self.reprod_cooldown = int(hash[:32], 16) % 50 + 5
+        self.reprod_cooldown = int(hash[:32], 16) % 50 + 20
         # reprod_countdown ranges from 0 to reprod_cooldown and ticks down
-        self.reprod_countdown = 0
+        self.reprod_countdown = (self.reprod_cooldown / 2)
         self.edible_consumers = sim.predation_table[self.species_id][0]
         self.edible_producers = sim.predation_table[self.species_id][1]
 

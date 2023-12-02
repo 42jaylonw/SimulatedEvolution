@@ -42,8 +42,6 @@ currently unused, will keep open for potential down the road since there is no 2
 
 # worker functions
 # byte_to_float is used for byte 3 to convert to a float
-# int_to_hex_string is used for random genome generation and ensures that the output is of desired length
-# extract_hex_sub is used to get the bytes from the hex string
 def byte_to_float(byte):
     # Convert the input byte (hex string) to an integer
     value = int(byte, 16)
@@ -56,6 +54,7 @@ def byte_to_float(byte):
     return float_value
 
 
+# int_to_hex_string is used for random genome generation and ensures that the output is of desired length
 def int_to_hex(number):
     # Convert the integer to a hexadecimal string with '0x' prefix, and remove the prefix
     hex_string = hex(number)[2:]
@@ -71,6 +70,7 @@ def hex_to_int(hex_str):
         return None
 
 
+# extract_hex_sub is used to get the bytes from the hex string
 def extract_hex_sub(input_string, start_index, end_index):
     if start_index < 0 or end_index > len(input_string):
         return "Invalid indices"
