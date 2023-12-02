@@ -54,6 +54,10 @@ class SimulationGrid{
         });
     }
 
+    makeSimulation(){
+        fetch('/setup_data');
+    }
+
     //Request state of simulation grid from server, then apply these changes on the frontend
     getGridData(){
         //Request simulation grid data
@@ -69,8 +73,20 @@ class SimulationGrid{
         });
     }
 
+    visualUpdate(data, isBatch=false){
+        console.log(data);
+        if(isBatch){
+            for(let packet of data){
+
+                this.handleData(packet);
+            }
+            return; 
+        }
+       this.handleInitialData(data);
+    }
     //Visually clear the simulation grid
     clearSimulation(){   
+        console.log("clearing simulation");
         for(let i = 0; i < this.width * this.width; i++)
         {
             let curCell = this.cells[i];
@@ -122,8 +138,11 @@ class SimulationGrid{
         for(var creatureImage of creatureImages){
            var refId = creatureImage[0];
            var imageData = creatureImage[1];
-           this.createCreatureImage(refId, imageData);
-           cell.addCreatureVisual(this.creatureImages[creatureImage[0]]);
+           if(this.creatureImages.refId == undefined){
+                this.createCreatureImage(refId, imageData);
+                cell.addCreatureVisual(this.creatureImages[creatureImage[0]]);
+           }
+           
         }
         // Update Cell based on extracted information
         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
@@ -161,6 +180,7 @@ class SimulationGrid{
         creatureImage.style.width = "100%";
         creatureImage.style.height = "100%";
         creatureImage.style.position = 'absolute';
+        creatureImage.classList.add("creature");
         // Add <canvas> element to image dictionary
         this.creatureImages[refId] = creatureImage;
 
@@ -208,6 +228,12 @@ class SimulationGrid{
         }
     }
     
+    addCellListener(){
+        console.log("adding listeners");
+        for(let cell of this.cells){
+            cell.addDisplayCellInfo();
+        }
+    }
 
     //USED FOR DEBUGGING
     print(){

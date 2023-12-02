@@ -21,6 +21,7 @@ class SimSpace:
         self.emitters = None
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
+        self.predation_table = self.generate_predation_table(0)
 
         self.layer_system = LayerSystem.LayerSystem(self.grid_size)
 
@@ -34,6 +35,13 @@ class SimSpace:
 
         for creature in self.creatures:
             creature.reset()
+
+    # Directly add a creature to the simulation
+    def add_creature(self, creature):
+        self.creatures.append(creature)
+
+    def add_emitter(self, emitter):
+        self.emitters.append(emitter)
 
     def step(self):
         assert self.creatures is not None, "Reset first!"
@@ -88,6 +96,43 @@ class SimSpace:
             newPos = creature.grid_pos
             positionData.append((oldPos, newPos, creature.rgb))
         return positionData
+
+    # generate_predation_table generates the dictionary of which creatures can consume which
+    # modes: 0 for only plant eaters, 1 for only meat eaters, 2 for omnivores
+    def generate_predation_table(self, mode):
+        num_consumers = self.cfg['Consumer']['num_species']
+        num_producers = self.cfg['Producer']['num_species']
+        
+        predation_table = {}
+        if (mode == 0):
+            for i in range(num_consumers):
+                producer_range = list(range(num_producers))
+                num_edible_species = np.random.choice(len(producer_range), 1, replace=False)
+                # guarantee at least 1 edible species
+                num_edible_species = max(num_edible_species, 1)
+                edible_species = np.random.choice(producer_range, num_edible_species, replace=False)
+                predation_table[i] = [[], edible_species]
+        if (mode == 1):
+            for i in range(num_consumers):
+                consumer_range = list(range(num_consumers))
+                consumer_range.remove(i)
+                num_edible_species = np.random.choice(consumer_range, 1, replace=False)
+                # guarantee at least 1 edible species
+                num_edible_species = max(num_edible_species, 1)
+                edible_species = np.random.choice(consumer_range, num_edible_species, replace=False)
+                predation_table[i] = [edible_species, []]
+        if (mode == 2):
+            for i in range(num_consumers):
+                producer_range = list(range(num_producers))
+                num_edible_producers = np.random.choice(producer_range, 1, replace=False)
+                edible_producers = np.random.choice(producer_range, num_edible_producers, replace=False)
+                consumer_range = list(range(num_producers))
+                consumer_range.remove(i)
+                num_edible_consumers = np.random.choice(len(consumer_range), 1, replace=False)
+                edible_consumers = np.random.choice(consumer_range, num_edible_consumers, replace=False)
+                predation_table[i] = [edible_consumers, edible_producers]
+        return predation_table
+        
 
     def get_render_image(self, img):
         scale = int(self._cfg['visual_size'][0] / img.shape[0])

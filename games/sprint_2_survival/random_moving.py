@@ -8,7 +8,6 @@ from sim.emitter import LightSource, HeatSource
 GRIDSIZE = 50
 def step(sim):
     assert sim.creatures is not None, "Reset first!"
-    print("i am running")
     # Refresh emitter layer values
     sim.layer_system.step()
 
@@ -85,7 +84,6 @@ def run_random_moving():
     producers = [Producer(sim) for _ in range(num_producers)]
     # consumers = [RandMoveConsumer(sim) for _ in range(num_consumers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
-    print(consumers)
     # add organisms to simulation space
     # sim.reset(producers + consumers)
 

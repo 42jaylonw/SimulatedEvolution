@@ -27,9 +27,11 @@ class LayerSystem():
         self.grid_spaces = [[GridSpace(self, [x, y]) for y in range(sim_dim[0])] for x in range(sim_dim[1])]
 
     # step() function gets called every SimSpace step
-    def step(self):
+    def step(self, decayPheromones=True):
         # Clear/update layer values
         self.clear_emitter_values()
+        if decayPheromones:
+            self.decay_pheromones()
 
     # Called every step() to refresh / update temperature and light values, decay pheremone values
     def clear_emitter_values(self):
@@ -37,6 +39,10 @@ class LayerSystem():
             for y in range(self.dimensions[1]):
                 self.grid_spaces[x][y].set_light_level(0)
                 self.grid_spaces[x][y].set_temperature(0)
+    
+    def decay_pheromones(self):
+          for x in range(self.dimensions[0]):
+            for y in range(self.dimensions[1]):
                 self.grid_spaces[x][y].decay_pheremones()
 
     def add_pheremone(self, pos, pheremone):
@@ -54,6 +60,10 @@ class LayerSystem():
     def get_gridspace(self, pos):
         assert not self.out_of_bounds(pos)
         return self.grid_spaces[pos[0]][pos[1]]
+    
+    # Returns the dimensions of the SimSpace
+    def get_dimensions(self):
+        return self.dimensions
 
     # Returns the light value at the specified position
     # Output type: float
@@ -319,6 +329,9 @@ class GridSpace():
         self.elevation_val = np.clip(self.elevation_val + inc, MIN_ELEVATION, MAX_ELEVATION)
 
     def creature_enter(self, creature):
+        if creature is None:
+            return
+
         # Handles the specific type (Consumer/Producer) internally
         self.creatures.append(creature)
         if type(creature) == Consumer:
@@ -329,9 +342,13 @@ class GridSpace():
     def creature_exit(self, creature):
         # If the creature has not yet been assigned to a position, do not perform exit
         # Note: this may cause issues if the creature position is not perfectly mapped to the layer system (which should not happen)
-        if creature.position is None:
+        if creature is None:
             return
 
+        if creature.position is None:
+            return
+        if creature not in self.creatures:
+            return
         # Handles the specific type (Consumer/Producer) internally
         self.creatures.remove(creature)
         if type(creature) == Consumer:

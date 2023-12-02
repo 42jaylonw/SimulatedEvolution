@@ -15,8 +15,8 @@ class Food():
 class Producer(Creature):
     name = 'Producer'
 
-    def __init__(self, sim, genome=None):
-        super().__init__(sim, genome)
+    def __init__(self, sim, genome=None, spawn_pos=None):
+        super().__init__(sim, genome, spawn_pos)
 
         if (self.genome == None):
             self.genome = self.generate_genome()
@@ -200,7 +200,7 @@ class Producer(Creature):
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
-        self.sim.layer_system.creature_exit(self.position, self)
+        # self.sim.layer_system.creature_exit(self.position, self)
 
     # expansion_possible checks if the producer can expand into that tile
     def expansion_possible(self, pos):

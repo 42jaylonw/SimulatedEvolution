@@ -3,25 +3,19 @@
 {% block title %}Simulated Evolution Home{% endblock %}
 
 {% block content %}
- 
+
 <!--Layout for Home page-->
 <div class="row content">
+    
+  
+
     <!-- Simulator Control Binding Information(left side of screen) -->
     <div class="col-3 sidenav left-window">
-        <h1 class="text-center">Quick Controls</h1>
-        <h5 class="text-center">Use these neat bindings!</h5>
-        <p class="text-left">Pause/Play Simulation: SPACE<br>
-        Create New Simulation: SHIFT + N<br>
-        Toggle Heatmap: TAB
-        </p>
-        <h5 class="text-center">Or use the buttons below<br>
-            <button id="simulateButton" type="button">Play Simulation</button>
-            <button id="toggleClimateButton" type="button">Show Overlay</button>
-            <button id="newSimulationButton" type="button">New Simulation</button>
-        </h5>
         <!--Simulation parameters -->
-        {# Displayed when user first visits page or wants to reset the simulation #}
-        {% if not simulator %}
+        <!-- {# Displayed when user first visits page or wants to reset the simulation #} -->
+        {#  (1)initSimParameters (2-3)simulationSetup, (4)ActiveSimulation #}
+        {% if not initSimParameters %}
+          
         <form method="POST">
             <div class="sim-form">
                 <label for="gridSize">Grid Size</label>
@@ -32,7 +26,7 @@
                     name="gridSize" 
                     placeholder="Enter grid size"
                 />
-                <label for="numConsumers">Consumer Count</label>
+                <!-- <label for="numConsumers">Consumer Count</label>
                 <input 
                     type="numConsumers" 
                     class="form-control" 
@@ -40,7 +34,7 @@
                     name="numConsumers" 
                     placeholder="number of consumers"
                 />
-                 <label for="numProducers">Producer Count</label>
+                <label for="numProducers">Producer Count</label>
                 <input 
                     type="numProducers" 
                     class="form-control" 
@@ -48,30 +42,95 @@
                     name="numProducers" 
                     placeholder="number of producers"
                 />
-            </div>
+            </div> -->
             <br>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         {% else %}
+
+            {% if simulationSetup %}
+            <div class="col-3 placing-stuff">
+                <h5 class="text-center">ToolBox<br>
+                    <button id="selectButton" class="menuButton" type="button">
+                        <span class="selectHoverText" data-hover="Select">
+                            S
+                          </span>
+                    </button>
+                    <button id="addWallButton" class="menuButton" type="button">
+                        <span class="selectHoverText" data-hover="Place Wall">
+                            W
+                          </span>
+                    </button>
+                    <button id="addLightSourceButton" class="menuButton" type="button">
+                        <span class="selectHoverText" data-hover="Place Lightsource">
+                            L
+                          </span>
+                    </button>
+                    <button id="addHeatSourceButton" class="menuButton" type="button">
+                        <span class="selectHoverText" data-hover="Place Heatsource">
+                            H
+                          </span>
+                    </button>
+                    <button id="addConsumerButton" class="menuButton" type="button">
+                        <span class="selectHoverText" data-hover="Place Consumer">
+                            C
+                          </span>
+                    </button>
+                    <button id="addProducerButton" class="menuButton" type="button">
+                        <span class="selectHoverText" data-hover="Place Producer">
+                            P
+                          </span>
+                    </button>
+                    <button id="eraserButton" class="menuButton" type="button">
+                        <span class="selectHoverText" data-hover="Eraser">
+                            E
+                          </span>
+                    </button>
+                </h5>
+            </div>
+            <form method="POST">
+            <button id="startSimulation" type="submit">Start Simulation</button>
+            </form>
+            <script
+            type = "text/javascript"
+            src = "{{ url_for('static', filename='sim-edit-menu.js') }}"
+            ></script>
+            {% endif %}
+            {% if activeSimulation %}
+            <h1 class="text-center">Quick Controls</h1>
+            <h5 class="text-center">Use these neat bindings!</h5>
+            <p class="text-left">Pause/Play Simulation: SPACE<br>
+            Create New Simulation: SHIFT + N<br>
+            Toggle Heatmap: TAB
+            </p>
+            <h5 class="text-center">Or use the buttons below<br>
+                <button id="simulateButton" type="button">Play Simulation</button>
+                <button id="toggleClimateButton" type="button">Show Overlay</button>
+                <button id="newSimulationButton" type="button">New Simulation</button>
+            </h5>
+              <script
+                type = "text/javascript"
+                src = "{{ url_for('static', filename='simulation-controls.js') }}"
+               ></script>
+            {% endif %}
             <form method="POST" action='/reset_simulator'>
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
             </form>
-        {% endif %}
+        {%endif%}
+    
     </div>
     <!-- Simulation Area(center of screen)-->
     <div class="col-6">
+         
             <div class="sim-container">
-                {% if grid_size %}
-                 <script>
-                  document.addEventListener("DOMContentLoaded", function(){
-                     simSpace = new SimulationGrid({{ grid_size }});
-                  });
-                 </script>
-                 <script
-                    type = "text/javascript"
-                    src = "{{ url_for('static', filename='simulation-controls.js') }}"
-                 ></script>
-                {% endif %}
+            {% if grid_size %}
+                <script>
+                document.addEventListener("DOMContentLoaded", function(){
+                simSpace = new SimulationGrid({{grid_size}});
+                });
+                </script>
+
+            {% endif %}
             </div>
     </div>
     <!--Descriptive information of selected simulation cell(right of screen)-->
@@ -83,6 +142,10 @@
 
 <!-- Scripts -->
 {% block script %}
+
+
+
+
 <!-- Grid functions -->
 <script
 type = "text/javascript"

@@ -5,6 +5,7 @@ class EnergyBar:
         self.max_energy = max_energy
         self.size = size
         self.age_rate = age_rate
+        self.satiation_level = satiation_level
 
     def consume_energy(self, additional_cost=0):
         """
