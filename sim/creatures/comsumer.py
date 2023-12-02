@@ -68,6 +68,7 @@ class Consumer(Creature):
                         # initialize creature and add to sim
                         child_creature = Consumer(self.sim, child_genome, self.position)
                         child_creature.species_id = self.species_id
+                        print("Added craeture")
                         self.sim.add_creature(child_creature)
                         # print("child added at location", child_creature.position)
                         return -1

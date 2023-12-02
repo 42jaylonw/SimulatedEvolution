@@ -12,6 +12,7 @@ class SimulationGrid{
      */
     constructor(width){
         //Set SimulationGrid Width
+        this.totalPopulation = 0;
         this.width = width;
         this.creatureImages = {};
         //Create NxN Array to store Cell objects
@@ -65,7 +66,7 @@ class SimulationGrid{
         .then((response) => response.json())
         .then((packet) => {
             for(let data of packet){
-                this.handleData(data);
+                this.handleInitialData(data, true);
             }   
         })
         .catch((error) =>{
@@ -74,7 +75,6 @@ class SimulationGrid{
     }
 
     visualUpdate(data, isBatch=false){
-        console.log(data);
         if(isBatch){
             for(let packet of data){
 
@@ -124,7 +124,7 @@ class SimulationGrid{
      * Update front-end elements based on information received from the back-end
      * @param {JSON} data Information from back-end simulation 
      */
-    handleInitialData(data){
+    handleInitialData(data, notifyNewCreature=false){
         // Extract information
         var position = data["position"];
         var numConsumer = data["consumerCount"];
@@ -138,11 +138,15 @@ class SimulationGrid{
         for(var creatureImage of creatureImages){
            var refId = creatureImage[0];
            var imageData = creatureImage[1];
-           if(this.creatureImages.refId == undefined){
+           //Search by refId if there already exists a visual for a creature
+           //Create and add a visual if it does exist
+           if(this.creatureImages[refId] == undefined){
                 this.createCreatureImage(refId, imageData);
-                cell.addCreatureVisual(this.creatureImages[creatureImage[0]]);
+                cell.addCreatureVisual(this.creatureImages[refId]);    
            }
-           
+           else{
+            cell.addCreatureVisual(this.creatureImages[refId]);
+           }
         }
         // Update Cell based on extracted information
         cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);
@@ -201,6 +205,10 @@ class SimulationGrid{
          var creatureImageReferences = data["creatureImages"];
          var cell = this.cells[this.width * position[0] + position[1]];
          for(var reference of creatureImageReferences){
+            if(this.creatureImages[reference] == undefined){
+                console.log("something went wrong!");
+                console.log(reference);
+            }
             cell.addCreatureVisual(this.creatureImages[reference]);
          }
          cell.updateProperties(numConsumer, numProducer, isWall, temp, lightLevel);

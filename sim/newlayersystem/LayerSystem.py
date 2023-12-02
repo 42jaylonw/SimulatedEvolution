@@ -366,6 +366,8 @@ class GridSpace():
         self.emitters.append(emitter)
 
     def emitter_exit(self, emitter):
+        if emitter not in self.emitters:
+            return
         self.emitters.remove(emitter)
 
     def add_pheremone(self, pheremone):

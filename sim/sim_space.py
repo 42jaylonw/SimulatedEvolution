@@ -70,7 +70,7 @@ class SimSpace:
         emitters, and creatures' states.
         """
         assert self.creatures is not None, "Reset first!"
-
+        print("Making STEP:", self.creatures)
         self.layer_system.step()
 
         for emitter in self.emitters:

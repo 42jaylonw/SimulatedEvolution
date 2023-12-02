@@ -149,17 +149,20 @@ class Cell{
         this.temperature = temp;
         this.lightLevel = lightLevel;
         this.isWall = isWall;
+        if(this.numConsumers <= 0){
+            this.clearCreatureVisuals();
+        }
         //Display different based on whether the Cell is a Wall
         if(this.isWall){
             this.infoDisplay.innerHTML = "Wall";
             this.setCellColor(`rgb(${(0)}, ${(0)}, ${(0)})`);
-            this.clearCreatureVisuals();
+            // this.clearCreatureVisuals();
             return;
         }
         //No Creatures present
         if(this.numConsumers <= 0 && this.numProducers <= 0){
             this.setCellColor("white");
-            this.clearCreatureVisuals();
+            // this.clearCreatureVisuals();
         }
         //Set color to Producer
         if(this.numProducers > 0){
@@ -251,11 +254,12 @@ class Cell{
      */
     updateCellOverlay(mode){
         let color;
-        if(mode == "lightmap"){
+        if(mode == "lightmap" || mode == "/add_lightsource"){
             color = `rgb(0,0,0, ${(100 - this.lightLevel) / 100})`; // WIP - magic numbers should be replaced later
             this.overlay.style.backgroundColor = color;
             return;
         }
+
         if (this.temperature < 20) 
         {
             color = `rgb(0,0,255, 0.3)`;

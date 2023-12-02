@@ -85,15 +85,18 @@ class Creature:
         pass
 
     def remove(self):
+        print("removing self")
         """
         Removes the creature from the SimSpace. Removes itself from sim.creatures
         and updates the list stored at that position in the layer system.
         Different from die() in that no additional simulation logic is attached.
         """
+        print(self.sim.creatures)
+        self.layer_system.creature_exit(self.position, self)
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
-
-        self.layer_system.creature_exit(self.position, self)
+        print(self.sim.creatures)
+        
         pass
 
     def die(self):
@@ -131,7 +134,6 @@ class Creature:
 
     @property
     def creature_info(self):
-        print(self.energy_bar)
         if self.image_data is not None:
             return {"genome": self.genome,
                     "size": self.size,
