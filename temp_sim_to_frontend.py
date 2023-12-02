@@ -89,9 +89,9 @@ def user_place_wall(sim, position):
 # Place a LightSource in the simulation at the specified location.
 # If there is a wall there, no emitter will be placed
 # Currently a preset for the strength/range of the emitter
-def user_place_lightsource(sim, position):
+def user_place_lightsource(sim, position, emit_range=20, emit_strength=100):
     if not sim.layer_system.has_wall(position):
-        new_light_source = LightSource(sim, position, 20, 100)
+        new_light_source = LightSource(sim, position, emit_range, emit_strength)
         # sim.reset(sim.creatures, new_emitter_list)
         sim.add_emitter(new_light_source)
         user_place_emitter_visual_helper(sim)
@@ -99,9 +99,9 @@ def user_place_lightsource(sim, position):
 # Place a HeatSource in the simulation at the specified location.
 # If there is a wall there, no emitter will be placed
 # Currently a preset for the strength/range of the emitter
-def user_place_heatsource(sim, position):
+def user_place_heatsource(sim, position, emit_range=20, emit_strength=100):
     if not sim.layer_system.has_wall(position):
-        new_heat_source = HeatSource(sim, position, 20, 100)
+        new_heat_source = HeatSource(sim, position, emit_range, emit_strength)
         # sim.reset(sim.creatures, new_emitter_list)
         sim.add_emitter(new_heat_source)
         user_place_emitter_visual_helper(sim)

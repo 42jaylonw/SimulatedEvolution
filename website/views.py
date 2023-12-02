@@ -145,7 +145,10 @@ def add_producer():
 def add_lightsource():
     position = json.loads(request.data)["position"]
     position = np.array(position)
-    sim_to_front.user_place_lightsource(simulator, position)
+    emit_range = json.loads(request.data)["emit_range"]
+    emit_strength = json.loads(request.data)["emit_strength"]
+
+    sim_to_front.user_place_lightsource(simulator, position, emit_range, emit_strength)
     return sim_to_front.get_sim_state(simulator)
     #return sim_to_front.get_gridspace_state(simulator, position)
 
@@ -153,7 +156,10 @@ def add_lightsource():
 def add_heatsource():
     position = json.loads(request.data)["position"]
     position = np.array(position)
-    sim_to_front.user_place_heatsource(simulator, position)
+    emit_range = json.loads(request.data)["emit_range"]
+    emit_strength = json.loads(request.data)["emit_strength"]
+
+    sim_to_front.user_place_heatsource(simulator, position, emit_range, emit_strength)
     return sim_to_front.get_sim_state(simulator)
 
 @views.route('/visual_update', methods=["GET"])
