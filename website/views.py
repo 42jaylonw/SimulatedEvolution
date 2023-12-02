@@ -43,7 +43,7 @@ def home_page():
         res = validation.validateSimulationParameters(user_size, user_consumers, user_producers)
         # Create simulation if user entered valid input
         if res == 'OK':
-            NUMCONSUMERS = 10#int(user_consumers)
+            NUMCONSUMERS = 3#int(user_consumers)
             NUMPRODUCERS = 1#int(user_producers)
             size = int(user_size)
             return render_template("home.html", grid_size=size, initSimParameters=True, simulationSetup=isSetup, activeSimulation=isActive)
@@ -78,6 +78,7 @@ def new_grid():
     """Create a new grid on backend then send it to front"""
     global simulator
     global size
+    # make a clone function that takes the information from the old sim then builds a new sim using the same information
     simulator = sim_to_front.create_sim(NUMPRODUCERS, NUMCONSUMERS, size)
     return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
@@ -124,6 +125,8 @@ def erase_space():
 
 @views.route('/add_creature_consumer', methods=["POST"])
 def add_consumer():
+    global NUMCONSUMERS
+    NUMCONSUMERS += 1
     position = json.loads(request.data)["position"]
     position = np.array(position)
     sim_to_front.user_place_consumer(simulator, position)
@@ -131,6 +134,8 @@ def add_consumer():
 
 @views.route('/add_creature_producer', methods=["POST"])
 def add_producer():
+    global NUMPRODUCERS
+    NUMPRODUCERS += 1
     position = json.loads(request.data)["position"]
     position = np.array(position)
     sim_to_front.user_place_producer(simulator, position)
@@ -141,7 +146,8 @@ def add_lightsource():
     position = json.loads(request.data)["position"]
     position = np.array(position)
     sim_to_front.user_place_lightsource(simulator, position)
-    return sim_to_front.get_gridspace_state(simulator, position)
+    return sim_to_front.get_sim_state(simulator)
+    #return sim_to_front.get_gridspace_state(simulator, position)
 
 @views.route('/add_heatsource', methods=["POST"])
 def add_heatsource():
