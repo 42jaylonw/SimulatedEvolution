@@ -51,8 +51,10 @@ def generate_sim(num_producers=0, num_consumers=1):
     for i in range(sim.grid_size[0]):
         sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
 
-    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 20, 0),
-                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 8, 0)]
+    emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
+                HeatSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 5, 25),
+                LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)]
+
     # add organisms to simulation space
     sim.reset(producers + consumers, emitters)
     return sim

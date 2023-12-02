@@ -355,7 +355,10 @@ class Consumer(Creature):
         Checks to see if a creature underneath is edible. (exists within edible tags)
         """
         # TODO: Need to check how to access
-        return True
+        if creature in self.edible_consumers:
+            return True
+        else:
+            return False
 
     
     # NOTE: temporarily adding the "otherwise" param to do a regular action-move if a creature is not detected
@@ -394,9 +397,25 @@ class Consumer(Creature):
                     self.action_move(2)
         else:
             self.action_move(otherwise)
-        # else:
-            # get pheromones of tile above, below, to the right, and to the left (if not out of bounds)
-            # go to tile with strongest pheromone from edible-tagged species
+        
+        if self.energy_bar.is_satiated():
+            senseLocation = self.senseWithinRange(sameSpecies)
+            if senseLocation is not None:
+                if not on same square:
+                    manhattan to location of mate
+                else:
+                    reproduce with creature
+            else if immmediate_pheromone(list_of_creatures_to_detect, threshold) is not None:
+                take action immediate_pheromone(list_of_creatures_to_detect)
+            else: 
+                self.action_move(otherwise)
+        else:
+            senseLocation = self.senseWithinRange(listOfEdibleSpecies)
+            if creature of edible species in range:
+                if senseLocation is not None:
+                    manhattan to location of edible species
+                
+
         
  
     def eat_on_square(self):
@@ -428,5 +447,5 @@ class Consumer(Creature):
         Also updates the parent's max energy. 
         """
         # senseLocation = self.senseNearest()
-        # if senseLocation is not None:
+        # if senseLocation is not None:
 
