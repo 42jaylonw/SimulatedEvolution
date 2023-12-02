@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # creator = InvaderCreator(img_size=1500)
     # image = creator.create_image(size=5, invaders=5)
     # image.show()  # or image.save("invaders.png")
-    generator = InvaderCreator(img_size=6)
+    generator = InvaderCreator(img_size=8)
     for _ in range(1000):
         invader = generator.get_an_invader()
         plt.imshow(invader)
