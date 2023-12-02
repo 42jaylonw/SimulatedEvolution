@@ -109,12 +109,11 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function placeHeatSource(element){
         console.log("adding heat source");
-        
         performGridSpaceOperation(element, '/add_heatsource');
         simSpace.toggleOverlayDisplay(true, "heatmap");
     }
 
-    function performGridSpaceOperation(element, route){
+    function performGridSpaceOperation(element, route, payload=null){
         cellInformation = element.split("-") 
         console.log(cellInformation[1] + "," + cellInformation[2]);
         const dataToSend = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
@@ -196,9 +195,15 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function createEmitterMenu(){
         var emitterMenu = document.createElement("div");
+
         emitterMenu.classList.add("emitter-menu");
-        emitterMenu.innerHTML = `Emitter Menu`;
+        emitterMenu.innerHTML = `Emitter Menu` + `<br>` + generatePlaceValueSlider("emit_range", 1, 25) + `<br>` + generatePlaceValueSlider("emit_strength", 1, 100);
+
         return emitterMenu;
+    }
+
+    function generatePlaceValueSlider(id, min, max){
+        return `<div class="slidecontainer"><input type="range" min="${min}" max="${max}" value="${max}" class="slider" id=${id}> </div>`; /*  step=${step}*/
     }
 
     function createCreatureMenu(){
