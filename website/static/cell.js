@@ -160,7 +160,7 @@ class Cell{
             return;
         }
         //No Creatures present
-        if(this.numConsumers <= 0 && this.numProducers <= 0){
+        if(this.numProducers <= 0){
             this.setCellColor("white");
             // this.clearCreatureVisuals();
         }

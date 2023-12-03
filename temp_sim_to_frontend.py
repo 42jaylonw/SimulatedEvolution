@@ -119,7 +119,7 @@ def user_place_consumer(sim, position):
         new_creature = Consumer(sim, spawn_pos=position)
         new_creature_list = sim.creatures
         new_creature_list.append(new_creature)
-        sim.add_creature(new_creature)
+        # sim.add_creature(new_creature)
 
 
 # Place a Prodcuer in the simulation at the specified location.
@@ -130,7 +130,7 @@ def user_place_producer(sim, position):
         new_creature = Producer(sim, spawn_pos=position)
         new_creature_list = sim.creatures
         new_creature_list.append(new_creature)
-        sim.add_creature(new_creature)
+        # sim.add_creature(new_creature)
         # sim.reset(new_creature_list, sim.emitters)
 
 
