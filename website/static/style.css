@@ -155,3 +155,9 @@ body{
   background: #04AA6D; /* Green background */
   cursor: pointer; /* Cursor on hover */
 }
+
+.event-window{
+  background-color: black;
+  width: 100px;
+  height: 100px;
+}

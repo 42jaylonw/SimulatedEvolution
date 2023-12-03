@@ -118,23 +118,24 @@
             </form>
         {%endif%}
     
-    </div>
-    <!-- Simulation Area(center of screen)-->
-    <div class="col-6">
-         
-            <div class="sim-container">
-            {% if grid_size %}
-                <script>
-                document.addEventListener("DOMContentLoaded", function(){
-                simSpace = new SimulationGrid({{grid_size}});
-                });
-                </script>
+        </div>
+        <!-- Simulation Area(center of screen)-->
+        <div class="col-6">
+            
+                <div class="sim-container">
+                {% if grid_size %}
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function(){
+                    simSpace = new SimulationGrid({{grid_size}});
+                    });
+                    </script>
 
-            {% endif %}
-            </div>
-    </div>
-    <!--Descriptive information of selected simulation cell(right of screen)-->
-    <div class="col-3 sidenav right-window analysis-container">
+                {% endif %}
+                </div>
+        </div>
+        <!--Descriptive information of selected simulation cell(right of screen)-->
+        <div class="col-3 sidenav right-window analysis-container">
+            
         </div>
     </div>
 </div>
