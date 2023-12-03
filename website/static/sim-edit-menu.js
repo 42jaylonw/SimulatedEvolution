@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function (){
         // Change the default function to be called when pressing left click
         mode = buttonID;
         refreshParameterMenu(mode);
-        simSpace.toggleOverlayDisplay(false, "none");
+        simSpace.toggleOverlayDisplay(false, "none");    
     }
 
     // Call menu method based on selected mode

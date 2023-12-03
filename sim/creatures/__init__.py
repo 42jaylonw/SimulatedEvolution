@@ -28,8 +28,11 @@ class Creature:
         self.layer_system = sim.layer_system  # EXPERIMENTAL
         #self.position = None
         self.position = spawn_pos
-        if self.position is not None:
-            self.layer_system.creature_enter(self.position, self)
+        if self.position is None:
+            self.position = np.random.randint(self.sim.grid_size)
+        
+        self.sim.add_creature(self)
+        self.layer_system.creature_enter(self.position, self)
 
         if self.name == 'Consumer':
             self.behavior_system = GeneticAlgorithm(
@@ -62,8 +65,7 @@ class Creature:
             self.image_data = np.concatenate((self.appearance, mask), axis=2)
 
         if self.position is None:
-            self.position = np.random.randint(self.sim.grid_size)
-            self.layer_system.creature_enter(self.position, self)
+            self.set_position(np.random.randint(self.sim.grid_size))
 
         # self.sim.increment_pos_layer(self.name, self.position, 1)
 
@@ -94,9 +96,9 @@ class Creature:
         print(self.sim.creatures)
         self.layer_system.creature_exit(self.position, self)
         if self in self.sim.creatures:
-            self.sim.creatures.remove(self)
-        print(self.sim.creatures)
-        
+            self.sim.remove_creature(self)
+
+        self.layer_system.creature_exit(self.position, self)
         pass
 
     def die(self):

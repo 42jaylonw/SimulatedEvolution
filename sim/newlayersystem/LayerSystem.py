@@ -223,6 +223,9 @@ class LayerSystem():
         assert not self.out_of_bounds(pos1) and not self.out_of_bounds(pos2)
         self.emitter_exit(pos1, emitter)
         self.emitter_enter(pos2, emitter)
+    
+    def empty_space(self, pos):
+        self.get_gridspace(pos).empty_space()
 
     # Checks whether the position is out of bounds or not (True if out of bounds, False if within bounds)
     # Output: bool
@@ -269,10 +272,20 @@ class GridSpace():
         self.temperature_val = 0
         self.elevation_val = 0
         self.has_a_wall = False
-
-        #WIP
         self.pheremones = []
 
+    def empty_space(self):
+        self.wall_remove()
+        self.empty_all_creatures()
+        self.empty_all_emitters()
+
+    def empty_all_creatures(self):
+        self.creatures = []
+        self.consumers = []
+        self.producers = []
+    
+    def empty_all_emitters(self):
+        self.emitters = []
 
     def get_light_level(self):
         return self.light_val
