@@ -68,7 +68,7 @@ class Consumer(Creature):
                         # initialize creature and add to sim
                         child_creature = Consumer(self.sim, child_genome, self.position)
                         child_creature.species_id = self.species_id
-                        self.sim.add_creature(child_creature)
+                        #self.sim.add_creature(child_creature)
                         # print("child added at location", child_creature.position)
                         return -1
             # else check for compatible creatures in sensory range

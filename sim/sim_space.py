@@ -22,8 +22,8 @@ class SimSpace:
          """
         self.cfg = cfg
         self._cfg = cfg[self.name]
-        self.creatures = None
-        self.emitters = None
+        self.creatures = []
+        self.emitters = []
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.predation_table = self.generate_predation_table(0)
@@ -55,6 +55,15 @@ class SimSpace:
             creature: The creature object to be added.
         """
         self.creatures.append(creature)
+    
+    def remove_creature(self, creature):
+        """Remove a creature from the simulation.
+
+        Args:
+            creature: The creature object to be removed.
+        """
+        if creature in self.creatures:
+            self.creatures.remove(creature)
 
     def add_emitter(self, emitter):
         """Add an emitter to the simulation.
@@ -64,12 +73,23 @@ class SimSpace:
         """
         self.emitters.append(emitter)
 
+    def remove_emitter(self, emitter):
+        """Remove an emitter from the simulation.
+
+        Args:
+            emitter: The emitter object to be removed.
+        """
+        if emitter in self.emitters:
+            self.emitters.remove(emitter)
+
     def step(self):
         """
         Perform the next time step of the simulation, including updating the layer system,
         emitters, and creatures' states.
         """
         assert self.creatures is not None, "Reset first!"
+        
+        print(self.creatures)
 
         self.layer_system.step()
 
