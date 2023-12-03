@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function (){
         // Change the default function to be called when pressing left click
         mode = buttonID;
         refreshParameterMenu(mode);
-                
+        simSpace.toggleOverlayDisplay(false, "none");    
     }
 
     // Call menu method based on selected mode
@@ -135,6 +135,7 @@ document.addEventListener("DOMContentLoaded", function (){
             if(route == '/add_heatsource' || route == '/add_lightsource')
             {
                 simSpace.visualUpdate(data, isBatch=true);
+                simSpace.toggleOverlayDisplay(true, route);
                 return;
             }
             // update the visual grid based on function associated with route

@@ -74,7 +74,6 @@ class SimulationGrid{
     }
 
     visualUpdate(data, isBatch=false){
-        console.log(data);
         if(isBatch){
             for(let packet of data){
 
