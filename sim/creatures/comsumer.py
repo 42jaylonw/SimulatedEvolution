@@ -476,9 +476,9 @@ class Consumer(Creature):
         Checks to see if a creature underneath is edible. (exists within edible tags)
         """
         if isinstance(creature, Creature):
-            if creature.species_id in self.edible_producers:
+            if creature.species_id in self.edible_producers and creature.name == 'Producer':
                 return True
-            if creature.species_id in self.edible_consumers:
+            if creature.species_id in self.edible_consumers and creature.name == 'Consumer':
                 return True
         else:
             return False

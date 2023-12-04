@@ -76,7 +76,7 @@ class Creature:
             hash = self.generate_hash(self.genome)
         # Assign size and energy properties based on the hash
         self.size = int(hash[:32], 16) % 101 + 0.1
-        self.energy = int(hash[32:], 16) % 101 + 1
+        self.energy = int(hash[32:], 16) % 51 + 51
         self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size, age_rate=0.02)
         # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
@@ -141,10 +141,12 @@ class Creature:
                     "size": self.size,
                     "energy": self.energy_bar.current_energy,
                     "refId" : str(self),
-                    "image_data": self.image_data.tolist()}
+                    "image_data": self.image_data.tolist(),
+                    "species" : self.species_id}
         return {"genome": self.genome,
                 "size": self.size,
-                "energy": self.energy_bar.current_energy}
+                "energy": self.energy_bar.current_energy,
+                "species" : self.species_id}
 
 
 class Corpse:

@@ -181,7 +181,7 @@ class SimSpace:
             for i in range(num_consumers):
                 consumer_range = list(range(num_consumers))
                 consumer_range.remove(i)
-                num_edible_species = np.random.choice(consumer_range, 1, replace=False)
+                num_edible_species = np.random.choice(len(consumer_range), 1, replace=False)
                 # guarantee at least 1 edible species
                 num_edible_species = max(num_edible_species, 1)
                 edible_species = np.random.choice(consumer_range, num_edible_species, replace=False)

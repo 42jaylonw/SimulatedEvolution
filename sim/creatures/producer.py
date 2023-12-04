@@ -173,8 +173,8 @@ class Producer(Creature):
 
         tile_score += self.get_temp(pos)
         tile_score = tile_score * self.get_light_level(pos)
-
-        tile_score -= random.randint(1, int(tile_score))
+        if (int(tile_score) != 0):
+            tile_score -= random.randint(1, int(tile_score))
 
         ret[0] = int(tile_score)
 

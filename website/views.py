@@ -88,7 +88,7 @@ def new_grid():
 def get_grid_data():
     """Perform SimSpace Step then update front-end"""
     simulator.step()
-    print("number of creatures: ", len(simulator.creatures))
+    # print("number of creatures: ", len(simulator.creatures))
     return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
 # Retrieve detailed information at specified grid space
