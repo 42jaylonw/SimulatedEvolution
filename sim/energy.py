@@ -12,7 +12,7 @@ class EnergyBar:
         Called on a time step.
         Lowers energy level based on metabolism and an additional cost, such as movement cost or light level.
         """
-        energy_consumption = float(self.size * 0.10)
+        energy_consumption = float(self.size * 0.01)
         self.current_energy -= energy_consumption + additional_cost
         if self.current_energy < 0:
             self.current_energy = 0
@@ -40,8 +40,12 @@ class EnergyBar:
         """
         Adds energy to the creature.
         Added energy does not go above a creature's max energy.
+        If added energy is negative, ensures that current_energy
+        does not go below 0.
         """
         self.current_energy = min(self.max_energy, self.current_energy + energy)
+        if self.current_energy < 0:
+            self.current_energy = 0
 
     def is_empty(self):
         """

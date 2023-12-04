@@ -305,13 +305,17 @@ class Consumer(Creature):
 
     def senseWithinRange(self):
         positions_to_check = GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, self.sensory_range)
-        producer_positions = []
+        edible_positions = []
         for pos in positions_to_check:
-            if self.layer_system.get_num_producers(pos[0]) > 0:
-                producer_positions.append(pos)
-        if len(producer_positions) <= 0:
+            if self.layer_system.get_num_creatures(pos[0]) > 0:
+                creatures_there = self.layer_system.get_creatures(pos)
+                for creature in creatures_there:
+                    if creature in self.edible_producers or creature in self.edible_consumers:
+                        edible_positions.append(pos)
+                        break
+        if len(edible_positions) <= 0:
             return None
-        closest_pos = min(producer_positions, key=lambda x: x[1])
+        closest_pos = min(edible_positions, key=lambda x: x[1])
         return closest_pos[0]
 
     def action_move(self, action: int):
@@ -460,9 +464,11 @@ class Consumer(Creature):
         """
         Checks to see if a creature underneath is edible. (exists within edible tags)
         """
-        # TODO: Need to check how to access
-        return True
-
+        if creature in self.edible_producers:
+            return True
+        if creature in self.edible_consumers:
+            return True
+        return False
     
     # NOTE: temporarily adding the "otherwise" param to do a regular action-move if a creature is not detected
     def action_hunt(self, otherwise):
@@ -479,60 +485,154 @@ class Consumer(Creature):
         # tracking, as producers are completely stationary and do not use
         # pheromones.
         # senseLocation = self.senseNearest()
-        senseLocation = self.senseWithinRange()
-        if senseLocation is not None and not self.energy_bar.is_satiated():
-            raw_x = senseLocation[0] - self.position[0]
-            raw_y = senseLocation[1] - self.position[1]
-            distToLoc_x = np.abs(raw_x)
-            distToLoc_y = np.abs(raw_y)
-            if distToLoc_x == 0 and distToLoc_y == 0:
-                self.eat_on_square()
-                # print(f"a creature of {self.species_id} consumed food and its energy is now {self.energy_bar.current_energy}")
-            elif distToLoc_x >= distToLoc_y:
-                if raw_x > 0:
-                    self.action_move(1)
-                elif raw_x < 0:
-                    self.action_move(3)
-            elif distToLoc_x < distToLoc_y:
-                if raw_y > 0:
-                    self.action_move(0)
-                elif raw_y < 0:
-                    self.action_move(2)
+
+        if not self.energy_bar.is_satiated():
+            # if not satiated, then move in accordance with the hunting function
+            senseLocation = self.senseWithinRange()
+            if senseLocation is not None:
+                # if there are edible creatures within sensory range
+                raw_x = senseLocation[0] - self.position[0]
+                raw_y = senseLocation[1] - self.position[1]
+                distToLoc_x = np.abs(raw_x)
+                distToLoc_y = np.abs(raw_y)
+                # case: creature on same square
+                if distToLoc_x == 0 and distToLoc_y == 0:
+                    self.eat_on_square()
+                # case: creature has longer x dist to move, so move left/right towards target
+                elif distToLoc_x >= distToLoc_y:
+                    if raw_x > 0:
+                        self.action_move(1)
+                    elif raw_x < 0:
+                        self.action_move(3)
+                # case: creature has longer y dist to move, so move up/down towards target
+                elif distToLoc_x < distToLoc_y:
+                    if raw_y > 0:
+                        self.action_move(0)
+                    elif raw_y < 0:
+                        self.action_move(2)
+            else:
+                # if no edible creatures within sensory range, check to see if there are pheromones within
+                # the immediate up, down, left, right directions, and move towards the strongest one if so
+
+                # case: there are no pheromones and the creature should move in accordance with its neural network
+                strongest = self.get_strongest_immediate_pheromone(self.edible_consumers, 0)
+                strongest_direction = strongest[0]
+                if strongest is None:
+                    self.action_move(otherwise)
+                else:
+                    print(f"A creature of species {self.species_id} moved toward pheromone")
+                    self.action_move(strongest_direction)
         else:
+            # if satiated, then simply move with accordance with the reproduction protocol passed in
             self.action_move(otherwise)
-        # else:
-            # get pheromones of tile above, below, to the right, and to the left (if not out of bounds)
-            # go to tile with strongest pheromone from edible-tagged species
         
- 
+    def get_strongest_immediate_pheromone(self, mode=0):
+        """
+        Gets the strongest immediate (within a 1-space cardinal direction) 
+        pheromone's direction and strength as a 2-tuple.
+
+        Which pheromone it pertains to is based on the mode.
+
+        mode = 0: searches for edible pheromones. 
+        mode = 1: searches for same-species pheromones.
+        mode = anything else: default to mode 0
+
+        return: (strongest pheromone's direction, strongest pheromone's strength)
+        """
+        legal_positions = self._get_legal_neighbors(self.position)
+        
+        if len(legal_positions) > 0:
+            strongest_pheromone = None
+            strongest_direction = None
+            for position in legal_positions:
+                if mode == 0:
+                    potential_strongest = self._get_max_edible_pheromone(position)
+                else if mode == 1:
+                    potential_strongest = self._get_max_same_pheromone(position)
+                else:
+                    potential strongest = self._get_max_edible_pheromone(position)
+                    
+                if potential_strongest is None:
+                    continue
+                if strongest_pheromone is not None:
+                    if potential_strongest.strength > strongest_pheromone.strength:
+                        strongest_pheromone = potential_strongest
+                        temp = (position[0] - self.position[0], position[1] - self.position[1])
+                        strongest_direction = self._position_to_direction(temp)
+                else:
+                    strongest_pheromone = potential_strongest
+                    temp = (position[0] - self.position[0], position[1] - self.position[1])
+                    strongest_direction = self._position_to_direction(temp)
+        return strongest_direction, strongest_pheromone.strength
+
+    def _position_to_direction(self, position):
+        """
+        Takes in an offset position and returns a direction.
+        i.e: (0, 1) is up, (0, -1) is down, etc.
+        """
+        direction = None
+        if position[1] == 1:
+            # up
+            direction = 0
+        else if position[0] == 1:
+            # right
+            direction = 1
+        else if position[1] == -1:
+            # down
+            direction = 2
+        else if position[0] == -1:
+            # left
+            direction = 3
+        return direction
+
+    def _get_legal_neighbors(self, position):
+        pos_up = (self.position[0], self.position[1]+1)
+        pos_right = (self.position[0]+1, self.position[1])
+        pos_down = (self.position[0], self.position[1]-1)
+        pos_left = (self.position[0]-1, self.position[1])
+
+        possible_positions = [pos_up, pos_right, pos_down, pos_left]
+        legal_positions = []
+
+        for position in possible_positions:
+            if not self.layer_system.out_of_bounds(position):
+                legal_positions.append(position)
+        return legal_positions
+
+    def _get_max_edible_pheromone(self, position):
+        pheromone_list = self.layer_system.get_pheremones(position)
+        filtered_pheromones = [pheromone for pheromone in pheromone_list if pheromone.source.species_id in self.edible_consumers]
+        strongest_pheromone = max(filtered_pheromones, key=lambda x: x.strength, default=None)
+        return strongest_pheromone
+
+    def _get_max_same_pheromone(self, position):
+        pheromone_list = self.layer_system.get_pheromones(position)
+        filtered_pheromones = [pheromone for pheromone in pheromone_list if pheromone.source.species_id == self.species_id]
+        strongest_pheromone = max(filtered_pheromones, key=lambda x: x.strength, default=None)
+        return strongest_pheromone
+
     def eat_on_square(self):
         """
         Eats a producer (should be expanded to all edible creatures)
         on the same square as the calling creature.
         If there is no creature to eat here, then does nothing.
         """
-        # TODO: NOTE: I don't know anything about the "edible creatures" tag system
-        # that's been floating around, so I'll hold off on implementing the 'eat edible creature'
-        # check and make this function only consume a producer.
-        yummy_produce = self.layer_system.get_producers(self.position)
-        if len(yummy_produce) > 0:
-            chosen_to_eat = np.random.choice(yummy_produce)
+        creatures = self.layer_system.get_creatures(self.position)
+        choices_to_eat = []
+        for creature in creatures:
+            if self.is_edible(creature):
+                choices_to_eat.append(creature)
+        if len(choices_to_eat) > 0:
+            chosen_to_eat = np.random.choice(choices_to_eat)
+
             # print(f"{self.species_id} has chosen to eat {chosen_to_eat.species_id}, whose current energy is {chosen_to_eat.energy_bar.current_energy}")
             energy_gain_base = chosen_to_eat.energy_bar.current_energy * 0.10
 
             # a bonus to energy gain from consumption based on the size of the prey creature and the eating creature
             # this value is never greater than the eating creature's size
-            energy_gain_sizeBonus = max((1.75 * chosen_to_eat.size), self.size)
+            energy_gain_sizeBonus = max((1.5 * chosen_to_eat.size), self.size)
             self.energy_bar.replenish_energy(energy_gain_base + energy_gain_sizeBonus)
             chosen_to_eat.die()
         else:
-            print(f"a creature of (self.species_id) ate nothing")
-
-    def reproduce(self, child_starting_energy=30):
-        """
-        Create a new creature at a space nearby.
-        Also updates the parent's max energy. 
-        """
-        # senseLocation = self.senseNearest()
-        # if senseLocation is not None:
+            print(f"a creature of species (self.species_id) ate nothing")
 
