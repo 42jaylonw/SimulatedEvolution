@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", function (){
     placementButtons.push(placeProducerButton);
     placementButtons.push(eraserButton);
 
-    console.log(placementButtons);
     let mode = selectButton.id;
     let curMenu;
 
@@ -111,7 +110,8 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function placeConsumer(element){
         console.log("adding consumer");
-        performGridSpaceOperation(element, '/add_creature_consumer');
+        // var creaturePreset = document.getElementById("preset-input");
+        performGridSpaceOperation(element, '/add_creature_consumer', payload={headers: ["preset-id"], values: [document.getElementById("preset-input").value]});
     }
 
     function placeProducer(element){
@@ -202,6 +202,7 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function refreshParameterMenu(buttonID){
         var menuToAdd;
+        analysisContainer.innerHTML = '';
         switch(buttonID){
             case placeHeatSourceButton.id:
                 menuToAdd = createEmitterMenu();
@@ -212,16 +213,14 @@ document.addEventListener("DOMContentLoaded", function (){
             case placeConsumerButton.id:
                 menuToAdd = createCreatureMenu();
                 break;
+            case placeProducerButton.id:
+                menuToAdd = createCreatureMenu();
+                break;
             default:
                 menuToAdd = null;
         }
-
-        if(curMenu != null){
-            analysisContainer.removeChild(curMenu);
-        }
         
         if (menuToAdd != null){
-            
             analysisContainer.append(menuToAdd);
         }
         
@@ -250,6 +249,20 @@ document.addEventListener("DOMContentLoaded", function (){
         var creatureMenu = document.createElement("div");
         creatureMenu.classList.add("creature-menu");
         creatureMenu.innerHTML = `Consumer Menu`;
+
+        //Add inputFields
+        var presetInput = createInputField("presetID", "Enter Preset ID");
+        presetInput.id = "preset-input";
+        //Return menu 
+        creatureMenu.appendChild(presetInput);
         return creatureMenu;
+    }
+
+    function createInputField(name, placeholder="placeholder"){
+        var newInputField = document.createElement("input");
+        newInputField.setAttribute("type", "text");
+        newInputField.setAttribute("name", name);
+        newInputField.setAttribute("placeholder", placeholder);
+        return newInputField
     }
 });
