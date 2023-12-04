@@ -296,7 +296,7 @@ class Consumer(Creature):
                 # behavior when it comes to the nearest object.
                 # This results in "preferred" directions when there is a tie
                 # in distance
-                print(f"closest location to {self.species_id} at {self.position} is {closest_locations[0]}")
+                # print(f"closest location to {self.species_id} at {self.position} is {closest_locations[0]}")
                 return closest_locations[0]
 
             if len(closest_locations) > 0:
