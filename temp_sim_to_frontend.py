@@ -78,7 +78,7 @@ def get_creatures_wrapper(sim, position):
         creature_data["consumers"].append(consumer.creature_info)
     emitters = sim.layer_system.get_emitters(position)
     for emitter in emitters:
-        creature_data["emitters"].append({"range":emitter.emit_range, "strength":emitter.emit_value})
+        creature_data["emitters"].append({"range":emitter.emit_range, "strength":emitter.emit_val})
     return jsonify(creature_data)
 
 # Place a wall in the simulation at the specified location
