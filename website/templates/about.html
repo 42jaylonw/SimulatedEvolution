@@ -1,16 +1,33 @@
 {% extends "base.html" %} {% block title %}About{% endblock %}
 
 {% block content %}
-<h1>About Section </h1>
-<p id="demo">Click "Remove", and this paragraph will be removed from the DOM.</p>
-<button onclick="addToBody('A')">ADD</button>
-<p id="demo">Click "Remove", and this paragraph will be removed from the DOM.</p>
-<button onclick="removeFromBody('A')">Remove</button>
+<div class="row">
+    <div class="col-3">
+        <img class="secret-monke" src="https://gifdb.com/images/high/vibing-dancing-monkey-92ao7e9t9rmvlybp.gif" alt="Computer man">
+    </div>
+    <div class="col-6">
+      
+        <h1 class="text-center">  UCSC - CSE115A Fall 2023<br>
+        Contributors<br>
+        Justin <br>
+        Kristian <br>
+        Will <br>
+        Jaylon <br>
+        Carson 
+        </h1>
+       
+    </div>
+    <div class="col-3">
+        <img class="secret-monke" src="https://media.tenor.com/GPXUbdtkd0oAAAAM/marajtwt-orangutan.gif">
+    </div>
+
+</div>
+
 {% endblock %}
 
 {% block script %}
 <script
 type = "text/javascript"
-src = "{{ url_for('static', filename='temp.js') }}"
+src = "{{ url_for('static', filename='about.js') }}"
 ></script>
 {% endblock %}

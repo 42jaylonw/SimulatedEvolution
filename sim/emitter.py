@@ -36,6 +36,7 @@ class Emitter():
         self.emit_val = e_val
 
         # Update the Layer System
+        self.sim.add_emitter(self)
         self.layer_system.emitter_enter(self.position, self)
 
     def move_to_pos(self, new_pos):
@@ -47,11 +48,13 @@ class Emitter():
 
 
     def remove(self):
-        # Remove reference from SimSpace emitters list
-        if self in self.sim.emitters:
-            self.sim.emitters.remove(self)
         # Update the Layer System
         self.layer_system.emitter_exit(self.position, self)
+        # Remove reference from SimSpace emitters list
+        if self in self.sim.emitters:
+            self.sim.remove_emitter(self)
+     
+      
     """
     Update by radiating outwards in a circle from the center
     Note: Walls obstruct emitters

@@ -161,3 +161,16 @@ body{
   width: 100px;
   height: 100px;
 }
+
+.secret-monke{
+  width: 200px;
+  height: 200px;
+  opacity: 0;
+}
+
+.secret-monke:hover{
+  opacity: 1;
+
+  transition: opacity 5s ease-in;
+  transition-delay: 20s;
+}
