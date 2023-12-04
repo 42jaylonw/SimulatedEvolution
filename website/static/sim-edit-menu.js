@@ -2,6 +2,23 @@
 let placementButtons = [];
 
 document.addEventListener("DOMContentLoaded", function (){
+    let heatMapdisplayed = false;
+    document.addEventListener('keydown', function (e) {
+        //Press Tab to toggle heatmap
+        if(e.code === 'Tab'){
+            e.preventDefault();
+            toggleOverlay("heatmap");
+        }
+        if(e.shiftKey && e.code ==='KeyM'){
+            toggleOverlay("lightmap");
+        }
+    });
+    function toggleOverlay(mode)
+    {
+    //Change state
+    heatMapdisplayed = !heatMapdisplayed;
+    simSpace.toggleOverlayDisplay(heatMapdisplayed, mode);
+    }
     var analysisContainer = document.querySelector('.analysis-container');
     var selectButton = document.getElementById('selectButton');
     selectButton.disabled = true;

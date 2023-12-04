@@ -7,7 +7,9 @@
 <!--Layout for Home page-->
 <div class="row content">
     
-  
+    <div class="idk">
+    
+    </div>
 
     <!-- Simulator Control Binding Information(left side of screen) -->
     <div class="col-3 sidenav left-window">
@@ -49,48 +51,73 @@
         {% else %}
 
             {% if simulationSetup %}
-            <div class="col-3 placing-stuff">
-                <h5 class="text-center">ToolBox<br>
-                    <button id="selectButton" class="menuButton" type="button">
-                        <span class="selectHoverText" data-hover="Select">
-                            S
-                          </span>
-                    </button>
-                    <button id="addWallButton" class="menuButton" type="button">
-                        <span class="selectHoverText" data-hover="Place Wall">
-                            W
-                          </span>
-                    </button>
-                    <button id="addLightSourceButton" class="menuButton" type="button">
-                        <span class="selectHoverText" data-hover="Place Lightsource">
-                            L
-                          </span>
-                    </button>
-                    <button id="addHeatSourceButton" class="menuButton" type="button">
-                        <span class="selectHoverText" data-hover="Place Heatsource">
-                            H
-                          </span>
-                    </button>
-                    <button id="addConsumerButton" class="menuButton" type="button">
-                        <span class="selectHoverText" data-hover="Place Consumer">
-                            C
-                          </span>
-                    </button>
-                    <button id="addProducerButton" class="menuButton" type="button">
-                        <span class="selectHoverText" data-hover="Place Producer">
-                            P
-                          </span>
-                    </button>
-                    <button id="eraserButton" class="menuButton" type="button">
-                        <span class="selectHoverText" data-hover="Eraser">
-                            E
-                          </span>
-                    </button>
-                </h5>
+            <div class="row">
+                <div class="col">
+                    <h1 class="text-center">Simulation Setup</h1>
+                    <h2 class="text-center">Quick Controls</h2>
+                    <p class="text-left">
+                        Toggle Lightmap: SHIFT + M<br>
+                        Toggle Heatmap: TAB
+                    </p>
+                    
+                </div>
+                <div class="col placing-stuff">
+                    <h5 class="text-center">ToolBox<br>
+                        <button id="selectButton" class="menuButton" type="button">
+                            <span class="selectHoverText" data-hover="Select">
+                                S
+                            </span>
+                        </button>
+                        <button id="addWallButton" class="menuButton" type="button">
+                            <span class="selectHoverText" data-hover="Place Wall">
+                                W
+                            </span>
+                        </button>
+                        <button id="addLightSourceButton" class="menuButton" type="button">
+                            <span class="selectHoverText" data-hover="Place Lightsource">
+                                L
+                            </span>
+                        </button>
+                        <button id="addHeatSourceButton" class="menuButton" type="button">
+                            <span class="selectHoverText" data-hover="Place Heatsource">
+                                H
+                            </span>
+                        </button>
+                        <button id="addConsumerButton" class="menuButton" type="button">
+                            <span class="selectHoverText" data-hover="Place Consumer">
+                                C
+                            </span>
+                        </button>
+                        <button id="addProducerButton" class="menuButton" type="button">
+                            <span class="selectHoverText" data-hover="Place Producer">
+                                P
+                            </span>
+                        </button>
+                        <button id="eraserButton" class="menuButton" type="button">
+                            <span class="selectHoverText" data-hover="Eraser">
+                                E
+                            </span>
+                        </button>
+                    </h5>
+                     <div class="row">
+                        <div class="col">
+                            <form method="POST" action='/reset_simulator'>
+                                <button type="submit" class="small-btn btn-danger">Reset Simulator</button>
+                            </form>
+                        </div>
+                        <div class="col">
+                         <form method="POST">
+                            <button id="startSimulation" type="submit" class="small-btn btn-success">Start Simulation</button>
+                        </form>
+                        </div>
+                        
+                       
+                    </div>
+                </div>
+                
             </div>
-            <form method="POST">
-            <button id="startSimulation" type="submit">Start Simulation</button>
-            </form>
+          
+            
             <script
             type = "text/javascript"
             src = "{{ url_for('static', filename='sim-edit-menu.js') }}"
@@ -108,14 +135,17 @@
                 <button id="toggleClimateButton" type="button">Show Overlay</button>
                 <button id="newSimulationButton" type="button">New Simulation</button>
             </h5>
-              <script
+            <script
                 type = "text/javascript"
                 src = "{{ url_for('static', filename='simulation-controls.js') }}"
-               ></script>
-            {% endif %}
+            ></script>
             <form method="POST" action='/reset_simulator'>
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
             </form>
+            {% endif %}
+            {# <form method="POST" action='/reset_simulator'>
+                <button type="submit" class="btn btn-danger">Reset Simulator</button>
+            </form> #}
         {%endif%}
     
         </div>
