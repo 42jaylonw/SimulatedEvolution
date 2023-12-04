@@ -208,7 +208,7 @@ class LayerSystem():
     # This function should be called by the Emitter when it is spawned
     def emitter_enter(self, pos, emitter):
         assert not self.out_of_bounds(pos)
-        self.get_gridspace(pos).creature_enter(emitter)
+        self.get_gridspace(pos).emitter_enter(emitter)
 
     # Removes emitter from the GridSpace emitters list at the specified position
     # This function should be called by the Emitter when it gets removed from the SimSpace

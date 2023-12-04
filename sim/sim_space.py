@@ -89,7 +89,6 @@ class SimSpace:
         """
         assert self.creatures is not None, "Reset first!"
         
-        print(self.creatures)
 
         self.layer_system.step()
 
