@@ -88,7 +88,8 @@ def new_grid():
 def get_grid_data():
     """Perform SimSpace Step then update front-end"""
     simulator.step()
-    return sim_to_front.get_sim_state(simulator)
+    print("number of creatures: ", len(simulator.creatures))
+    return sim_to_front.get_sim_state(simulator, includeImageData=True)
 
 # Retrieve detailed information at specified grid space
 @views.route('/get_creatures_at_grid_space', methods=["POST"])
@@ -126,7 +127,7 @@ def erase_space():
 @views.route('/add_creature_consumer', methods=["POST"])
 def add_consumer():
     global NUMCONSUMERS
-    NUMCONSUMERS += 1
+    # NUMCONSUMERS += 1
     position = json.loads(request.data)["position"]
     position = np.array(position)
     sim_to_front.user_place_consumer(simulator, position)
@@ -135,7 +136,7 @@ def add_consumer():
 @views.route('/add_creature_producer', methods=["POST"])
 def add_producer():
     global NUMPRODUCERS
-    NUMPRODUCERS += 1
+    # NUMPRODUCERS += 1
     position = json.loads(request.data)["position"]
     position = np.array(position)
     sim_to_front.user_place_producer(simulator, position)
@@ -145,7 +146,10 @@ def add_producer():
 def add_lightsource():
     position = json.loads(request.data)["position"]
     position = np.array(position)
-    sim_to_front.user_place_lightsource(simulator, position)
+    emit_range = json.loads(request.data)["emit_range"]
+    emit_strength = json.loads(request.data)["emit_strength"]
+
+    sim_to_front.user_place_lightsource(simulator, position, emit_range, emit_strength)
     return sim_to_front.get_sim_state(simulator)
     #return sim_to_front.get_gridspace_state(simulator, position)
 
@@ -153,7 +157,10 @@ def add_lightsource():
 def add_heatsource():
     position = json.loads(request.data)["position"]
     position = np.array(position)
-    sim_to_front.user_place_heatsource(simulator, position)
+    emit_range = json.loads(request.data)["emit_range"]
+    emit_strength = json.loads(request.data)["emit_strength"]
+
+    sim_to_front.user_place_heatsource(simulator, position, emit_range, emit_strength)
     return sim_to_front.get_sim_state(simulator)
 
 @views.route('/visual_update', methods=["GET"])

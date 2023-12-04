@@ -28,8 +28,11 @@ class Creature:
         self.layer_system = sim.layer_system  # EXPERIMENTAL
         #self.position = None
         self.position = spawn_pos
-        if self.position is not None:
-            self.layer_system.creature_enter(self.position, self)
+        if self.position is None:
+            self.position = np.random.randint(self.sim.grid_size)
+        
+        self.sim.add_creature(self)
+        self.layer_system.creature_enter(self.position, self)
 
         if self.name == 'Consumer':
             self.behavior_system = GeneticAlgorithm(
@@ -62,8 +65,7 @@ class Creature:
             self.image_data = np.concatenate((self.appearance, mask), axis=2)
 
         if self.position is None:
-            self.position = np.random.randint(self.sim.grid_size)
-            self.layer_system.creature_enter(self.position, self)
+            self.set_position(np.random.randint(self.sim.grid_size))
 
         # self.sim.increment_pos_layer(self.name, self.position, 1)
 
@@ -85,13 +87,16 @@ class Creature:
         pass
 
     def remove(self):
+        print("removing self")
         """
         Removes the creature from the SimSpace. Removes itself from sim.creatures
         and updates the list stored at that position in the layer system.
         Different from die() in that no additional simulation logic is attached.
         """
+        print(self.sim.creatures)
+        self.layer_system.creature_exit(self.position, self)
         if self in self.sim.creatures:
-            self.sim.creatures.remove(self)
+            self.sim.remove_creature(self)
 
         self.layer_system.creature_exit(self.position, self)
         pass
@@ -131,7 +136,6 @@ class Creature:
 
     @property
     def creature_info(self):
-        print(self.energy_bar)
         if self.image_data is not None:
             return {"genome": self.genome,
                     "size": self.size,

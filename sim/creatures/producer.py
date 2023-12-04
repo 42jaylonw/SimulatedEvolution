@@ -101,13 +101,15 @@ class Producer(Creature):
     def producer_metabolize(self):
         pos = self.position
         light = self.light_req - self.get_light_level(pos)
-        light = max(0, light)
+        # light = max(0, light)
 
         size_penalty = .1
         light_penalty = .02
         # self.energy -= (self.current_size * size_penalty) + (light * light_penalty)
-        light_cost = light * light_penalty
-        self.energy_bar.consume_energy(light_cost)
+        energy_metab = 0 - ((self.current_size * size_penalty) + (light * light_penalty))
+        self.energy_bar.replenish_energy(energy_metab)
+        if (self.energy_bar.current_energy <= 0):
+            self.energy_bar.current_energy = 0
 
     # producer_growth handles growth of a plant that is not max size
     def producer_growth(self):
@@ -200,7 +202,7 @@ class Producer(Creature):
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
-        # self.sim.layer_system.creature_exit(self.position, self)
+        self.sim.layer_system.creature_exit(self.position, self)
 
     # expansion_possible checks if the producer can expand into that tile
     def expansion_possible(self, pos):

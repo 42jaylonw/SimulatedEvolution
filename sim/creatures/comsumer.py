@@ -22,9 +22,9 @@ class Consumer(Creature):
 
         # reprod_cooldown is generated from the genome and determines how long a creature waits before reprod
         hash = self.generate_hash(self.genome[3])
-        self.reprod_cooldown = int(hash[:32], 16) % 50 + 5
+        self.reprod_cooldown = int(hash[:32], 16) % 50 + 20
         # reprod_countdown ranges from 0 to reprod_cooldown and ticks down
-        self.reprod_countdown = 0
+        self.reprod_countdown = (self.reprod_cooldown / 2)
         self.edible_consumers = sim.predation_table[self.species_id][0]
         self.edible_producers = sim.predation_table[self.species_id][1]
 
@@ -68,7 +68,7 @@ class Consumer(Creature):
                         # initialize creature and add to sim
                         child_creature = Consumer(self.sim, child_genome, self.position)
                         child_creature.species_id = self.species_id
-                        self.sim.add_creature(child_creature)
+                        #self.sim.add_creature(child_creature)
                         # print("child added at location", child_creature.position)
                         return -1
             # else check for compatible creatures in sensory range
@@ -296,7 +296,7 @@ class Consumer(Creature):
                 # behavior when it comes to the nearest object.
                 # This results in "preferred" directions when there is a tie
                 # in distance
-                print(f"closest location to {self.species_id} at {self.position} is {closest_locations[0]}")
+                # print(f"closest location to {self.species_id} at {self.position} is {closest_locations[0]}")
                 return closest_locations[0]
 
             if len(closest_locations) > 0:

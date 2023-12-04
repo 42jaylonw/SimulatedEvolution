@@ -89,9 +89,9 @@ def user_place_wall(sim, position):
 # Place a LightSource in the simulation at the specified location.
 # If there is a wall there, no emitter will be placed
 # Currently a preset for the strength/range of the emitter
-def user_place_lightsource(sim, position):
+def user_place_lightsource(sim, position, emit_range=20, emit_strength=100):
     if not sim.layer_system.has_wall(position):
-        new_light_source = LightSource(sim, position, 20, 100)
+        new_light_source = LightSource(sim, position, emit_range, emit_strength)
         # sim.reset(sim.creatures, new_emitter_list)
         sim.add_emitter(new_light_source)
         user_place_emitter_visual_helper(sim)
@@ -99,9 +99,9 @@ def user_place_lightsource(sim, position):
 # Place a HeatSource in the simulation at the specified location.
 # If there is a wall there, no emitter will be placed
 # Currently a preset for the strength/range of the emitter
-def user_place_heatsource(sim, position):
+def user_place_heatsource(sim, position, emit_range=20, emit_strength=100):
     if not sim.layer_system.has_wall(position):
-        new_heat_source = HeatSource(sim, position, 20, 100)
+        new_heat_source = HeatSource(sim, position, emit_range, emit_strength)
         # sim.reset(sim.creatures, new_emitter_list)
         sim.add_emitter(new_heat_source)
         user_place_emitter_visual_helper(sim)
@@ -117,9 +117,9 @@ def user_place_emitter_visual_helper(sim):
 def user_place_consumer(sim, position):
     if not sim.layer_system.has_wall(position):
         new_creature = Consumer(sim, spawn_pos=position)
-        new_creature_list = sim.creatures
-        new_creature_list.append(new_creature)
-        sim.add_creature(new_creature)
+        #new_creature_list = sim.creatures
+        #new_creature_list.append(new_creature)
+        #sim.add_creature(new_creature) # TODO: 
 
 
 # Place a Prodcuer in the simulation at the specified location.
@@ -128,24 +128,30 @@ def user_place_consumer(sim, position):
 def user_place_producer(sim, position):
     if not sim.layer_system.has_wall(position):
         new_creature = Producer(sim, spawn_pos=position)
-        new_creature_list = sim.creatures
-        new_creature_list.append(new_creature)
-        sim.add_creature(new_creature)
+        #new_creature_list = sim.creatures
+        #new_creature_list.append(new_creature)
+        #sim.add_creature(new_creature)
         # sim.reset(new_creature_list, sim.emitters)
 
 
 # Erase EVERYTHING (Creatures, Wall, Emitters) at the specified location.
 def user_erase_space(sim, position):
+
     sim.layer_system.wall_remove(position)
 
-    for creature in sim.creatures:
-        if creature.position[0] == position[0] and creature.position[1] == position[1]:
-            creature.remove()
-    
-    for emitter in sim.emitters:
-        if emitter.position[0] == position[0] and  emitter.position[1] == position[1]:
-            emitter.remove()
+    removed_creatures = sim.layer_system.get_creatures(position)
+    removed_emitters = sim.layer_system.get_emitters(position)
 
+    # remove everything at the GridSpace object
+    sim.layer_system.empty_space(position)
+
+    # Remove the creatures and emitters from the lists in simspace
+    for creature in removed_creatures:
+        sim.remove_creature(creature)
+    
+    for emitter in removed_emitters:
+        sim.remove_emitter(emitter)
+    
 # EXPERIMENTAL
 # Erase EVERYTHING in the simulation at ALL POSITIONS.
 def user_clear_simulation(sim):

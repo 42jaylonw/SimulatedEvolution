@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function (){
         // Change the default function to be called when pressing left click
         mode = buttonID;
         refreshParameterMenu(mode);
-                
+        simSpace.toggleOverlayDisplay(false, "none");    
     }
 
     // Call menu method based on selected mode
@@ -104,20 +104,21 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function placeLightSource(element){
         console.log("adding light source");
-        performGridSpaceOperation(element, '/add_lightsource');
+        performGridSpaceOperation(element, '/add_lightsource', payload={headers: ["emit_range", "emit_strength"], values: [parseInt(document.getElementById("emit_range").value), parseInt(document.getElementById("emit_strength").value)]});
     }
 
     function placeHeatSource(element){
         console.log("adding heat source");
-        
-        performGridSpaceOperation(element, '/add_heatsource');
+        performGridSpaceOperation(element, '/add_heatsource', payload={headers: ["emit_range", "emit_strength"], values: [parseInt(document.getElementById("emit_range").value), parseInt(document.getElementById("emit_strength").value)]});
         simSpace.toggleOverlayDisplay(true, "heatmap");
     }
 
-    function performGridSpaceOperation(element, route){
+    function performGridSpaceOperation(element, route, payload=null){
         cellInformation = element.split("-") 
         console.log(cellInformation[1] + "," + cellInformation[2]);
-        const dataToSend = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
+
+        const dataToSend = constructDataToSend(payload);
+        
         fetch(route, {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(dataToSend)})
         .then((response) => response.json())
         .then((data) => {
@@ -134,6 +135,7 @@ document.addEventListener("DOMContentLoaded", function (){
             if(route == '/add_heatsource' || route == '/add_lightsource')
             {
                 simSpace.visualUpdate(data, isBatch=true);
+                simSpace.toggleOverlayDisplay(true, route);
                 return;
             }
             // update the visual grid based on function associated with route
@@ -143,6 +145,22 @@ document.addEventListener("DOMContentLoaded", function (){
             console.error('Error:', error);
         });
     }
+
+    function constructDataToSend(additionalInfo=null){
+        var dataToSend = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
+
+        if (additionalInfo != null){
+            var headers = additionalInfo.headers;
+            var values = additionalInfo.values;
+
+            for(var i = 0; i < headers.length; i++){
+                dataToSend[headers[i]] = values[i];
+            }
+        }
+        
+        return dataToSend;
+    }
+
     /**
          * 
          * @param {string} creatureClass name of type of creature 
@@ -196,9 +214,19 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function createEmitterMenu(){
         var emitterMenu = document.createElement("div");
+
         emitterMenu.classList.add("emitter-menu");
-        emitterMenu.innerHTML = `Emitter Menu`;
+        emitterMenu.innerHTML = `Emitter Menu<br>Range<br>` + generatePlaceValueSlider("emit_range", 1, 25);
+        //emitterMenu.innerHTML += `<br>Range = ` + `${document.getElementById("emit_range").value}`;
+        emitterMenu.innerHTML += `<br>Strength<br>` + generatePlaceValueSlider("emit_strength", 1, 100);
+        //emitterMenu.innerHTML += `<br>``<br>Strength = ` + `${document.getElementById("emit_strength").value}`;
+
         return emitterMenu;
+    }
+
+    function generatePlaceValueSlider(id, min, max){
+        returnValueHTML = `<div class="slidecontainer"><input type="range" min="${min}" max="${max}" value="${max}" class="slider" id=${id}> </div>`;
+        return returnValueHTML;
     }
 
     function createCreatureMenu(){
