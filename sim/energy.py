@@ -12,7 +12,7 @@ class EnergyBar:
         Called on a time step.
         Lowers energy level based on metabolism and an additional cost, such as movement cost or light level.
         """
-        energy_consumption = float(self.size * 0.10)
+        energy_consumption = float(self.size * 0.01)
         self.current_energy -= energy_consumption + additional_cost
         if self.current_energy < 0:
             self.current_energy = 0
