@@ -101,11 +101,13 @@ class Creature:
         self.layer_system.creature_exit(self.position, self)
         pass
 
-    def die(self):
+    def die(self, deathMessage=""):
         """
         Handles death. A creature that dies should remove itself from sim.creatures
         and update the layer's grid position value.
         """
+        if len(deathMessage) > 0:
+            print(deathMessage)
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 

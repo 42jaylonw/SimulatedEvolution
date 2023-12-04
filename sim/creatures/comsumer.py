@@ -19,6 +19,7 @@ class Consumer(Creature):
         self.curr_action = [0, 0]
         self.last_action = [0, 0]
         self.move_cost = 0.0
+        self.times_eaten = 0
 
         # reprod_cooldown is generated from the genome and determines how long a creature waits before reprod
         hash = self.generate_hash(self.genome[3])
@@ -29,27 +30,32 @@ class Consumer(Creature):
         self.edible_producers = sim.predation_table[self.species_id][1]
 
     def step(self):
+        # print(f"Creature of species {self.species_id}", end="")
         obs = self.get_observation()
         # if energy and cooldown is sufficient to reproduce
         action = self.reproduction_protocol()
         # if reproduction protocol not active
         if action == -1:
             action = np.argmax(self.behavior_system.predict(obs))
+            # print(" got action from neural network")
+        # else:
+            # print(" got action from reproduction protocol")
         # self.die()
         self.action_hunt(action)
         self.energy_bar.consume_energy(self.move_cost)
         self.energy_bar.age_tick()
         if self.energy_bar.is_empty():
             # print(f"A creature of {self.species_id} has died")
-            self.die()
+            self.die(f"creature of {self.species_id} died of starvation")
 
     
     def reproduction_protocol(self):
-        reproduce_thresh = 40
+        reproduce_thresh = 85
         if (self.reprod_countdown > 0):
             self.reprod_countdown = self.reprod_countdown - 1
             return -1
-        if (self.energy_bar.current_energy >= reproduce_thresh and self.reprod_countdown == 0):
+        # if (self.energy_bar.current_energy >= reproduce_thresh and self.reprod_countdown == 0):
+        if (self.energy_bar.is_satiated() and self.reprod_cooldown == 0):
             # if another creature on current space that is compatible
             for creature in self.sim.layer_system.get_consumers(self.position):
                 if creature == self:
@@ -70,6 +76,7 @@ class Consumer(Creature):
                         child_creature.species_id = self.species_id
                         #self.sim.add_creature(child_creature)
                         # print("child added at location", child_creature.position)
+                        print("reproduced")
                         return -1
             # else check for compatible creatures in sensory range
             potential_partners = self.sensePartners()
@@ -110,7 +117,9 @@ class Consumer(Creature):
         return min_dir
 
 
-    def die(self):
+    def die(self, deathMessage=""):
+        if len(deathMessage) > 0:
+            print(deathMessage)
         # self.sim.creatures -= this
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
@@ -308,14 +317,16 @@ class Consumer(Creature):
         edible_positions = []
         for pos in positions_to_check:
             if self.layer_system.get_num_creatures(pos[0]) > 0:
-                creatures_there = self.layer_system.get_creatures(pos)
+                creatures_there = self.layer_system.get_creatures(pos[0])
                 for creature in creatures_there:
-                    if creature in self.edible_producers or creature in self.edible_consumers:
+                    if self.is_edible(creature):
+                        # print(f"EDIBLE FOUND -- {pos}")
                         edible_positions.append(pos)
                         break
         if len(edible_positions) <= 0:
             return None
         closest_pos = min(edible_positions, key=lambda x: x[1])
+        # print(f"closest_pos is {closest_pos}")
         return closest_pos[0]
 
     def action_move(self, action: int):
@@ -464,11 +475,13 @@ class Consumer(Creature):
         """
         Checks to see if a creature underneath is edible. (exists within edible tags)
         """
-        if creature in self.edible_producers:
-            return True
-        if creature in self.edible_consumers:
-            return True
-        return False
+        if isinstance(creature, Creature):
+            if creature.species_id in self.edible_producers:
+                return True
+            if creature.species_id in self.edible_consumers:
+                return True
+        else:
+            return False
     
     # NOTE: temporarily adding the "otherwise" param to do a regular action-move if a creature is not detected
     def action_hunt(self, otherwise):
@@ -485,11 +498,14 @@ class Consumer(Creature):
         # tracking, as producers are completely stationary and do not use
         # pheromones.
         # senseLocation = self.senseNearest()
-
+        # print("hunt enter -", end="")
         if not self.energy_bar.is_satiated():
+            # print(" not satiated, should hunt")
             # if not satiated, then move in accordance with the hunting function
             senseLocation = self.senseWithinRange()
+            # print(f"senseLocation is {senseLocation} vs the creature {self.species_id}'s position {self.position}")
             if senseLocation is not None:
+                # print("is manhattanning")
                 # if there are edible creatures within sensory range
                 raw_x = senseLocation[0] - self.position[0]
                 raw_y = senseLocation[1] - self.position[1]
@@ -511,19 +527,22 @@ class Consumer(Creature):
                     elif raw_y < 0:
                         self.action_move(2)
             else:
+                # print("is not manhattanning")
                 # if no edible creatures within sensory range, check to see if there are pheromones within
                 # the immediate up, down, left, right directions, and move towards the strongest one if so
 
                 # case: there are no pheromones and the creature should move in accordance with its neural network
-                strongest = self.get_strongest_immediate_pheromone(self.edible_consumers, 0)
-                strongest_direction = strongest[0]
+                strongest = self.get_strongest_immediate_pheromone(0)
                 if strongest is None:
+                    # print("moving neural network style")
                     self.action_move(otherwise)
                 else:
-                    print(f"A creature of species {self.species_id} moved toward pheromone")
+                    strongest_direction = strongest[0]
+                    # print(f"A creature of species {self.species_id} moved toward pheromone")
                     self.action_move(strongest_direction)
         else:
             # if satiated, then simply move with accordance with the reproduction protocol passed in
+            # print(" satiated, should take action according to reproduction protocol")
             self.action_move(otherwise)
         
     def get_strongest_immediate_pheromone(self, mode=0):
@@ -547,10 +566,10 @@ class Consumer(Creature):
             for position in legal_positions:
                 if mode == 0:
                     potential_strongest = self._get_max_edible_pheromone(position)
-                else if mode == 1:
+                elif mode == 1:
                     potential_strongest = self._get_max_same_pheromone(position)
                 else:
-                    potential strongest = self._get_max_edible_pheromone(position)
+                    potential_strongest = self._get_max_edible_pheromone(position)
                     
                 if potential_strongest is None:
                     continue
@@ -563,7 +582,10 @@ class Consumer(Creature):
                     strongest_pheromone = potential_strongest
                     temp = (position[0] - self.position[0], position[1] - self.position[1])
                     strongest_direction = self._position_to_direction(temp)
-        return strongest_direction, strongest_pheromone.strength
+        if strongest_pheromone is not None:
+            return strongest_direction, strongest_pheromone.strength
+        else:
+            return None
 
     def _position_to_direction(self, position):
         """
@@ -574,13 +596,13 @@ class Consumer(Creature):
         if position[1] == 1:
             # up
             direction = 0
-        else if position[0] == 1:
+        elif position[0] == 1:
             # right
             direction = 1
-        else if position[1] == -1:
+        elif position[1] == -1:
             # down
             direction = 2
-        else if position[0] == -1:
+        elif position[0] == -1:
             # left
             direction = 3
         return direction
@@ -621,7 +643,10 @@ class Consumer(Creature):
         choices_to_eat = []
         for creature in creatures:
             if self.is_edible(creature):
+                # print('Y',end="")
                 choices_to_eat.append(creature)
+            # else:
+                # print('N',end="")
         if len(choices_to_eat) > 0:
             chosen_to_eat = np.random.choice(choices_to_eat)
 
@@ -632,7 +657,9 @@ class Consumer(Creature):
             # this value is never greater than the eating creature's size
             energy_gain_sizeBonus = max((1.5 * chosen_to_eat.size), self.size)
             self.energy_bar.replenish_energy(energy_gain_base + energy_gain_sizeBonus)
-            chosen_to_eat.die()
+            chosen_to_eat.die(f"eaten by a creature of {chosen_to_eat.species_id}, a {type(chosen_to_eat)}")
+            self.times_eaten = self.times_eaten + 1
+            # print(f"eaten {self.times_eaten} times")
         else:
             print(f"a creature of species (self.species_id) ate nothing")
 

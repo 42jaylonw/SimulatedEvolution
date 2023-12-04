@@ -198,7 +198,9 @@ class Producer(Creature):
         return
 
 
-    def die(self):
+    def die(self, deathMessage=""):
+        if len(deathMessage) > 0:
+            print(deathMessage)
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
