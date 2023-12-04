@@ -25,6 +25,8 @@ class Producer(Creature):
 
         self.ideal_temp = int(hash[:32], 16) % 25 + 15
         self.light_req = int(hash[32:], 16) % 20 + 20
+        self.reprod_cooldown = int(hash[32:], 16) % 30 + 10
+        self.reprod_countdown = (self.reprod_cooldown / 2)
 
         # growth rate determines how fast the creature grows
         # given ideal conditions
@@ -187,14 +189,11 @@ class Producer(Creature):
         expansion = max(expansions, key=lambda x: x[0])
         # TODO: handle creation of new plant at expansion tile
         new_genome = self.mutate_producer_genome()
-        new_plant = self.__class__(self.sim, new_genome)
+        new_plant = self.__class__(self.sim, new_genome, expansion[1:3])
         new_plant.species_id = self.species_id
-        new_plant.set_position(expansion[1:3])
-        self.sim.layer_system.creature_enter(expansion[1:3], new_plant)
-        self.sim.creatures.append(new_plant)
 
         # reset plant so it doesn't proliferate
-        self.current_size = 0.02
+        self.reprod_countdown = self.reprod_cooldown
         return
 
 
@@ -218,6 +217,10 @@ class Producer(Creature):
     def step(self):
         # check if light and temp are sufficient for growth
         if (self.check_suff_energy()):
+            # if creature's reproduction cooldown is not 0, tick down
+            if (self.reprod_countdown > 0):
+                self.reprod_countdown = self.reprod_countdown - 1
+
             # if current size is not 1.0, grow in size
             # grow differently based on size percentage
             # 0-50, 51-90, 91-100, each with different rate
@@ -240,7 +243,7 @@ class Producer(Creature):
                     # this can be changed to reduce energy 
                     self.current_size = 0.01
 
-                else:
+                elif self.reprod_countdown == 0:
                     expansions = self.expansion_assess()
 
                     self.producer_expand(expansions)
