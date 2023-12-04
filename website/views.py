@@ -130,7 +130,8 @@ def add_consumer():
     # NUMCONSUMERS += 1
     position = json.loads(request.data)["position"]
     position = np.array(position)
-    sim_to_front.user_place_consumer(simulator, position)
+    preset_id = json.loads(request.data)["preset-id"]
+    sim_to_front.user_place_consumer(simulator, position, preset_id)
     return sim_to_front.get_gridspace_state(simulator, position)
 
 @views.route('/add_creature_producer', methods=["POST"])

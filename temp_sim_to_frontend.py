@@ -2,6 +2,7 @@ import toml
 from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
+from sim import presets as preset
 import numpy as np
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
@@ -78,7 +79,8 @@ def get_creatures_wrapper(sim, position):
         creature_data["consumers"].append(consumer.creature_info)
     emitters = sim.layer_system.get_emitters(position)
     for emitter in emitters:
-        creature_data["emitters"].append({"range":emitter.emit_range, "strength":emitter.emit_val})
+        creature_data["emitters"].append({"range":emitter.emit_range, "strength":int(emitter.emit_val)})
+
     return jsonify(creature_data)
 
 # Place a wall in the simulation at the specified location
@@ -115,9 +117,9 @@ def user_place_emitter_visual_helper(sim):
 # Place a Consumer in the simulation at the specified location.
 # If there is a wall there, no consumer will be placed
 # Currently the genome is random
-def user_place_consumer(sim, position):
+def user_place_consumer(sim, position, presetID=None):
     if not sim.layer_system.has_wall(position):
-        new_creature = Consumer(sim, spawn_pos=position)
+        Consumer(sim, spawn_pos=position, genome=preset.load_consumer_preset(presetID))
 
 
 # Place a Prodcuer in the simulation at the specified location.
