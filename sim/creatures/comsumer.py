@@ -515,8 +515,9 @@ class Consumer(Creature):
                 # the immediate up, down, left, right directions, and move towards the strongest one if so
 
                 # case: there are no pheromones and the creature should move in accordance with its neural network
-                strongest_direction = self.get_strongest_immediate_pheromone(self.edible_consumers, 0)
-                if strongest_direction is None:
+                strongest = self.get_strongest_immediate_pheromone(self.edible_consumers, 0)
+                strongest_direction = strongest[0]
+                if strongest is None:
                     self.action_move(otherwise)
                 else:
                     print(f"A creature of species {self.species_id} moved toward pheromone")
@@ -527,12 +528,16 @@ class Consumer(Creature):
         
     def get_strongest_immediate_pheromone(self, mode=0):
         """
-        Gets the direction to the strongest immediate (within a 1-space cardinal direction) pheromone.
+        Gets the strongest immediate (within a 1-space cardinal direction) 
+        pheromone's direction and strength as a 2-tuple.
+
         Which pheromone it pertains to is based on the mode.
 
         mode = 0: searches for edible pheromones. 
         mode = 1: searches for same-species pheromones.
         mode = anything else: default to mode 0
+
+        return: (strongest pheromone's direction, strongest pheromone's strength)
         """
         legal_positions = self._get_legal_neighbors(self.position)
         
@@ -552,11 +557,33 @@ class Consumer(Creature):
                 if strongest_pheromone is not None:
                     if potential_strongest.strength > strongest_pheromone.strength:
                         strongest_pheromone = potential_strongest
-                        strongest_direction = (position[0] - self.position[0], position[1] - self.position[1])
+                        temp = (position[0] - self.position[0], position[1] - self.position[1])
+                        strongest_direction = self._position_to_direction(temp)
                 else:
                     strongest_pheromone = potential_strongest
-                    strongest_direction = (position[0] - self.position[0], position[1] - self.position[1])
-        return strongest_direction
+                    temp = (position[0] - self.position[0], position[1] - self.position[1])
+                    strongest_direction = self._position_to_direction(temp)
+        return strongest_direction, strongest_pheromone.strength
+
+    def _position_to_direction(self, position):
+        """
+        Takes in an offset position and returns a direction.
+        i.e: (0, 1) is up, (0, -1) is down, etc.
+        """
+        direction = None
+        if position[1] == 1:
+            # up
+            direction = 0
+        else if position[0] == 1:
+            # right
+            direction = 1
+        else if position[1] == -1:
+            # down
+            direction = 2
+        else if position[0] == -1:
+            # left
+            direction = 3
+        return direction
 
     def _get_legal_neighbors(self, position):
         pos_up = (self.position[0], self.position[1]+1)
