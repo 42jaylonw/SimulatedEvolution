@@ -252,7 +252,7 @@ class Cell{
     updateCellOverlay(mode){
         let color;
         if(mode == "lightmap" || mode == "/add_lightsource"){
-            color = `rgb(0,0,0, ${(100 - this.lightLevel) / 100})`; // WIP - magic numbers should be replaced later
+            color = `rgb(0,0,0, ${(100 - this.lightLevel) / 100})`;
             this.overlay.style.backgroundColor = color;
             return;
         }

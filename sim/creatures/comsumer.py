@@ -3,8 +3,8 @@ from . import Creature
 from sim import GridUtils
 from sim.pheremone import Pheremone
 
-PHEREMONE_EMIT_RANGE = 8  # WIP - arbitrary constant for now -
-PHEREMONE_EMIT_STRENGTH = 80  # WIP - arbitrary constant for now -
+PHEREMONE_EMIT_RANGE = 8
+PHEREMONE_EMIT_STRENGTH = 80
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
@@ -360,11 +360,6 @@ class Consumer(Creature):
         self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
 
         self.set_position(target_pos)
-
-        # Update the Layer System
-        # self.layer_system.creature_move(self.position, target_pos, self) # WIP
-        # Update the creature's position to the target position
-        # self.position = target_pos #WIP
 
     # TODO: finalize + test this implementation
     # WIP - consumer acts like an emitter onto the pheremone layer
