@@ -49,7 +49,7 @@ body{
 .info-display{
   background-color: grey;
   width: 140px;
-  height: 100px;
+  height: 125px;
   position: absolute;
   pointer-events: none;
   font-weight: bold;

@@ -127,7 +127,7 @@ class Cell{
     generateCreatureText(creatureClass, creatures){
         var creatureText = creatureClass
         for(let creature of creatures){
-            creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
+            creatureText += `<p>SpeciesID: ${creature["species"]}<br>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
         }
         return creatureText
     }
@@ -170,7 +170,7 @@ class Cell{
         }
         //Update display information for this cell
         this.infoDisplay.innerHTML = `Temperature: ${this.temperature}<br>Light-level ${this.lightLevel}` + '<br>' + `Consumers: ${this.numConsumers}` + 
-            '<br>' + `Producers: ${this.numProducers}` +  
+            '<br>' + `Producers: ${this.numProducers} <br>Position: ${this.element.id}` +  
             '<p class="text-center" class="details-text">click for details</p>';
         
         //Update the overlay at this Cell

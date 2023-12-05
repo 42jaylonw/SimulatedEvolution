@@ -44,7 +44,7 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     return sim
 
 
-def get_sim_state(simulator, includeImageData=False):
+def get_sim_state(simulator, includeImageData=False, getRawState=False):
     """
     Retrieves and jsonifies information about each grid space in a simulator
     
@@ -62,11 +62,12 @@ def get_sim_state(simulator, includeImageData=False):
            # access and append each gridspaces' properties
            gridspacesInformation.append(simulator.layer_system.get_gridspace([i,j]).get_properties(includeImageData))
     # return information of all gridspaces
+    if getRawState:
+        return gridspacesInformation
     return jsonify(gridspacesInformation)
 
-def get_gridspace_state(simulator, position):
+def get_gridspace_state(simulator, position, has_emitter=False):
     return jsonify(simulator.layer_system.get_gridspace(position).get_properties(True))
-    
 
 # Get the information of all creatures at specified location
 def get_creatures_wrapper(sim, position):
