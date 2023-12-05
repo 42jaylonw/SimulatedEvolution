@@ -155,6 +155,15 @@ document.addEventListener("DOMContentLoaded", function (){
                 simSpace.toggleOverlayDisplay(true, route);
                 return;
             }
+            if(route == '/erase_space'){ 
+                    
+                if(data.length == 1){
+                    simSpace.visualUpdate(data);
+                }
+                else if(data.length > 1)
+                    simSpace.visualUpdate(data, isBatch=true);
+                return;
+            }
             // update the visual grid based on function associated with route
             simSpace.visualUpdate(data);
         })
@@ -187,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function (){
     function generateCreatureText(creatureClass, creatures){
         var creatureText = creatureClass;
         for(let creature of creatures){
-            creatureText += `<p>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
+            creatureText += `<p>SpeciesID: ${creature["species"]} <br>Genome: ${creature["genome"]} <br>Size: ${creature["size"]} <br>Energy ${creature["energy"]} </p>`;
         }
         return creatureText;
     }

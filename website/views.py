@@ -39,6 +39,8 @@ def home_page():
         user_size = request.form.get("gridSize")
         user_consumers = request.form.get("numConsumers")
         user_producers = request.form.get("numProducers")
+        # get user specified generations
+        num_generations = request.form.get("numGenerations")
         # validate the input
         res = validation.validateSimulationParameters(user_size, user_consumers, user_producers)
         # Create simulation if user entered valid input
@@ -121,7 +123,10 @@ def add_wall():
 def erase_space():
     position = json.loads(request.data)["position"]
     position = np.array(position)
+    has_emitter = len(simulator.layer_system.get_gridspace(position).get_emitters()) > 0
     sim_to_front.user_erase_space(simulator, position)
+    if has_emitter:
+        return sim_to_front.get_sim_state(simulator)
     return sim_to_front.get_gridspace_state(simulator, position)
 
 @views.route('/add_creature_consumer', methods=["POST"])
