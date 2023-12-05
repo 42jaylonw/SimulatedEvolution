@@ -100,7 +100,6 @@ class SimSpace:
             creature.step()
 
         self.time_steps += 1
-        print(f'curr_step: {self.time_steps}')
         if self.time_steps >= self.max_steps:
             self.end_generation()
 
@@ -114,7 +113,10 @@ class SimSpace:
 
     def render(self):
         """Render the current state of the simulation and display it on the screen."""
-        render_img = np.copy(self.grid_rgb)
+        # print(f'curr_step: {self.time_steps}')
+        # m = np.mean([c.energy_bar.current_energy for c in self.creatures])
+        # print(f"Avg Energy: {m}")
+        render_img = np.ones((*self.grid_size, 3))
         for creature in self.creatures:
             if not hasattr(creature, 'appearance'):
                 render_img[creature.grid_pos] = creature.rgb
@@ -215,7 +217,7 @@ class SimSpace:
             if hasattr(creature, 'appearance'):
                 top_half = int(scale / 2)
                 bot_half = scale - int(scale / 2)
-                x, y = creature.grid_pos
+                y,x = creature.grid_pos
                 scaled_x = x * scale + int(scale / 2)
                 scaled_y = y * scale + int(scale / 2)
                 grid_background = img[scaled_x - top_half:scaled_x + bot_half, scaled_y - top_half: scaled_y + bot_half]

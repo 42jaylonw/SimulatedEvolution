@@ -29,9 +29,10 @@ class SurvivalSim(SimSpace):
         # todo: add walls
         # self.layer_system.wall_add()
         self.reset(consumers + producers, emitters)
+        self.step()
         # show maps
         light_map = get_map(self, self.layer_system.get_light_level)
-        heat_map = get_map(self, self.layer_system.get_elevation)
+        heat_map = get_map(self, self.layer_system.get_temperature)
         self.curr_generation = 0
         self.pass_rate_list = []
 
@@ -46,26 +47,30 @@ class SurvivalSim(SimSpace):
         pass_rate = len(self.get_survivors()) / len(self.creatures)
         self.pass_rate_list.append(pass_rate)
 
-        print(f"Generation: {self.curr_generation}: Pass Rate {pass_rate}")
+        print(f"Generation: {self.curr_generation}: Survival Rate {pass_rate}")
+
         # reproduce and reset
         survivors = self.get_survivors()
         offsprings = self.generate_offsprings(survivors)
-        self.reset(offsprings)
+        #
+        producers = [Producer(self) for _ in range(self.population_producers)]
+        self.reset(offsprings + producers)
 
     def get_survivors(self):
         survivors = []
         for creatures in self.creatures:
-            # if creatures.position[0] >= int(self.grid_size[0] * (1. - PASS_CONDITION)):
-            survivors.append(creatures)
+            if isinstance(creatures, Consumer):
+                # if creatures.position[0] >= int(self.grid_size[0] * (1. - PASS_CONDITION)):
+                survivors.append(creatures)
         return survivors
 
     def generate_offsprings(self, parent_pool):
-        min_num_parents = int(self.population * self.min_survival_rate)
+        min_num_parents = int(self.population_consumers * self.min_survival_rate)
         if len(parent_pool) < min_num_parents:
             new_creatures = [Consumer(self) for _ in range(min_num_parents - len(parent_pool))]
             parent_pool = parent_pool + new_creatures
         offsprings = []
-        for i in range(self.population):
+        for i in range(self.population_consumers):
             p0_id = np.random.randint(len(parent_pool))
             p1_id = np.random.choice([p_id for p_id in range(len(parent_pool))
                                       if p_id != p0_id])
@@ -80,9 +85,20 @@ def run_random_moving():
     # create simulation space
     config = toml.load("games/sprint_2_survival/config.toml")
     sim = SurvivalSim(config)
-    for _ in range(1000):
-        sim.render()
+    is_render = False
+    # backend evolution
+    while not sim.termination():
+        if is_render:
+            sim.render()
         sim.step()
+        # pro_energy = [c.energy_bar.current_energy for c in sim.creatures if isinstance(c, Producer)]
+        # print(f'Pro energy: {pro_energy}')
+
+    # show result
+    for _ in range(1000):
+        # sim.render()
+        sim.step()
+        sim.render()
 
 
 if __name__ == '__main__':

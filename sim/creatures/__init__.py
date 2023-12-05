@@ -75,11 +75,14 @@ class Creature:
         else:
             hash = self.generate_hash(self.genome)
         # Assign size and energy properties based on the hash
-        self.init_energy = self._cfg['init_energy']
-        self.size = int(hash[:32], 16) % 101 + 0.1
-        self.energy = int(hash[32:], 16) % 81 + self.init_energy
-        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size,
-                                    age_rate=0.02)
+        self.size = 5 + (int(hash[:32], 16) % 100) / 100 * 15  # 5-20
+        self.energy = 1 + (int(hash[:32], 16) % 100) / 100 * 100
+        self.energy_bar = EnergyBar(initial_energy=self.energy,
+                                    max_energy=100,
+                                    satiation_level=40.0,
+                                    size=self.size,
+                                    age_rate=0.02,
+                                    size_consumption_rate=self._cfg['size_consumption_rate'])
         # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
     def reset(self):
@@ -106,8 +109,8 @@ class Creature:
         Handles death. A creature that dies should remove itself from sim.creatures
         and update the layer's grid position value.
         """
-        if len(deathMessage) > 0:
-            print(deathMessage)
+        # if len(deathMessage) > 0:
+        #     print(deathMessage)
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 

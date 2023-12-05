@@ -3,8 +3,8 @@ from . import Creature
 from sim import GridUtils
 from sim.pheremone import Pheremone
 
-PHEREMONE_EMIT_RANGE = 8 # WIP - arbitrary constant for now -
-PHEREMONE_EMIT_STRENGTH = 80 # WIP - arbitrary constant for now -
+PHEREMONE_EMIT_RANGE = 8  # WIP - arbitrary constant for now -
+PHEREMONE_EMIT_STRENGTH = 80  # WIP - arbitrary constant for now -
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
@@ -39,7 +39,7 @@ class Consumer(Creature):
             action = np.argmax(self.behavior_system.predict(obs))
             # print(" got action from neural network")
         # else:
-            # print(" got action from reproduction protocol")
+        # print(" got action from reproduction protocol")
         # self.die()
         self.action_hunt(action)
         self.energy_bar.consume_energy(self.move_cost)
@@ -48,7 +48,6 @@ class Consumer(Creature):
             # print(f"A creature of {self.species_id} has died")
             self.die(f"creature of {self.species_id} died of starvation")
 
-    
     def reproduction_protocol(self):
         reproduce_thresh = 85
         if (self.reprod_countdown > 0):
@@ -74,7 +73,7 @@ class Consumer(Creature):
                         # initialize creature and add to sim
                         child_creature = Consumer(self.sim, child_genome, self.position)
                         child_creature.species_id = self.species_id
-                        #self.sim.add_creature(child_creature)
+                        # self.sim.add_creature(child_creature)
                         # print("child added at location", child_creature.position)
                         print("reproduced")
                         return -1
@@ -116,10 +115,9 @@ class Consumer(Creature):
 
         return min_dir
 
-
     def die(self, deathMessage=""):
-        if len(deathMessage) > 0:
-            print(deathMessage)
+        # if len(deathMessage) > 0:
+        #     print(deathMessage)
         # self.sim.creatures -= this
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
@@ -207,10 +205,10 @@ class Consumer(Creature):
         """ Obtains population count (of consumers) within sensory range. """
 
         # Obtains nearby information from function centered on the creature
-        #near_info = self.sim.get_near_info(self.position, self.sensory_range)
+        # near_info = self.sim.get_near_info(self.position, self.sensory_range)
 
         # sums number of 1s in consumer layer of the array (if this is how the array works)
-        #num_consumers = np.sum(near_info[2])
+        # num_consumers = np.sum(near_info[2])
 
         # EXPERIMENTAL - original code commented out above, the implementation below
         # should do the same job of counting the nearby consumers
@@ -280,11 +278,13 @@ class Consumer(Creature):
                         if self.layer_system.get_num_producers(checked_pos) > 0:
                             if len(closest_locations) == 0:
                                 closest_locations.append(checked_pos)
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(
+                                    np.array(self.position) - np.array(closest_locations[0])):
                                 closest_locations = [checked_pos]
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(
+                                    np.array(self.position) - np.array(closest_locations[0])):
                                 closest_locations.append(checked_pos)
-                                
+
             for dy in range(-radius + 1, radius):
                 for dx in [-radius, radius]:
                     checked_pos = self.position
@@ -294,9 +294,11 @@ class Consumer(Creature):
                         if self.layer_system.get_num_producers(checked_pos) > 0:
                             if len(closest_locations) == 0:
                                 closest_locations.append(checked_pos)
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(
+                                    np.array(self.position) - np.array(closest_locations[0])):
                                 closest_locations = [checked_pos]
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(np.array(self.position) - np.array(closest_locations[0])):
+                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(
+                                    np.array(self.position) - np.array(closest_locations[0])):
                                 closest_locations.append(checked_pos)
 
             if len(closest_locations) > 0:
@@ -355,14 +357,14 @@ class Consumer(Creature):
 
         target_pos = self.position + (d_x, d_y)
         self.curr_action = [d_x, d_y]
-        
+
         self.move_cost = 0.0
 
         if self.layer_system.out_of_bounds(target_pos) or self.layer_system.has_wall(target_pos):
             # Space is blocked: no change in position can be made in this direction
             d_x, d_y = 0, 0
             target_pos = self.position
-        
+
         current_elevation = self.layer_system.get_elevation(self.position)
         target_elevation = self.layer_system.get_elevation(target_pos)
         self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
@@ -370,9 +372,9 @@ class Consumer(Creature):
         self.set_position(target_pos)
 
         # Update the Layer System
-        #self.layer_system.creature_move(self.position, target_pos, self) # WIP
+        # self.layer_system.creature_move(self.position, target_pos, self) # WIP
         # Update the creature's position to the target position
-        #self.position = target_pos #WIP
+        # self.position = target_pos #WIP
 
     # TODO: finalize + test this implementation
     # WIP - consumer acts like an emitter onto the pheremone layer
@@ -446,7 +448,7 @@ class Consumer(Creature):
                 return 0
         else:
             return 1
-    
+
     def metabolize(self, activity=0.0, climate=0.0):
         """
         Subtract Consumer's energy by the sum of activity, climate, and 10% of its size\n
@@ -466,15 +468,19 @@ class Consumer(Creature):
         Notes:
             Only accepts positive energy values
         """
-        if energy < 0: 
+        if energy < 0:
             raise Exception(f"Cannot Consume {energy} energy")
         self.energy += energy
         # 
-    
+
     def is_edible(self, creature):
         """
         Checks to see if a creature underneath is edible. (exists within edible tags)
         """
+        # position_edible = np.all(creature.position == self.position)
+        # class_edible = (creature.species_id in self.edible_producers and creature.name == 'Producer'
+        #                 or creature.species_id in self.edible_consumers and creature.name == 'Consumer')
+        # return position_edible and class_edible
         if isinstance(creature, Creature):
             if creature.species_id in self.edible_producers and creature.name == 'Producer':
                 return True
@@ -482,7 +488,7 @@ class Consumer(Creature):
                 return True
         else:
             return False
-    
+
     # NOTE: temporarily adding the "otherwise" param to do a regular action-move if a creature is not detected
     def action_hunt(self, otherwise):
         """
@@ -544,7 +550,7 @@ class Consumer(Creature):
             # if satiated, then simply move with accordance with the reproduction protocol passed in
             # print(" satiated, should take action according to reproduction protocol")
             self.action_move(otherwise)
-        
+
     def get_strongest_immediate_pheromone(self, mode=0):
         """
         Gets the strongest immediate (within a 1-space cardinal direction) 
@@ -559,7 +565,7 @@ class Consumer(Creature):
         return: (strongest pheromone's direction, strongest pheromone's strength)
         """
         legal_positions = self._get_legal_neighbors(self.position)
-        
+
         if len(legal_positions) > 0:
             strongest_pheromone = None
             strongest_direction = None
@@ -570,7 +576,7 @@ class Consumer(Creature):
                     potential_strongest = self._get_max_same_pheromone(position)
                 else:
                     potential_strongest = self._get_max_edible_pheromone(position)
-                    
+
                 if potential_strongest is None:
                     continue
                 if strongest_pheromone is not None:
@@ -608,10 +614,10 @@ class Consumer(Creature):
         return direction
 
     def _get_legal_neighbors(self, position):
-        pos_up = (self.position[0], self.position[1]+1)
-        pos_right = (self.position[0]+1, self.position[1])
-        pos_down = (self.position[0], self.position[1]-1)
-        pos_left = (self.position[0]-1, self.position[1])
+        pos_up = (self.position[0], self.position[1] + 1)
+        pos_right = (self.position[0] + 1, self.position[1])
+        pos_down = (self.position[0], self.position[1] - 1)
+        pos_left = (self.position[0] - 1, self.position[1])
 
         possible_positions = [pos_up, pos_right, pos_down, pos_left]
         legal_positions = []
@@ -623,13 +629,15 @@ class Consumer(Creature):
 
     def _get_max_edible_pheromone(self, position):
         pheromone_list = self.layer_system.get_pheremones(position)
-        filtered_pheromones = [pheromone for pheromone in pheromone_list if pheromone.source.species_id in self.edible_consumers]
+        filtered_pheromones = [pheromone for pheromone in pheromone_list if
+                               pheromone.source.species_id in self.edible_consumers]
         strongest_pheromone = max(filtered_pheromones, key=lambda x: x.strength, default=None)
         return strongest_pheromone
 
     def _get_max_same_pheromone(self, position):
         pheromone_list = self.layer_system.get_pheromones(position)
-        filtered_pheromones = [pheromone for pheromone in pheromone_list if pheromone.source.species_id == self.species_id]
+        filtered_pheromones = [pheromone for pheromone in pheromone_list if
+                               pheromone.source.species_id == self.species_id]
         strongest_pheromone = max(filtered_pheromones, key=lambda x: x.strength, default=None)
         return strongest_pheromone
 
@@ -646,7 +654,7 @@ class Consumer(Creature):
                 # print('Y',end="")
                 choices_to_eat.append(creature)
             # else:
-                # print('N',end="")
+            # print('N',end="")
         if len(choices_to_eat) > 0:
             chosen_to_eat = np.random.choice(choices_to_eat)
 
@@ -657,9 +665,9 @@ class Consumer(Creature):
             # this value is never greater than the eating creature's size
             energy_gain_sizeBonus = max((1.5 * chosen_to_eat.size), self.size)
             self.energy_bar.replenish_energy(energy_gain_base + energy_gain_sizeBonus)
+            assert np.all(chosen_to_eat.position == self.position)
             chosen_to_eat.die(f"eaten by a creature of {chosen_to_eat.species_id}, a {type(chosen_to_eat)}")
             self.times_eaten = self.times_eaten + 1
             # print(f"eaten {self.times_eaten} times")
         else:
             print(f"a creature of species (self.species_id) ate nothing")
-

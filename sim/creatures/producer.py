@@ -25,7 +25,7 @@ class Producer(Creature):
 
         self.ideal_temp = int(hash[:32], 16) % 25 + 15
         self.light_req = int(hash[32:], 16) % 20 + 20
-        self.reprod_cooldown = int(hash[32:], 16) % 30 + 10
+        self.reprod_cooldown = int(hash[32:], 16) % 10 + 10
         self.reprod_countdown = (self.reprod_cooldown / 2)
 
         # growth rate determines how fast the creature grows
@@ -105,11 +105,11 @@ class Producer(Creature):
         light = self.light_req - self.get_light_level(pos)
         # light = max(0, light)
 
-        size_penalty = .1
+        size_penalty = .05
         light_penalty = .02
         # self.energy -= (self.current_size * size_penalty) + (light * light_penalty)
-        energy_metab = 0 - ((self.current_size * size_penalty) + (light * light_penalty))
-        self.energy_bar.replenish_energy(energy_metab)
+        energy_metab = light * light_penalty
+        self.energy_bar.consume_energy(energy_metab)
         if (self.energy_bar.current_energy <= 0):
             self.energy_bar.current_energy = 0
 
@@ -198,8 +198,8 @@ class Producer(Creature):
 
 
     def die(self, deathMessage=""):
-        if len(deathMessage) > 0:
-            print(deathMessage)
+        # if len(deathMessage) > 0:
+        #     print(deathMessage)
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
@@ -255,6 +255,6 @@ class Producer(Creature):
 
         # check if dead
         if self.energy_bar.is_empty():
-            self.die()
+            self.die("Die by starvation")
 
                     
