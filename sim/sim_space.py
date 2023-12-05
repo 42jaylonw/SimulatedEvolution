@@ -26,12 +26,12 @@ class SimSpace:
         self.emitters = []
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
-        self.predation_table = self.generate_predation_table(0)
-
+        self.predation_table = self.generate_predation_table(2)
+        print(self.predation_table)
         self.layer_system = LayerSystem.LayerSystem(self.grid_size)
 
         self.max_steps = self._cfg['max_steps']
-        self.max_generations = self._cfg['max_generations']
+        # self.max_generations = self._cfg['max_generations']
 
     def reset(self, creatures, emitters=()):
         """Reset the simulation with new creatures and emitters.
@@ -192,10 +192,15 @@ class SimSpace:
             for i in range(num_consumers):
                 producer_range = list(range(num_producers))
                 num_edible_producers = np.random.choice(producer_range, 1, replace=False)
+                num_edible_producers = max(1, num_edible_producers)
                 edible_producers = np.random.choice(producer_range, num_edible_producers, replace=False)
-                consumer_range = list(range(num_producers))
+                consumer_range = list(range(num_consumers))
+                if(len(consumer_range)) == 1:
+                    predation_table[i] = [[], edible_producers]
+                    continue
                 consumer_range.remove(i)
                 num_edible_consumers = np.random.choice(len(consumer_range), 1, replace=False)
+                num_edible_consumers = max(1, num_edible_consumers)
                 edible_consumers = np.random.choice(consumer_range, num_edible_consumers, replace=False)
                 predation_table[i] = [edible_consumers, edible_producers]
         return predation_table

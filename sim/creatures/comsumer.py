@@ -12,8 +12,8 @@ MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 class Consumer(Creature):
     name = 'Consumer'
 
-    def __init__(self, sim, genome=None, spawn_pos=None):
-        super().__init__(sim, genome, spawn_pos)
+    def __init__(self, sim, genome=None, spawn_pos=None, species_id=None):
+        super().__init__(sim, genome, spawn_pos, species_id)
         self.speed = sim.cfg['Consumer']['init_speed']
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]
@@ -23,7 +23,7 @@ class Consumer(Creature):
 
         # reprod_cooldown is generated from the genome and determines how long a creature waits before reprod
         hash = self.generate_hash(self.genome[3])
-        self.reprod_cooldown = int(hash[:32], 16) % 50 + 20
+        self.reprod_cooldown = int(hash[:32], 16) % 20 + 20
         # reprod_countdown ranges from 0 to reprod_cooldown and ticks down
         self.reprod_countdown = (self.reprod_cooldown / 2)
         self.edible_consumers = sim.predation_table[self.species_id][0]
@@ -49,12 +49,12 @@ class Consumer(Creature):
             self.die(f"creature of {self.species_id} died of starvation")
 
     def reproduction_protocol(self):
-        reproduce_thresh = 85
+        reproduce_thresh = self.energy_bar.satiation_level
         if (self.reprod_countdown > 0):
             self.reprod_countdown = self.reprod_countdown - 1
             return -1
         # if (self.energy_bar.current_energy >= reproduce_thresh and self.reprod_countdown == 0):
-        if (self.energy_bar.is_satiated() and self.reprod_cooldown == 0):
+        if (self.energy_bar.is_satiated() and self.reprod_countdown == 0):
             # if another creature on current space that is compatible
             for creature in self.sim.layer_system.get_consumers(self.position):
                 if creature == self:
@@ -71,11 +71,10 @@ class Consumer(Creature):
                         creature.reprod_countdown = creature.reprod_cooldown
 
                         # initialize creature and add to sim
-                        child_creature = Consumer(self.sim, child_genome, self.position)
-                        child_creature.species_id = self.species_id
+                        child_creature = Consumer(self.sim, child_genome, self.position, species_id=self.species_id)
                         # self.sim.add_creature(child_creature)
                         # print("child added at location", child_creature.position)
-                        print("reproduced")
+                        # print("reproduced")
                         return -1
             # else check for compatible creatures in sensory range
             potential_partners = self.sensePartners()
@@ -114,15 +113,6 @@ class Consumer(Creature):
                 min_dist = dist
 
         return min_dir
-
-    def die(self, deathMessage=""):
-        # if len(deathMessage) > 0:
-        #     print(deathMessage)
-        # self.sim.creatures -= this
-        if self in self.sim.creatures:
-            self.sim.creatures.remove(self)
-
-        self.layer_system.creature_exit(self.position, self)
 
     def get_observation(self):
 
@@ -663,7 +653,7 @@ class Consumer(Creature):
 
             # a bonus to energy gain from consumption based on the size of the prey creature and the eating creature
             # this value is never greater than the eating creature's size
-            energy_gain_sizeBonus = max((1.5 * chosen_to_eat.size), self.size)
+            energy_gain_sizeBonus = max((2.5 * chosen_to_eat.size), self.size)
             self.energy_bar.replenish_energy(energy_gain_base + energy_gain_sizeBonus)
             assert np.all(chosen_to_eat.position == self.position)
             chosen_to_eat.die(f"eaten by a creature of {chosen_to_eat.species_id}, a {type(chosen_to_eat)}")

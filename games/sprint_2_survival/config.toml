@@ -6,7 +6,7 @@ grid_size = [20, 20, ]
 visual_size = [800, 800, ]
 time_step = 0.01
 max_steps = 75
-max_generations = 5
+#max_generations = 5
 global_brightness = 0.2
 global_temperature = 0.5
 # game
@@ -15,7 +15,7 @@ population_producers = 50
 min_survival_rate = 0.25
 
 [Producer]
-size_consumption_rate = 0.001
+size_consumption_rate = 0.0
 num_species = 1
 rgb = [0.0, 0.96, 0.0, ]
 sensory_range = 3
@@ -26,8 +26,8 @@ reproduce_mode = 1
 mutation_rate = 0.2
 
 [Consumer]
-size_consumption_rate = 0.15
-num_species = 1
+size_consumption_rate = 0.2
+num_species = 2
 rgb = [0.96, 0.5, 0.0, ]
 init_speed = 1
 sensory_range = 5

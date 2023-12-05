@@ -21,7 +21,7 @@ class Creature:
     energy: float
     size: float
 
-    def __init__(self, sim, genome=None, spawn_pos=None):
+    def __init__(self, sim, genome=None, spawn_pos=None, species_id=None):
         self.cfg = sim.cfg
         self._cfg = sim.cfg[self.name]
         self.sim = sim
@@ -30,7 +30,7 @@ class Creature:
         self.position = spawn_pos
         if self.position is None:
             self.position = np.random.randint(self.sim.grid_size)
-
+        self.species_id = species_id
         self.sim.add_creature(self)
         self.layer_system.creature_enter(self.position, self)
 
@@ -53,10 +53,8 @@ class Creature:
     def _init_properties(self):
         self.image_data = None
         self.ref_id = str(self)
-        if 'num_species' in self._cfg:
+        if self.species_id is None:
             self.species_id = np.random.randint(self._cfg['num_species'])
-        else:
-            self.species_id = 0
         self.rgb = rgb_mutation(self._cfg['rgb'], self.species_id, self._cfg['num_species'])
         if self.name == 'Consumer':
             self.appearance = InvaderCreator(img_size=5).get_an_invader(5)
