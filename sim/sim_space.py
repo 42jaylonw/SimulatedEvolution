@@ -27,7 +27,7 @@ class SimSpace:
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.predation_table = self.generate_predation_table(2)
-        print(self.predation_table)
+        #print(self.predation_table)
         self.layer_system = LayerSystem.LayerSystem(self.grid_size)
 
         self.max_steps = self._cfg['max_steps']

@@ -172,9 +172,6 @@ class Cell{
         this.infoDisplay.innerHTML = `Temperature: ${this.temperature}<br>Light-level ${this.lightLevel}` + '<br>' + `Consumers: ${this.numConsumers}` + 
             '<br>' + `Producers: ${this.numProducers} <br>Position: ${this.element.id}` +  
             '<p class="text-center" class="details-text">click for details</p>';
-        
-        //Update the overlay at this Cell
-        // this.updateCellOverlay(); 
     }
 
     /**

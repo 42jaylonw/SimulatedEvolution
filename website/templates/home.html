@@ -6,16 +6,10 @@
 
 <!--Layout for Home page-->
 <div class="row content">
-    
-    <div class="idk">
-    
-    </div>
-
     <!-- Simulator Control Binding Information(left side of screen) -->
     <div class="col-3 sidenav left-window">
         <!--Simulation parameters -->
         <!-- {# Displayed when user first visits page or wants to reset the simulation #} -->
-        {#  (1)initSimParameters (2-3)simulationSetup, (4)ActiveSimulation #}
         {% if not initSimParameters %}
           
         <form method="POST">
@@ -35,28 +29,12 @@
                     name="numGenerations"
                     placeholder="Enter Training Generations"
                 />
-                <!-- <label for="numConsumers">Consumer Count</label>
-                <input 
-                    type="numConsumers" 
-                    class="form-control" 
-                    id="numConsumers" 
-                    name="numConsumers" 
-                    placeholder="number of consumers"
-                />
-                <label for="numProducers">Producer Count</label>
-                <input 
-                    type="numProducers" 
-                    class="form-control" 
-                    id="numProducers" 
-                    name="numProducers" 
-                    placeholder="number of producers"
-                />
-            </div> -->
+            </div>
             <br>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         {% else %}
-
+            <!--Pre-Simulation setup -->
             {% if simulationSetup %}
             <div class="row">
                 <div class="col">
@@ -116,20 +94,16 @@
                          <form method="POST">
                             <button id="startSimulation" type="submit" class="small-btn btn-success">Start Simulation</button>
                         </form>
-                        </div>
-                        
-                       
+                        </div> 
                     </div>
                 </div>
-                
             </div>
-          
-            
             <script
             type = "text/javascript"
             src = "{{ url_for('static', filename='sim-edit-menu.js') }}"
             ></script>
             {% endif %}
+             <!--Running Simulation setup -->
             {% if activeSimulation %}
             <h1 class="text-center">Quick Controls</h1>
             <h5 class="text-center">Use these neat bindings!</h5>
@@ -151,15 +125,11 @@
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
             </form>
             {% endif %}
-            {# <form method="POST" action='/reset_simulator'>
-                <button type="submit" class="btn btn-danger">Reset Simulator</button>
-            </form> #}
         {%endif%}
     
         </div>
         <!-- Simulation Area(center of screen)-->
         <div class="col-6">
-            
                 <div class="sim-container">
                 {% if grid_size %}
                     <script>
@@ -167,7 +137,6 @@
                     simSpace = new SimulationGrid({{grid_size}});
                     });
                     </script>
-
                 {% endif %}
                 </div>
         </div>
@@ -178,13 +147,8 @@
     </div>
 </div>
 {% endblock %}
-
 <!-- Scripts -->
 {% block script %}
-
-
-
-
 <!-- Grid functions -->
 <script
 type = "text/javascript"

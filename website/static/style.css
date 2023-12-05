@@ -3,23 +3,20 @@ body{
     background-color: cadetblue;
 }
 
-/* Style for upper menu buttons */
+
 .nav-item{
     font-weight: bold;
     font-size: 18px;
 }
 
-
-/* container for simulation */
 .sim-container {
   display: flex;
   justify-content: center;
   max-width: 900vw;
   max-height: 900vh;
   display: grid;
-  /* grid-template-columns: repeat(50, 18px); */
 }
-/* Style for Cells */
+
 .cell-item {
   border: 0;
   width: 18px;
@@ -27,7 +24,6 @@ body{
   position: relative;
 }
 
-/* Style for Cell-overlay */
 .cell-overlay{
   width: inherit;
   height: inherit;
@@ -39,13 +35,11 @@ body{
   background-color: beige;
 }
 
-
 .left-window{
   background-color: beige;
   
 }
 
-/* Visual displayed when user's mouse hovers over Cell */
 .info-display{
   background-color: grey;
   width: 140px;
@@ -117,43 +111,43 @@ body{
 }
 
 .slidecontainer {
-  width: 100%; /* Width of the outside container */
+  width: 100%; 
 }
 
 /* Value slider for Emitter Range/Strength */
 /* Source: https://www.w3schools.com/howto/howto_js_rangeslider.asp */
 .slider {
-  -webkit-appearance: none;  /* Override default CSS styles */
+  -webkit-appearance: none; 
   appearance: none;
-  width: 100%; /* Full-width */
-  height: 25px; /* Specified height */
-  background: #d3d3d3; /* Grey background */
-  outline: none; /* Remove outline */
-  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  width: 100%;
+  height: 25px; 
+  background: #d3d3d3; 
+  outline: none; 
+  opacity: 0.7; 
+  -webkit-transition: .2s; 
   transition: opacity .2s;
 }
 
-/* Mouse-over effects */
+
 .slider:hover {
-  opacity: 1; /* Fully shown on mouse-over */
+  opacity: 1;
 }
 
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
 .slider::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Override default look */
+  -webkit-appearance: none; 
   appearance: none;
-  width: 25px; /* Set a specific slider handle width */
-  height: 25px; /* Slider handle height */
-  background: #04AA6D; /* Green background */
-  cursor: pointer; /* Cursor on hover */
+  width: 25px; 
+  height: 25px; 
+  background: #04AA6D;
+  cursor: pointer; 
 }
 
 .slider::-moz-range-thumb {
-  width: 25px; /* Set a specific slider handle width */
-  height: 25px; /* Slider handle height */
-  background: #04AA6D; /* Green background */
-  cursor: pointer; /* Cursor on hover */
+  width: 25px; 
+  height: 25px;
+  background: #04AA6D; 
+  cursor: pointer; 
 }
 
 .event-window{

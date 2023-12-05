@@ -68,7 +68,7 @@ def get_sim_state(simulator, includeImageData=False, getRawState=False):
         return gridspacesInformation
     return jsonify(gridspacesInformation)
 
-def get_gridspace_state(simulator, position, has_emitter=False):
+def get_gridspace_state(simulator, position):
     return jsonify(simulator.layer_system.get_gridspace(position).get_properties(True))
 
 # Get the information of all creatures at specified location
@@ -128,9 +128,9 @@ def user_place_consumer(sim, position, presetID=None):
 # Place a Prodcuer in the simulation at the specified location.
 # If there is a wall there, no producer will be placed
 # Currently the genome is random
-def user_place_producer(sim, position):
+def user_place_producer(sim, position, presetID=None):
     if not sim.layer_system.has_wall(position):
-        new_creature = Producer(sim, spawn_pos=position)
+        Producer(sim, spawn_pos=position, genome=preset.load_producer_preset(presetID))
 
 
 # Erase EVERYTHING (Creatures, Wall, Emitters) at the specified location.

@@ -110,13 +110,12 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function placeConsumer(element){
         console.log("adding consumer");
-        // var creaturePreset = document.getElementById("preset-input");
         performGridSpaceOperation(element, '/add_creature_consumer', payload={headers: ["preset-id"], values: [document.getElementById("preset-input").value]});
     }
 
     function placeProducer(element){
         console.log("adding producer");
-        performGridSpaceOperation(element, '/add_creature_producer');
+        performGridSpaceOperation(element, '/add_creature_producer',  payload={headers: ["preset-id"], values: [document.getElementById("preset-input").value]});
     }
 
     function placeLightSource(element){
@@ -132,7 +131,6 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function performGridSpaceOperation(element, route, payload=null){
         cellInformation = element.split("-") 
-        console.log(cellInformation[1] + "," + cellInformation[2]);
 
         const dataToSend = constructDataToSend(payload);
         
@@ -143,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function (){
                 var producers = data["producers"];
                 var consumers = data["consumers"];
                 var emitters = data["emitters"];
-                // var analysisContainer = document.querySelector('.analysis-container');
+
                 analysisContainer.innerHTML += `<br>` + generateEmitterText("EMITTERS", emitters);
                 analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${cellInformation[1]}, ${cellInformation[2]}</h2> ` + 
                 generateCreatureText("CONSUMERS", consumers) + "<br>" + generateCreatureText("PRODUCERS", producers) + "<br>" + generateEmitterText("EMITTERS", emitters);
@@ -156,8 +154,7 @@ document.addEventListener("DOMContentLoaded", function (){
                 return;
             }
             if(route == '/erase_space'){ 
-                    
-                if(data.length == 1){
+                if(data != undefined && data.length == undefined){
                     simSpace.visualUpdate(data);
                 }
                 else if(data.length > 1)
@@ -242,9 +239,7 @@ document.addEventListener("DOMContentLoaded", function (){
 
         emitterMenu.classList.add("emitter-menu");
         emitterMenu.innerHTML = `Emitter Menu<br>Range<br>` + generatePlaceValueSlider("emit_range", 1, 25);
-        //emitterMenu.innerHTML += `<br>Range = ` + `${document.getElementById("emit_range").value}`;
         emitterMenu.innerHTML += `<br>Strength<br>` + generatePlaceValueSlider("emit_strength", 1, 100);
-        //emitterMenu.innerHTML += `<br>``<br>Strength = ` + `${document.getElementById("emit_strength").value}`;
 
         return emitterMenu;
     }
