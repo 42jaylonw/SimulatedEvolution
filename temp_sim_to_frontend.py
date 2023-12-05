@@ -6,6 +6,7 @@ from sim import presets as preset
 import numpy as np
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
+from games.sprint_2_survival.survival import SurvivalSim 
 
 def create_sim(num_producers=1, num_consumers=1, width=50):
     """
@@ -27,7 +28,8 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     with open('games/sprint_2_survival/config.toml', 'w') as f:
         toml.dump(config, f)
     # Create SimSpace
-    sim = SimSpace(config)
+    #sim = SimSpace(config)
+    sim = SurvivalSim(config)
     # Instantiate Organisms
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]

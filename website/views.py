@@ -4,6 +4,7 @@ import random
 import json
 from website import validation
 import numpy as np
+from games.sprint_2_survival.survival import SurvivalSim 
 #TEMP
 import temp_sim_to_frontend as sim_to_front
 #END TEMP
@@ -30,9 +31,13 @@ def home_page():
     global NUMPRODUCERS
     # Received user input
     if request.method == "POST":
+        # Start simulation
         if isSetup:
             isActive = True
             isSetup = False
+            # num GEnerations
+            simulator.train(1)
+
             return render_template("home.html", grid_size=size, initSimParameters=simulator, simulationSetup=isSetup, activeSimulation=isActive)
         isSetup = True
         isActive = False
