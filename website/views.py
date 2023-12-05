@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, jsonify, request, flash, redirect,
 import games.sprint_0_random.random_moving as random_moving
 import random
 import json
+from sim import presets as preset
 from website import validation
 import numpy as np
 #TEMP
@@ -172,3 +173,17 @@ def add_heatsource():
 @views.route('/visual_update', methods=["GET"])
 def visual_update():
     return sim_to_front.get_gridspace_state(simulator)
+
+@views.route('/save_simulator', methods=["POST"])
+def save_simulator():
+    # save preset
+    preset.save_simspace_to_file(simulator, "test_run")
+    # do nothing
+    return redirect('/')
+
+@views.route('/load_simulator', methods=["POST"])
+def load_simulator():
+    global simulator
+    simulator = preset.loadSimSpaceFromFile(simulator, "./sim/preset_folder/test_run.pkl")
+    print(simulator.emitters)
+    return redirect('/')

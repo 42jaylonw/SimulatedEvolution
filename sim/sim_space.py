@@ -83,6 +83,7 @@ class SimSpace:
             self.emitters.remove(emitter)
 
     def step(self):
+        print("performing simulation step")
         """
         Perform the next time step of the simulation, including updating the layer system,
         emitters, and creatures' states.

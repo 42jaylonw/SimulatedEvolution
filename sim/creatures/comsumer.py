@@ -30,6 +30,7 @@ class Consumer(Creature):
         self.edible_producers = sim.predation_table[self.species_id][1]
 
     def step(self):
+        print("consumer making step")
         # print(f"Creature of species {self.species_id}", end="")
         obs = self.get_observation()
         # if energy and cooldown is sufficient to reproduce

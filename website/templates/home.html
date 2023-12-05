@@ -150,10 +150,17 @@
             <form method="POST" action='/reset_simulator'>
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
             </form>
+          
             {% endif %}
-            {# <form method="POST" action='/reset_simulator'>
+            <form method="POST" action='/save_simulator'>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+            <form method="POST" action='/load_simulator'>
+                <button type="submit" class="btn btn-primary">Load</button>
+            </form>
+            <!-- {# <form method="POST" action='/reset_simulator'>
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
-            </form> #}
+            </form> #} -->
         {%endif%}
     
         </div>
