@@ -100,7 +100,7 @@ class SimSpace:
             creature.step()
 
         self.time_steps += 1
-
+        print(f'curr_step: {self.time_steps}')
         if self.time_steps >= self.max_steps:
             self.end_generation()
 

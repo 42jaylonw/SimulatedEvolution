@@ -26,11 +26,11 @@ class Creature:
         self._cfg = sim.cfg[self.name]
         self.sim = sim
         self.layer_system = sim.layer_system  # EXPERIMENTAL
-        #self.position = None
+        # self.position = None
         self.position = spawn_pos
         if self.position is None:
             self.position = np.random.randint(self.sim.grid_size)
-        
+
         self.sim.add_creature(self)
         self.layer_system.creature_enter(self.position, self)
 
@@ -46,7 +46,7 @@ class Creature:
             self.genome = self.behavior_system.genome
         elif self.name == 'Producer':
             self.genome = self.generate_producer_genome()
-            self.mutation_rate=self._cfg['mutation_rate']
+            self.mutation_rate = self._cfg['mutation_rate']
         self._init_properties()
 
     def _init_properties(self):
@@ -75,9 +75,11 @@ class Creature:
         else:
             hash = self.generate_hash(self.genome)
         # Assign size and energy properties based on the hash
+        self.init_energy = self._cfg['init_energy']
         self.size = int(hash[:32], 16) % 101 + 0.1
-        self.energy = int(hash[32:], 16) % 51 + 51
-        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size, age_rate=0.02)
+        self.energy = int(hash[32:], 16) % 81 + self.init_energy
+        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size,
+                                    age_rate=0.02)
         # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
     def reset(self):
@@ -120,7 +122,7 @@ class Creature:
         # Update the Layer System
         self.layer_system.creature_move(self.position, target_pos, self)
         # Update the creature's position to the target position
-        self.position = target_pos
+        self.position = np.array(target_pos)
 
     def generate_hash(self, to_hash):
         hasher = hashlib.sha256()
@@ -130,7 +132,7 @@ class Creature:
 
     @property
     def grid_pos(self):
-        assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
+        assert np.all(0 <= np.array(self.position)) and np.all(np.array(self.position) < self.sim.grid_size)
         # return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
         return int(self.position[0]), int(self.position[1])
 
@@ -140,13 +142,13 @@ class Creature:
             return {"genome": self.genome,
                     "size": self.size,
                     "energy": self.energy_bar.current_energy,
-                    "refId" : str(self),
+                    "refId": str(self),
                     "image_data": self.image_data.tolist(),
-                    "species" : self.species_id}
+                    "species": self.species_id}
         return {"genome": self.genome,
                 "size": self.size,
                 "energy": self.energy_bar.current_energy,
-                "species" : self.species_id}
+                "species": self.species_id}
 
 
 class Corpse:
