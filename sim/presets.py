@@ -1,7 +1,7 @@
 PRODUCER_PRESETS = dict()
 
 # WE can format the dictionaries to include species id like {"1" : [<species>, <genome>]}
-CONSUMER_PRESET = {"1": ["07034df2","0109d0e6","120c92ee","110ae8ef"]}
+CONSUMER_PRESET = {"1": ["01054df2","0d0bd0e6","120492ee","0601e8ef"]}
 
 SIM_PRESET = {"followers_and_leaders": [], "cat_and_mouse": [], "secret_room": [], "half-and-half": []}
 

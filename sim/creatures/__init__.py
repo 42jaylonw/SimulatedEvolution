@@ -40,6 +40,7 @@ class Creature:
                 num_actions=self._cfg['num_actions'],
                 genome=genome,
                 num_neurons=self._cfg['num_neurons'],
+                num_genomes=self._cfg['num_genomes'],
                 reproduce_mode=self._cfg['reproduce_mode'],
                 mutation_rate=self._cfg['mutation_rate'],
                 creature=self)
