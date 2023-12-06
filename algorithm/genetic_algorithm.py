@@ -92,8 +92,6 @@ def generate_genome():
     # second byte
     genome += int_to_hex(random.randint(1, num_outputs + num_int_neurons))  # same as before
     # third byte
-    # as of right now, we are going to weight connections positively, since we would like to see action
-    # may need to revert later
     genome += int_to_hex(random.randint(55, 255))
     # fourth byte
     genome += int_to_hex(random.randint(0, 255))
@@ -101,7 +99,6 @@ def generate_genome():
 
 
 # movement_cost_handler is used to add the energy level of the creature to its decision making
-# can be adjusted later
 def movement_cost_handler():
     return (self.creature.energy / 101.0)
 
@@ -155,10 +152,12 @@ def sensor_switch_handler(creature, properties, sensor):
             return (dist_west / grid_height) * (dist_west / grid_height)
         # nearest border distance
         case 12:
+            # constant to prevent the neuron from becoming overpowering
+            neuron_weight = .8
             grid_height = 50
             nearest_border = max(properties[0], properties[1], grid_height - properties[1],
                                  grid_height - properties[0])
-            return (nearest_border / grid_height) * .8  # arbitrary value to prevent overpowering
+            return (nearest_border / grid_height) * neuron_weight
         # current location north
         # formula is (dist from south border / grid height)^2
         case 13:
@@ -215,7 +214,6 @@ def if_neuron_triggers(properties, input_sensors, creature):
 # create_active_map takes in a creature's genome and active sensors to create an adjacency map of network
 # the key is the input sensor and the value is a list of pairs, with format (output index, connection strength)
 def create_active_map(genome):
-
     # create dict to be returned
     ret = {}
 
@@ -229,9 +227,6 @@ def create_active_map(genome):
         # to_add is pair with format (output index, connection strength)
         to_add = [hex_to_int(extract_hex_sub(k, 2, 4)), conn_str]
         ret[input_node].append(to_add)
-
-    # filter internal connections with no output
-    # TODO: create function to filter internal connections with no meaningful output
 
     return ret
 
@@ -278,7 +273,6 @@ def movement_output(output_index, properties, creature):
             return output_array
         # emit pheromone
         case 10:
-            # TODO: detect pheromone is added to input space
             # add emitting pheromone to output space
             creature.emit_pheremones()
             return output_array
@@ -300,14 +294,14 @@ def clean_genome(genome):
         # first byte (input)
         to_add = extract_hex_sub(gene, 0, 2)
         to_add = hex_to_int(to_add) % (num_inputs + num_internal_neurons)
-        # this is a temporary fix, since 00 is reserved for food detected
+        # 00 is reserved and thus can not be a valid genome
         if to_add == 0:
             to_add = 1
         new_gene += int_to_hex(to_add)
         # second byte
         to_add = extract_hex_sub(gene, 2, 4)
         to_add = hex_to_int(to_add) % (num_outputs + num_internal_neurons)
-        # this is a temporary fix, since 00 is reserved for move to food
+        # 00 is reserved and thus can not be a valid genome
         if to_add == 0:
             to_add = 1
         new_gene += int_to_hex(to_add)
@@ -324,9 +318,6 @@ def mutate_genome(genome, mutation_chance):
     for g in range(len(genome)):
         # gene mutates
         if random.randint(0, 100) / 100.0 <= mutation_chance:
-            # this code mutates the entire genome
-            # mutate_index = random.randint(0, len(genome[g]) - 1)
-            # this code mutates only the weights
             mutate_index = random.randint(0, len(genome[g]) - 1)
             mutate_char = int_to_hex(random.randint(0, 15))
             temp = list(genome[g])
@@ -436,6 +427,7 @@ class GeneticAlgorithm:
                         out_vec[key - self.num_neurons] += (
                                 inter_neurons[input_index - self.num_observations] * conn_str)
 
+        # normalize output and convert to action
         out_vec = np.tanh(out_vec)
         output_index = np.array(out_vec).argmax()
         action = np.array(movement_output(output_index, np.int64(obs), self.creature))
@@ -451,16 +443,3 @@ class GeneticAlgorithm:
     def mutate_genome(self):
         genome = self.genome
         return mutate_genome(genome, self.mutation_rate)
-
-
-if __name__ == '__main__':
-    state = [22, 24, 2, 0, 1, 0, 1, 1]
-    gen = GeneticAlgorithm(num_observations=17,
-                           num_actions=10,
-                           num_neurons=3)
-
-    for _ in range(100):
-        obs = np.random.rand(16)
-        gen.update_state(state)
-        act = gen.predict(obs)
-        print(act)

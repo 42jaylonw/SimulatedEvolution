@@ -21,35 +21,31 @@ class Consumer(Creature):
         self.move_cost = 0.0
         self.times_eaten = 0
 
-        # reprod_cooldown is generated from the genome and determines how long a creature waits before reprod
         hash = self.generate_hash(self.genome[3])
-        self.reprod_cooldown = int(hash[:32], 16) % 20 + 20
+        # reprod_cooldown is generated from the genome and determines how long a creature waits before reprod
+        self.reprod_cooldown = int(hash[:32], 16) % 50 + 20
         # reprod_countdown ranges from 0 to reprod_cooldown and ticks down
         self.reprod_countdown = (self.reprod_cooldown / 2)
+        # edible_consumers is a list of edible creature species ID's
         self.edible_consumers = sim.predation_table[self.species_id][0]
+        # edible_producers is a list of edible producer species ID's
         self.edible_producers = sim.predation_table[self.species_id][1]
 
     def step(self):
-        # print(f"Creature of species {self.species_id}", end="")
         obs = self.get_observation()
         # if energy and cooldown is sufficient to reproduce
         action = self.reproduction_protocol()
         # if reproduction protocol not active
         if action == -1:
             action = np.argmax(self.behavior_system.predict(obs))
-            # print(" got action from neural network")
-        # else:
-        # print(" got action from reproduction protocol")
-        # self.die()
         self.action_hunt(action)
         self.energy_bar.consume_energy(self.move_cost)
         self.energy_bar.age_tick()
         if self.energy_bar.is_empty():
-            # print(f"A creature of {self.species_id} has died")
-            self.die(f"creature of {self.species_id} died of starvation")
+            self.die()
 
+    
     def reproduction_protocol(self):
-        reproduce_thresh = self.energy_bar.satiation_level
         if (self.reprod_countdown > 0):
             self.reprod_countdown = self.reprod_countdown - 1
             return -1
@@ -61,7 +57,6 @@ class Consumer(Creature):
                     continue
                 if creature.species_id == self.species_id and creature != self:
                     if creature.energy_bar.current_energy >= reproduce_thresh and creature.reprod_countdown == 0:
-                        # reproduce
                         child_genome = self.behavior_system.reproduce_genome(creature.behavior_system)
                         # remove energy from parents and put cooldown on reproduce
                         self.energy_bar.current_energy = self.energy_bar.current_energy * 0.3
@@ -70,10 +65,8 @@ class Consumer(Creature):
                         creature.reprod_countdown = creature.reprod_cooldown
 
                         # initialize creature and add to sim
-                        child_creature = Consumer(self.sim, child_genome, self.position, species_id=self.species_id)
-                        self.sim.add_creature(child_creature)
-                        # print("child added at location", child_creature.position)
-                        # print("reproduced")
+                        child_creature = Consumer(self.sim, child_genome, self.position)
+                        child_creature.species_id = self.species_id
                         return -1
             # else check for compatible creatures in sensory range
             potential_partners = self.sensePartners()
@@ -113,8 +106,17 @@ class Consumer(Creature):
 
         return min_dir
 
-    def get_observation(self):
 
+    def die(self, deathMessage=""):
+        if len(deathMessage) > 0:
+            print(deathMessage)
+
+        if self in self.sim.creatures:
+            self.sim.creatures.remove(self)
+
+        self.layer_system.creature_exit(self.position, self)
+
+    def get_observation(self):
         observation = np.zeros(self._cfg['num_observations'])
         # block here
         observation[0] = self.blockedFwd()
@@ -192,15 +194,6 @@ class Consumer(Creature):
 
     def sensePopulation(self):
         """ Obtains population count (of consumers) within sensory range. """
-
-        # Obtains nearby information from function centered on the creature
-        # near_info = self.sim.get_near_info(self.position, self.sensory_range)
-
-        # sums number of 1s in consumer layer of the array (if this is how the array works)
-        # num_consumers = np.sum(near_info[2])
-
-        # EXPERIMENTAL - original code commented out above, the implementation below
-        # should do the same job of counting the nearby consumers
         num_consumers = 0
         center = self.position
         length = self.sensory_range
@@ -240,68 +233,7 @@ class Consumer(Creature):
                     if consumer.species_id == species and consumer != self:
                         potential_mates = potential_mates + [consumer]
         return potential_mates
-        # ---------
 
-    def senseNearest(self):
-        """
-        Senses the location of the nearest of a specified object using 
-        square "rings". Returns None if there are no creatures 
-        within the sensory range, and returns the location of the 
-        nearest creature(s) otherwise.
-        """
-        # TODO: NOTE: Right now, this only checks for the nearest producer. Need to implement functionality
-        # where it can instead specify the type of creature or object it wants to find, esp. with regards to which species are edible to it.
-        closest_locations = []
-
-        # Check first if there is a producer on same square
-        if self.layer_system.get_num_producers(self.position) > 0:
-            return self.position
-
-        for radius in range(1, self.sensory_range + 1):
-            for dx in range(-radius, radius + 1):
-                for dy in [-radius, radius]:
-                    checked_pos = self.position
-                    checked_pos[0] = checked_pos[0] + dx
-                    checked_pos[1] = checked_pos[1] + dy
-                    if not self.layer_system.out_of_bounds(checked_pos):
-                        if self.layer_system.get_num_producers(checked_pos) > 0:
-                            if len(closest_locations) == 0:
-                                closest_locations.append(checked_pos)
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(
-                                    np.array(self.position) - np.array(closest_locations[0])):
-                                closest_locations = [checked_pos]
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(
-                                    np.array(self.position) - np.array(closest_locations[0])):
-                                closest_locations.append(checked_pos)
-
-            for dy in range(-radius + 1, radius):
-                for dx in [-radius, radius]:
-                    checked_pos = self.position
-                    checked_pos[0] = checked_pos[0] + dx
-                    checked_pos[1] = checked_pos[1] + dy
-                    if not self.layer_system.out_of_bounds(checked_pos):
-                        if self.layer_system.get_num_producers(checked_pos) > 0:
-                            if len(closest_locations) == 0:
-                                closest_locations.append(checked_pos)
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) < np.linalg.norm(
-                                    np.array(self.position) - np.array(closest_locations[0])):
-                                closest_locations = [checked_pos]
-                            elif np.linalg.norm(np.array(self.position) - np.array(checked_pos)) == np.linalg.norm(
-                                    np.array(self.position) - np.array(closest_locations[0])):
-                                closest_locations.append(checked_pos)
-
-            if len(closest_locations) > 0:
-                # return np.random.choice(closest_locations)
-                # random.choice is not used to provide for more "consistent"
-                # behavior when it comes to the nearest object.
-                # This results in "preferred" directions when there is a tie
-                # in distance
-                # print(f"closest location to {self.species_id} at {self.position} is {closest_locations[0]}")
-                return closest_locations[0]
-
-            if len(closest_locations) > 0:
-                return np.random.choice(closest_locations)
-        return None
 
     def senseWithinRange(self):
         positions_to_check = GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, self.sensory_range)
@@ -311,13 +243,11 @@ class Consumer(Creature):
                 creatures_there = self.layer_system.get_creatures(pos[0])
                 for creature in creatures_there:
                     if self.is_edible(creature):
-                        # print(f"EDIBLE FOUND -- {pos}")
                         edible_positions.append(pos)
                         break
         if len(edible_positions) <= 0:
             return None
         closest_pos = min(edible_positions, key=lambda x: x[1])
-        # print(f"closest_pos is {closest_pos}")
         return closest_pos[0]
 
     def action_move(self, action: int):
@@ -360,14 +290,13 @@ class Consumer(Creature):
 
         self.set_position(target_pos)
 
-    # TODO: finalize + test this implementation
-    # WIP - consumer acts like an emitter onto the pheremone layer
-    # Emit range + strength are defined by arbitrary constants for now
+
     def emit_pheremones(self):
         pheremone = Pheremone(PHEREMONE_EMIT_STRENGTH, self)
         emit_positions = GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, PHEREMONE_EMIT_RANGE)
         for emit_pos in emit_positions:
             self.layer_system.add_pheremone(emit_pos[0], pheremone)
+
 
     def blockedFwd(self):
         """
@@ -432,31 +361,7 @@ class Consumer(Creature):
                 return 0
         else:
             return 1
-
-    def metabolize(self, activity=0.0, climate=0.0):
-        """
-        Subtract Consumer's energy by the sum of activity, climate, and 10% of its size\n
-        params:
-            activity = added energy cost associated with movement
-
-            climate = added energy cost based on the climate layer that the creature resides in
-        """
-        self.energy -= (self.size * 0.1) + activity + (climate * 0.5)
-        # NOTE: Functionality already in self.energy_bar.consume_energy(act)
-
-    def consume(self, energy=0):
-        """
-        Increment a Creature's energy by a specified amount\n
-        param:
-            energy = energy to add to Creature's current energy level 
-        Notes:
-            Only accepts positive energy values
-        """
-        if energy < 0:
-            raise Exception(f"Cannot Consume {energy} energy")
-        self.energy += energy
-        # 
-
+    
     def is_edible(self, creature):
         """
         Checks to see if a creature underneath is edible. (exists within edible tags)
@@ -487,15 +392,10 @@ class Consumer(Creature):
         # producer, the action_hunt behavior does not currently include pheromone
         # tracking, as producers are completely stationary and do not use
         # pheromones.
-        # senseLocation = self.senseNearest()
-        # print("hunt enter -", end="")
         if not self.energy_bar.is_satiated():
-            # print(" not satiated, should hunt")
             # if not satiated, then move in accordance with the hunting function
             senseLocation = self.senseWithinRange()
-            # print(f"senseLocation is {senseLocation} vs the creature {self.species_id}'s position {self.position}")
             if senseLocation is not None:
-                # print("is manhattanning")
                 # if there are edible creatures within sensory range
                 raw_x = senseLocation[0] - self.position[0]
                 raw_y = senseLocation[1] - self.position[1]
@@ -517,22 +417,18 @@ class Consumer(Creature):
                     elif raw_y < 0:
                         self.action_move(2)
             else:
-                # print("is not manhattanning")
                 # if no edible creatures within sensory range, check to see if there are pheromones within
                 # the immediate up, down, left, right directions, and move towards the strongest one if so
 
                 # case: there are no pheromones and the creature should move in accordance with its neural network
                 strongest = self.get_strongest_immediate_pheromone(0)
                 if strongest is None:
-                    # print("moving neural network style")
                     self.action_move(otherwise)
                 else:
                     strongest_direction = strongest[0]
-                    # print(f"A creature of species {self.species_id} moved toward pheromone")
                     self.action_move(strongest_direction)
         else:
             # if satiated, then simply move with accordance with the reproduction protocol passed in
-            # print(" satiated, should take action according to reproduction protocol")
             self.action_move(otherwise)
 
     def get_strongest_immediate_pheromone(self, mode=0):
