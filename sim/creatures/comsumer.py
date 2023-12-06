@@ -49,7 +49,7 @@ class Consumer(Creature):
         if (self.reprod_countdown > 0):
             self.reprod_countdown = self.reprod_countdown - 1
             return -1
-        reproduce_thrsh = 85
+        reproduce_thresh = 85
         if (self.energy_bar.is_satiated() and self.reprod_countdown <= 0):
             # if another creature on current space that is compatible
             for creature in self.sim.layer_system.get_consumers(self.position):
