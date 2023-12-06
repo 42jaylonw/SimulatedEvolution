@@ -12,7 +12,7 @@
    ```
    press `q` to quit the simulation
 
-![example](doc/survival_generation_5.gif)
+![example](./doc/survival_generation_5.gif)
 
 ## Documentation
 [Here](https://lumbar-haddock-2e2.notion.site/Evolution-Simulation-e12f50a180fe490a842e340b1ee03c76) is the documentation.
