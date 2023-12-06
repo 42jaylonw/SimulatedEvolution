@@ -68,9 +68,11 @@ function changeSimulationMode()
     isSimRunning = !isSimRunning;
 }
 
+//Activate the hover listeners in the Simulation Grid
 function addLayers(){
     simSpace.addCellListener();
 }
+
 /**
  * Toggle Simulation overlay based on specified mode.
  * Currently, heatmap and light-level map are supported

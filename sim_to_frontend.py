@@ -3,7 +3,6 @@ from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
 from sim import presets as preset
-import numpy as np
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
 from games.sprint_2_survival.survival import SurvivalSim 
@@ -15,7 +14,7 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     Params:
         num_producers(int): number of produces present in SimSpace
 
-        num_consumers(int): numner of consumers present in SimSpace
+        num_consumers(int): number of consumers present in SimSpace
         
         width(int): width to create NxN SimSpace(default width is 50)
     Return:
@@ -33,13 +32,6 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     # Instantiate Organisms
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
-
-    # # Add Wall
-    # for i in range(sim.grid_size[0]):
-    #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
-    # Instantiate emitters(sim, pos, e_range, e_val)
-    # emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
-    #             LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)] 
     
     # add all instantiated objects to SimSpace
     sim.reset(producers + consumers, emitters=[])

@@ -1,5 +1,5 @@
 /**
- * @class
+ * @class SimulationGrid
  * @classdesc A square grid that displays a simulated environment
  */
 class SimulationGrid{
@@ -69,6 +69,14 @@ class SimulationGrid{
         });
     }
 
+    
+    /**
+     * Update the visual representation of the simulator
+     * @param {object{} | object} data data used to update simulator 
+     * @param {boolean} isBatch specify whether the data represents a single Cell or the entire simulation
+     *  EX1: isBatch = false means that data = {X: [a,b], Y: [c,d]...}
+     *  EX2: isBath = true means that data = {{X: [a,b], Y: [c,d]...},{Z: [e,f], W: [g,h]...}}
+     */
     visualUpdate(data, isBatch=false){
         if(isBatch){
             for(let packet of data){
@@ -79,6 +87,7 @@ class SimulationGrid{
         }
        this.handleInitialData(data);
     }
+    
     //Visually clear the simulation grid
     clearSimulation(){   
         for(let i = 0; i < this.width * this.width; i++)

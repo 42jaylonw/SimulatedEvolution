@@ -419,4 +419,3 @@ class GridSpace():
                 "temperature": np.int16(self.temperature_val).item(),
                 "light": np.int16(self.light_val).item(),
                 "creatureImages": [x.ref_id  for x in self.get_consumers()]}
-                # "creatureImages": [x.image_data.tolist()  for x in self.get_consumers()]}

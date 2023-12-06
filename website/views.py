@@ -1,18 +1,13 @@
-from flask import Blueprint, render_template, jsonify, request, flash, redirect, url_for
-import games.sprint_0_random.random_moving as random_moving
-import random
+from flask import Blueprint, render_template, request, flash, redirect
 import json
 from website import validation
 import numpy as np
 from games.sprint_2_survival.survival import SurvivalSim 
-#TEMP
-import temp_sim_to_frontend as sim_to_front
-#END TEMP
+import sim_to_frontend as sim_to_front
 views = Blueprint('views', __name__)
 
 
 # simulator information for user session
-# TODO: make mini class to remove use of 'global' keyword
 simulator = None
 isSetup = False
 isActive = False
