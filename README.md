@@ -22,7 +22,7 @@ Evolution Simulator has a number of tools for the user to create an environment 
    ```
    press `q` to quit the simulation
 
-![example](doc/survival_generation_5.gif)
+![example](./doc/survival_generation_5.gif)
 
 ### Running the application
 
