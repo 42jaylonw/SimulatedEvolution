@@ -2,7 +2,7 @@
 
 ---
 
-Evolution Simulator??? is a neural-network based software to host a front-end display of creatures evolving. 
+Evolution Simulator is a neural-network based software to host a front-end display of creatures evolving. 
 
 Evolution Simulator has a number of tools for the user to create an environment and place organisms, then watch as the organisms become adapted to living in the custom environment over time. 
 
