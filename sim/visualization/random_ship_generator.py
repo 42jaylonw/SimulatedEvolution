@@ -82,13 +82,10 @@ class InvaderCreator:
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-
     # Example usage
-    # creator = InvaderCreator(img_size=1500)
     # image = creator.create_image(size=5, invaders=5)
-    # image.show()  # or image.save("invaders.png")
     generator = InvaderCreator(img_size=8)
-    for _ in range(1000):
+    for _ in range(100):
         invader = generator.get_an_invader()
         plt.imshow(invader)
         plt.show()

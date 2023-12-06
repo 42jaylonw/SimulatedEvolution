@@ -5,7 +5,7 @@ from sim.creatures.producer import Producer
 from sim import presets as preset
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
-from games.sprint_2_survival.survival import SurvivalSim 
+from games.survival.survival import SurvivalSim
 
 def create_sim(num_producers=1, num_consumers=1, width=50):
     """
@@ -21,10 +21,10 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
         sim(SimSpace): NxN SimSpace with specified features from parameters
     """
     # Change TOML gridsize
-    with open("games/sprint_2_survival/config.toml", 'r') as f:
+    with open("games/survival/config.toml", 'r') as f:
         config = toml.load(f)
     config['SimSpace']['grid_size'] = [width, width]
-    with open('games/sprint_2_survival/config.toml', 'w') as f:
+    with open('games/survival/config.toml', 'w') as f:
         toml.dump(config, f)
     # Create SimSpace
     #sim = SimSpace(config)

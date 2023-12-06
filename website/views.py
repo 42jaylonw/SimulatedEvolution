@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect
 import json
 from website import validation
 import numpy as np
-from games.sprint_2_survival.survival import SurvivalSim 
+from games.survival.survival import SurvivalSim
 import sim_to_frontend as sim_to_front
 views = Blueprint('views', __name__)
 

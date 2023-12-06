@@ -54,7 +54,7 @@ class Consumer(Creature):
             self.reprod_countdown = self.reprod_countdown - 1
             return -1
         # if (self.energy_bar.current_energy >= reproduce_thresh and self.reprod_countdown == 0):
-        if (self.energy_bar.is_satiated() and self.reprod_countdown == 0):
+        if (self.energy_bar.is_satiated() and self.reprod_countdown <= 0):
             # if another creature on current space that is compatible
             for creature in self.sim.layer_system.get_consumers(self.position):
                 if creature == self:
@@ -62,7 +62,6 @@ class Consumer(Creature):
                 if creature.species_id == self.species_id and creature != self:
                     if creature.energy_bar.current_energy >= reproduce_thresh and creature.reprod_countdown == 0:
                         # reproduce
-                        # TODO: make actual reproduction function
                         child_genome = self.behavior_system.reproduce_genome(creature.behavior_system)
                         # remove energy from parents and put cooldown on reproduce
                         self.energy_bar.current_energy = self.energy_bar.current_energy * 0.3
@@ -72,7 +71,7 @@ class Consumer(Creature):
 
                         # initialize creature and add to sim
                         child_creature = Consumer(self.sim, child_genome, self.position, species_id=self.species_id)
-                        # self.sim.add_creature(child_creature)
+                        self.sim.add_creature(child_creature)
                         # print("child added at location", child_creature.position)
                         # print("reproduced")
                         return -1
