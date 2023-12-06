@@ -40,11 +40,13 @@ class LayerSystem():
                 self.grid_spaces[x][y].set_light_level(0)
                 self.grid_spaces[x][y].set_temperature(0)
     
+    # Decreases the strength values of all Pheremone objects in the LayerSystem by a decay multiplier
     def decay_pheromones(self):
           for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 self.grid_spaces[x][y].decay_pheremones()
 
+    # Adds the provided Pheremone object to the specified position
     def add_pheremone(self, pos, pheremone):
         assert not self.out_of_bounds(pos)
         self.get_gridspace(pos).add_pheremone(pheremone)
@@ -176,7 +178,6 @@ class LayerSystem():
     # Appends creature to the GridSpace creatures list at the specified position
     # This function should be called by the Creature when it is spawned
     def creature_enter(self, pos, creature):
-        # print("CREATURE ENTER: ", pos)
         assert not self.out_of_bounds(pos)
         self.get_gridspace(pos).creature_enter(creature)
 
@@ -396,12 +397,12 @@ class GridSpace():
     
     def decay_pheremones(self):
         for p in self.pheremones:
-            p.strength = math.floor(p.strength * PHEREMONE_DECAY) # WIP - this might need to be changed to linear decay
+            p.strength = math.floor(p.strength * PHEREMONE_DECAY)
             # Remove pheremones if their strength is 0
             if p.strength == 0:
                 self.pheremones.remove(p)
 
-    # Returns a dictionary of the properties (WIP - this does not return all properties yet) at this GridSpace
+    # Returns a dictionary of the properties at this GridSpace
     def get_properties(self, includeImages=False):
         if includeImages:
              return  {"position": self.position,
@@ -418,4 +419,3 @@ class GridSpace():
                 "temperature": np.int16(self.temperature_val).item(),
                 "light": np.int16(self.light_val).item(),
                 "creatureImages": [x.ref_id  for x in self.get_consumers()]}
-                # "creatureImages": [x.image_data.tolist()  for x in self.get_consumers()]}

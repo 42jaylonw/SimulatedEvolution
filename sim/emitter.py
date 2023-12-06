@@ -78,7 +78,6 @@ class LightSource(Emitter):
         emit_pos_pairs = self.get_emit_position_pairs()
         cur_val = self.emit_val
         for emit_pos, dist in emit_pos_pairs:
-            # TODO: make a universal decay coefficient rather than depend on individual emit strength + range
             cur_val = self.emit_val * ((self.emit_range - dist) / self.emit_range)
             self.layer_system.increment_light_level(emit_pos, cur_val)
 

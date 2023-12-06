@@ -2,5 +2,5 @@ toml
 numpy
 opencv-python
 nicegui
-hashlib
+pillow
 flask==3.0.0

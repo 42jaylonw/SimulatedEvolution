@@ -10,7 +10,7 @@ def load_consumer_preset(PresetID):
         return None
     return CONSUMER_PRESET[PresetID]
 
-def load_conusmer_preset(PresetID):
+def load_producer_preset(PresetID):
     if PresetID not in PRODUCER_PRESETS:
         return None
     return PRODUCER_PRESETS

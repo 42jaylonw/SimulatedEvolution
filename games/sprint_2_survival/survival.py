@@ -22,14 +22,14 @@ class SurvivalSim(SimSpace):
         self.population_consumers = self._cfg['population_consumers']
         self.population_producers = self._cfg['population_producers']
         self.min_survival_rate = self._cfg['min_survival_rate']
-        consumers = [Consumer(self) for _ in range(self.population_consumers)]
-        producers = [Producer(self) for _ in range(self.population_producers)]
-        self.heat_source = HeatSource(self, np.array([0, 0]), 20, 100)
-        self.light_source = LightSource(self, np.array([0, 0]), 20, 100)
-        emitters = [self.light_source, self.heat_source]
-        # self.layer_system.wall_add()
-        self.reset(consumers + producers, emitters)
-        self.step()
+        # consumers = [Consumer(self) for _ in range(self.population_consumers)]
+        # producers = [Producer(self) for _ in range(self.population_producers)]
+        # self.heat_source = HeatSource(self, np.array([0, 0]), 20, 100)
+        # self.light_source = LightSource(self, np.array([0, 0]), 20, 100)
+        # emitters = [self.light_source, self.heat_source]
+        # # self.layer_system.wall_add()
+        # self.reset(consumers + producers, emitters)
+        # self.step()
         # show maps
         light_map = get_map(self, self.layer_system.get_light_level)
         heat_map = get_map(self, self.layer_system.get_temperature)
@@ -50,7 +50,10 @@ class SurvivalSim(SimSpace):
     def end_generation(self):
         self.curr_generation += 1
         # log data
-        pass_rate = len(self.get_survivors()) / len(self.creatures)
+        if len(self.creatures) == 0:
+            pass_rate = 0
+        else:
+            pass_rate = len(self.get_survivors()) / len(self.creatures)
         self.pass_rate_list.append(pass_rate)
 
         print(f"Generation: {self.curr_generation}: Survival Rate {pass_rate}")
@@ -59,11 +62,11 @@ class SurvivalSim(SimSpace):
         survivors = self.get_survivors()
         offsprings = self.generate_offsprings(survivors)
         #
-        producers = [Producer(self) for _ in range(self.population_producers)]
-        self.heat_source = HeatSource(self, np.array([0, 0]), 20, 100)
-        self.light_source = LightSource(self, np.array([0, 0]), 20, 100)
-        emitters = [self.light_source, self.heat_source]
-        self.reset(offsprings + producers, emitters)
+        # producers = [Producer(self) for _ in range(self.population_producers)]
+        # self.heat_source = HeatSource(self, np.array([0, 0]), 20, 100)
+        # self.light_source = LightSource(self, np.array([0, 0]), 20, 100)
+        # emitters = [self.light_source, self.heat_source]
+        self.reset(self.creatures, self.emitters)
 
     def get_survivors(self):
         survivors = []

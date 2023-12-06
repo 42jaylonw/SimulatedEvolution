@@ -3,60 +3,16 @@
 {% block title %}Simulated Evolution Home{% endblock %}
 
 {% block content %}
-
 <!--Layout for Home page-->
 <div class="row content">
-    
-    <div class="idk">
-    
-    </div>
-
     <!-- Simulator Control Binding Information(left side of screen) -->
     <div class="col-3 sidenav left-window">
         <!--Simulation parameters -->
         <!-- {# Displayed when user first visits page or wants to reset the simulation #} -->
-        {#  (1)initSimParameters (2-3)simulationSetup, (4)ActiveSimulation #}
         {% if not initSimParameters %}
-          
-        <form method="POST">
-            <div class="sim-form">
-                <label for="gridSize">Grid Size</label>
-                <input 
-                    type="gridSize" 
-                    class="form-control" 
-                    id="gridSize" 
-                    name="gridSize" 
-                    placeholder="Enter grid size"
-                />
-                <input 
-                    type="numGenerations"
-                    class="form-control"
-                    id="numGenerations"
-                    name="numGenerations"
-                    placeholder="Enter Training Generations"
-                />
-                <!-- <label for="numConsumers">Consumer Count</label>
-                <input 
-                    type="numConsumers" 
-                    class="form-control" 
-                    id="numConsumers" 
-                    name="numConsumers" 
-                    placeholder="number of consumers"
-                />
-                <label for="numProducers">Producer Count</label>
-                <input 
-                    type="numProducers" 
-                    class="form-control" 
-                    id="numProducers" 
-                    name="numProducers" 
-                    placeholder="number of producers"
-                />
-            </div> -->
-            <br>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+        
         {% else %}
-
+            <!--Pre-Simulation setup -->
             {% if simulationSetup %}
             <div class="row">
                 <div class="col">
@@ -116,20 +72,16 @@
                          <form method="POST">
                             <button id="startSimulation" type="submit" class="small-btn btn-success">Start Simulation</button>
                         </form>
-                        </div>
-                        
-                       
+                        </div> 
                     </div>
                 </div>
-                
             </div>
-          
-            
             <script
             type = "text/javascript"
             src = "{{ url_for('static', filename='sim-edit-menu.js') }}"
             ></script>
             {% endif %}
+             <!--Running Simulation setup -->
             {% if activeSimulation %}
             <h1 class="text-center">Quick Controls</h1>
             <h5 class="text-center">Use these neat bindings!</h5>
@@ -151,25 +103,57 @@
                 <button type="submit" class="btn btn-danger">Reset Simulator</button>
             </form>
             {% endif %}
-            {# <form method="POST" action='/reset_simulator'>
-                <button type="submit" class="btn btn-danger">Reset Simulator</button>
-            </form> #}
         {%endif%}
     
         </div>
         <!-- Simulation Area(center of screen)-->
-        <div class="col-6">
-            
-                <div class="sim-container">
-                {% if grid_size %}
-                    <script>
-                    document.addEventListener("DOMContentLoaded", function(){
-                    simSpace = new SimulationGrid({{grid_size}});
-                    });
-                    </script>
-
-                {% endif %}
+        <div class="col-6 d-flex justify-content-center align-items-center">
+            {% if not initSimParameters %}
+                <div class="home-container col">
+                    <div class="home-text col">
+                    <h1 class="text-center">Simulated Evolution</h1>
+                    <h5 class="text-center">Welcome to the Simulated Evolution project!</h5>
+                    <p>Please enter a grid size(1-50) and the number of training generations(>0). <br>
+                    These values will be used to create a simulation grid of the specified size and train the creatures!
+                    </p>
+                    <figure>
+                        <img  style="border: 3px solid #000;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARAAAAC5CAMAAADXsJC1AAAAwFBMVEX///8ScM4AbM0AZssAacwAa80Abs4AZ8sAYsoAZMu2zu0Scc4Aas0AXskAYMkAZMp7pN4AXMk5eNCeteOVr+H0+f2ived0oNzH1/Dj7PgAV8cndM9nmNr3+v2yx+rt9vzR2vBZkdiowuiQtOTY4/TD1O92m9rU4fRGgtOxwedjldpRiNVjjtaSrODV5fZPhNOErOGnu+V9ntttndyKseNwldhDfdK6yOlbitU+eNDJ3fNEidbFz+yIpd4AUcZ5pt93ErwSAAAWYklEQVR4nO1de1/buNLGTmInhNyApJiQhEuAFuiNbllOW7bf/1u9sWxdrHlkjSBp8tt9569ztiiWH8mjmWcu2tv7L8rs6DD6lm17Fjsj84ckjaJksNz2RHZDlodpEglJtz2VnZDlKJISD7c9mR2Q2TRRgETpYtvT2b68NDUeUetq29PZutz2DTyi5Gnb89m6tKKK9P7rR+9DXAWkOdn2jLYr1+0qHlFyse0pbVfmqQVI1N/2lLYrl00bkMZ823PaqkwIINHhtue0Vbk6IIAMbrc9qW3K75gAEv/e9qS2Ke8oIMnztie1TflGAYmS2bZntUW5AYD0x9ue1Rble0IBGf0/IBXpjv7LFMAD2CH/6U/mpkEBGfy7ADm5fxfy5w/UVP03USLjy2k7aT6FcBpkjyQPG5ven5ZsGIu3SxrnAaOGFkUU32xqfn9YTu4H6tUGl/xxS2uLNP8ltOqkZx4YbT7xtdC2WTxod1rRyQZn+edkf1Bd5wBEpkp7nJ0ss+zfYbif2FRg1N5nDs3UDjnYUW5osby+unkfoAVWL9Uhh2eUMs8a7fA2du9jyea/75+S9uAgSQbcFc7lGgDCDLFkem+ln143683JLErjROrGXgBzNSFccb7grE12p3VxvHMm6k3FJODu+ZUMgRfPIzaykTHgDVPfiJz0q+/znj3yEfhoK0QZStLYIBH/eX9GxrZbkX7hDkW0xgrRe+/AW9Mq27VPhrJX7EDre4TH6uj1MhvPJpIxewH+iICTIuG6FdRlLQD54RlXDf1HjZ2ihnpd+kYxc4YjMDZiuCXvq59a/O3Nb7FGOQUvxYwrjkd0aC6tj/XjTuxNuVPsIXoppiv+qQ/GMgB5snXxLuWY4VXmnYT7gAjMpVl/bGT0bIp3x7XLeuiVOqwJgpB1LqlHhSwHdMju+Hdw23dHLECOoKEatTyDl+Bc2504Jt72vKCRdVhEhT+U+iiRE/DI/s7kmO0j/4wHiE0CPj0+TPu9/sA37hI8Mg2iHTYpc6gHWIBYIfzkLv+Ps09eZ/4LinTvTI7ZhxadHU+HLOwPhvtOKNIdnb7pLdYoXxEgLU7Qyd75bEC+I0D6u8ISfUEOa8L5Yqb2IC4gn9EjWx/e8hZrlGFlduL/dFmWO+GX2YDYh1Mxelf8mQtzds2bg9E0PmUlBD7br1UoVYZAFmVnst0PzVkFpEZm1JiYMomeG0grTXfDeq/QxK0j/sCPVBm3mDQKPGWi5mZMs/FCCPfPF5V1DijjmaF3al+zxmJqenDOfniAZKc9IW3mr1cUAVsJrGROHbSVNFgfDTLMVmN5aAbKsXxW5y/On1fpw05AROYJvVMUn3HG/oVMnw0VVWnWd/Do/+tZ1ZQIWKMlJA1W5hUHU+TLrMAMykDiikFyNvwq7tia2ZT9nDN4UDDfitaG5JJ8Zz89QEyCtOMh8ui+b3DjugsH3b76CcZozDhsJqWqwhj7orSEPWTH7K6cgHgjEHtO5nEjAby+CYjv/ejW5SZ30Pof9cxj/+hzkDMQbcgyq4bSBvWJF++oImBqkXN46HLX2QFIuomI5kvliPecgmDndnhbJIMHZ/FM/+hzknYkpL0JQKxga2084BNYZq7Pabv+xiP9vMYSAtLdSPK/FYartaU/IEXwk/ecQzC0EIYFjgGJehsI351Yix6/1PzxBbIlmP4uUD+lNH55B4MwxKYAObK/7RolOYbbnqlVIfEo5MCflwkCVblsIhJhc1HdGurWsXF5Z5+dnhoECKBScmmvvyxzTAL5HbeddAUXOeYt08Lhy7B8tAxbMRybLlBuybrVsKOEAhSSMpfJkQixAoSxQ3AEdLB+/5/S2afuowy/Epemwe5/xPpkFnhkc+3Bu3v6EbiZW5RzG/EpgBe8yqzXol92MXLdHTOGVdekGyXNkduz+IjfiLtMWANFrGMXn29rB+SyqkAap9Ph0Q/3meGwNbkZgdeuY8bjP+Uy+yOA/F3VCb5o+sKR/JOwSEBXnk3E0sozbOeuF5AfVt6Lj+v5BVkrPk2zcOmQFsPeJDlmBSABQRCvkJPMB8g3h+3NTuXB0abVDzDGYkBCokJe+WLrOB8geE4Rv1g0cygRju2PHx4zuCW2kFCHB5AM2+0RM/CfCzbsWBFvGO1eLyB2zacPkEuHTl25WFyf09ZaAW/1c/OAkDoNDyAuDRDSYQ2uc5OT5oGDGNsFxHVIBPic+8jWZTkkOJaZfOY+mSFkxT2APDoBYcXeCjkEC81ieQhtU4g3nzNA7kIBcX4yAcEAEIzojjgD/3ZEMTg2DFOIyn8tICFp+GOw0KzeuR9o0y4hzfVpkc/2b3sAeXEB0gigrTJg7fqry/ZcOiTipthzhNATPkBcU+LHu2GKNi9ijY/daJ3uDHmCBxDXGsXeALkhQBUkjCSMGjN5fRWrZPO+EpCg9FnwI7VxDykOb1dMe11V732bhHolIN2Qh4LADotOcVCIuYRkddUKqQb0AIKzmqJWkJoHGcksQBDJPC1JozWdvLNQQBwMYFCsCO18FiAwUFX66+l6OIAZodBf5dwFFLmvZA5AZekQFMpsZ2W57HraqtK4kQeQOQYkpNDrBMUxktcC0ti/LLzn9lrUakZccQ8ga0jzgrFy1g5BCTMrV/dY/OewXeoSWkn4OkCYDHMuY2h+tzjpsSj/KHcZ5oK1Wkvn3R+EAPMAgqMISUCqKKokZGbfwtXIN8YyTtZUbEYrCT2A4DSvkGRi0EQ4YtbIo9XotvN/EWFwZsZ8rdBKQg8gS8j/MeKySjClysp0RYUDZeJG8dXwZ+ES0Cb9NSRz6g9DSpnhaDcjbreH7eSy7DHHmVtmUiM0occDCLaeGXFZ9QOOpBfW5Uqo21fpRQmjLaSDIBZac/6quExAyQo96IvX4pm6IA4qJyy4vzc34aEkpQ+QewRIADvkAISZLQ9a9ciqzPN867XeWpF4HLxDoFnFyDGV4gCEaXkDwk6VqQoLPqSZGpJhKEGEy3UDXE0XILwzE/TZUFEZEbRJ3ujS0NC1D5BLZGgGfLqudIqowdEit/SQSyS7XXz+b2yOQENh3nQI+EL8JzpZr6TL2GZjoFVlDnVpx75ti/ykC+UBBFrenFQGKdgwW0nM8M5QDpEcNj4V/7fzJnuVLpcPEBRCCKLcnaGEqMXwmWlf9+R/8t+KA/Btpe8UcO/5h4JnIdXm1878gSj1+4j09hCtRueF2RZE79pCJ+UFBCjVID9z5iyqWm13r09EfQ3jXBFpBQmzLgML3f9eQMBXHOL9uwszcxn5ng68bd05YBylSdI/D5mMLXS1vICQ8HhglMruZ1iF1qcAlnQJu/rMn119/37OnMb4B7ImXwEINW5ZBYSG4MSo4pd8ew0cM8mrAhDfTtu9hHiUM6oQOj638ytQIox6OUNIR8MAQIBz2XzFLcTj57SbX2BsG4O0rtjfngSVV6dhZz+6E4ULCPWl0nBAsiTGb7sgL+fP+QTWcyidCW0ZJiCAsAgGRDf9sXkpOjO/RwGbQnbCqrycdWZ+QGjmQDAgE03N2kr8BwHEn7cCAQlsWUE9BjYgn8gGDQ0/vFSo6qpb+olYjX6bExeJtYLm5CgxYVk0pK9t5zzk0eP7yiawPR9yAvqb5+DmsGEuFajNTJ5yOfRnqpEdEgTIYmq1HbQSdUjox8+f09iW+OEgtUoP3u5ob5aLfyzhMEMAmTTt0TZbYKuoxLtEGJCQtv+rdaJ6iNM/RAj53PiAXB9Sx7Jn/Y1dDeEPGe9j5yysaIV2/GYzCIRF5AKSPQ/AJXl2gTKpDSbGmy2uFiBBTBWJVjGa/pdC7CAeIIt3bRwytP4uuIDI1U85LD+DpMzzb94ipxwrKDRpYNuHJHKQYmlvfqSrej8oR4S0aGMlzAghtaoMQPYPXbYxuRWH2qo+R82RgB92hydxiFgJM4XYpKwXkNv37r42h/a5RvsLjDxKxNFxe/VOAWqVNFQIMHXtK3c9gFx/7mNfMj+BaRYGDR+3vtbPB/AhEm32O9HCO3bjr5VWt7ZoLSBfpw2Xaz1/7rXomUrTG3wpsL+arkcEWEhjm+7npUMIsROr3I/NvvTcPY9WhtPikfqFoBmI1y3ZfwIHOgNKU+zc3YBEV7uxkwuQ27O2G47VEmAnGQDCKLE+ee4hSPz35SixmdmQzF+LRXQBclpDZkdOahDtEE5+1PIBqJKAIg1bNbMiu6VYVp0DEHcvm0IcNYIAEF4WLmx/w+dWbZ4ngCkeWkMdgLhK0D3DUEMh1uTsvlZC+KrRbiFA7AGXjJ9sE8bxZs7DsBRHwxOUC9vmbN8JSovwHdlarIAmu/V2FpOFx4DgdFgTEJwIiiKtLAWnvJGnWG9hPityUl1nrm93Dc43DAju32yII5EEJQezAJGhhPhqfNyQkPB7rFvtA5nVA3PExUBAaoqvSolxMjkChJMiqSJoAuijuFwPZvMuYiHzttYcRrh65+BPcYJxIT8Fx+2o0EHlHpyqc5XKU+qmMn7ErncfWzqEk9RxCV+yDeOobgcjir8WGZyYG5SAJE3NNnL8CrUC5XYqs/fYlshVdcIxw7eD30vUwy6lsztYfhSKKxUclxROSuv26cMHZTxyLDPFm1UBYV6FeB1btgTjkRiPjiPHDrePFzLaqwOkRCHPbZTYsGpX1AqU5LIEhNOoYXlP3i392zdoH+IxcBZRuJXqU5GGFMPSadkzKp+Q0q+MdA9d7FXmDsqE177XwJoNgbfsTZb/Ac2KmiA7bnkeCSpKVFJihk9m8+RXLCrbk8Fe6Syg0sRUgPhOqMsBckF9dciOPpndGpLO1du3c12ABU0fefiJZhXKio+9Zee695YMW0hAfA3vPuNvO61veLkg8aXKakAh52dcFitmZZwMBVxkexRhBqika79RoO9SkUpDApLUf24LB0NRH+aadTEe9fZtdYvEzY9iGfMJF4lqIFtRbURRmK2z0L3BKq2x5AWvKmm+nkfEedCrjVXnT85QRxoBSC0jZXaxTHpnK8jP4sL8KO7ZA+ruRa6XMMWMLHQPHsYtU5JmUYB0ake6WjIf1A0CzTwL8RyHOpIfPwmDMa8gyfVwwbnRQNJMhXxEAyB1/Vy3X/scM96sfBAFSKO2UsRlLzVrxjw68408Z5POvpLbNv+K8tZAYsvRfgU6yVooJ1UN5+sHZBDTqkuGAqTWoshc/XZrkuVf7K9M75f6Mh3dBVTl9ub3sTRfpGFvZ/jqS9nLI1luMR8gusuM1moKkKSuqwG+ICaq0zx/WQ5dGl2p0F0tQWe05VSAzHI12Vvu/RA/an/dutFDGSVSIbF6QIxYombINCB1tipI+i0Guc612U31mI7Tyd5Y/UhtEreRC6SzvwVLMi3bKFts+lg/pgz1qGzJ+qZ12k0wXn5oW2pQHHeXOzOpTqKKPo3Tj+bEa0OFR8Zm1ICIbtzNL4VhaTXXM7bUQVYFpL5/jobeoCU1IDX5FNVcG4MMdDTvG1b8/aR/Vvy0NDDq2kBXGknY9QG9TFS0W6e2kdZUJquoIvRaQsS4ZcpIcjEAcVvhOvaQNNL4Rdv/MDs2q26PxpPc4RKQuptbp8KhTRIbEFHK3pzM8qWx+D1t2rZKpJTVVHsRtn4N8woVDUjLrVVVWnbz29+ZydYhcjrrmAonneo5SUBqCmNe8vdunb0UatGsTMy/mZX3KiyHajBI6dRELvStnGCzBhDDfDOPBg0IdqvFULlBSutFh0CQB2Qq4GY6MXZDaSfX5NiUlLvs4G8CUroxggGofgnyisZE1ZvM5ITrogk6gahCWx8ZUQnX0DP5+2XIc6wyzcA3arYsT39X/qmsZnZnUBRNE0TLSBuQhfgPo+JrqLKIL5QXlnOoA0S7MdVukFpfuhJnLuWfSFZnpnQE0OJGalNiJeSVedBuZVXUocU57HYxb/EVjMai7qZqIpS6oG843jKWUWNcaVVssX76frIOnqiybzUzowrXQe9Q4x5rOwGkDFK6oyUFHmL5hU1qAFJEDFfnk1j8iloucG6b7oBsWFLDgevKDsvh0aV0B9g8UC5rR729vD8X3vSt3B5SiCcJbScgxTDxz8etKiBFTHllwQhHp3LviICxVdFmsquZmxDRzgjpG3asolWwIZG6b6GtNbYssYS+gvQgm0R3liEGd+GzmEWhuG1AipN/tCxyByumndBoltstJ+EMwGl/sGVrCs39oIwbxRiYYF9JTTwAI0qjBRTzl3mQh07+UOBY4G4DIj63vJlF4c6Yxr+oKrDcbnkUu3wt/V20KDOmwAJXoC2UzWludBVYRhZFmTABqmE+FLN06xCBc+ciN5NsQPIlLy5/LdwZPagoe7EAkZaBK89atywCFJcqpAGM8bNmGoz/Ku/5gVRgYSYiUqwExN3H6UjkNyWDeEwAeWxEo8LiFRrd8O8KV8YCRJ51LkAUMwRrBOQhdUDNLGXeVsxlmS0GIwKFcYUeVAJSExwYvxOhjqdyh5irMBydF/9DFBEY/l2xXW1A5M7Gn6eOIMMe29KIBVpVZz+YR7+MmMPs6SJzE5lEMuRSR/0u7/pJ3jurAMS04eQnKFKujKkWu9/xycRYgaucixify+W/I0pEmS+Vf/tf4gZk5gPEw2Pdvv8nk4CgiKdYfGPDFvvOAkS6Wy2sr9SZ68gxknniICdL9o+vlp+UPZZxZoLAsAUuBJA7xNflNyczS0CiHlU4wtDR1ZPFqeY4ZXChowr+Ou8WLV8bhO+khVt1uUsTC3slqQ8QTgKXvouccL13cZIk2mMv5tKsmojSv0meUZ6Hsh2dtdRlpRTKVlJmm7l75HkB8y+mPkCSe3+mnq6/6ttn3/7F3d3dhTKDC47eWmuVOJYMHshXodiBKHYGcIsfQPpffjOVlJoyTIOpLzFDBIhqdx8n3iyKW01nyePFIaVjNTgG/1FA0juzIFHee03fsjJYPKVvKL8Zkz+SpzzO4RLb9QABYgQiBsOT+iRSo2axNjxYcGyR1S6rkmqZpC/mL1SSoByJ4srg6Dzbf6A5bf3fZMEfBuTYBUilhCnpRA/zmjc96bVKOajPlv4uufPWl58Hp+WMLFa81R5qg+SoElNx1ZcvpS3SvrFmKRkwrWAUxHimgopCn4xdl5k0BxfuLIyJlvoKp7lMMYgVdWS3rE7SY/0bwwrHmbh6Mih+IG4fV3SeYmwb8jePNIVy/3h1nlkqUuhOtENoN7rVB37z9tshss/6IyjIjU+j2JT+c2XllveV0iRHuMGIVprE8J62YlT6iRmUSJqdxuHnd+ZviqAFiozCzgG9V3QRIXI0SEoprqn/dHxkCtGMJ5VCYMceMcnhxqGhfZU/I0lckuOTNEwVL0zJFJzIMH3sjR3uSlnenRVyxyx5m0epMX24R6ohopE+GPflFpF2MLiJxLRjx7lGOwXPgMlS/rSnzcjsSJcO4ZuQdJvnJInjplHTOIl6wjiUvu3ECn2v/u0f81ErAJvAJnbkm62li/lrZPbYKFcWd6O5bzdacXc6PXz/bXj0dT43TZbs6/BsqBTLsjGVcnh4+PT+4t3wo7khvmAfYXY8jdJBI20eHLSErmsdNJvNxj+buOyeJ9ldr9mKE0f65q/z22yxpguBXO84Xp6f7F9OJn/9zuVqMrmcX//awN3ubLmdHH98d/EU0N7+T8r/AYMqZKkvubmdAAAAAElFTkSuQmCC">
+                        <figcaption>courtesy of Pixabay</figcaption>
+                    </figure>
+                    </div>
+                    <div class="home-form col">
+                        <form method="POST">
+                            <label for="gridSize">Grid Size</label>
+                            <input 
+                                type="gridSize" 
+                                class="form-control" 
+                                id="gridSize" 
+                                name="gridSize" 
+                                placeholder="Enter Grid Size"
+                            />
+                            <label for="numGenerations">Number of Generations</label>
+                            <input 
+                                type="numGenerations"
+                                class="form-control"
+                                id="numGenerations"
+                                name="numGenerations"
+                                placeholder="Enter Training Generations"
+                            />
+                            <br>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                     </div>
                 </div>
+            {% endif %}
+            <div class="sim-container">
+            {% if grid_size %}
+                <script>
+                document.addEventListener("DOMContentLoaded", function(){
+                simSpace = new SimulationGrid({{grid_size}});
+                });
+                </script>
+            {% endif %}
+            </div>
         </div>
         <!--Descriptive information of selected simulation cell(right of screen)-->
         <div class="col-3 sidenav right-window analysis-container">
@@ -178,13 +162,8 @@
     </div>
 </div>
 {% endblock %}
-
 <!-- Scripts -->
 {% block script %}
-
-
-
-
 <!-- Grid functions -->
 <script
 type = "text/javascript"
