@@ -20,9 +20,7 @@ class Cell{
         this.numProducers = 0;
         this.temperature = 0;
         this.isWall = false;
-        // document.addEventListener("DOMContentLoaded", () =>{
         this.analysisContainer = document.querySelector('.analysis-container');
-        // });
         
         //Create HTML elements associated with Cell object
         this.createCellElement(position);
@@ -97,9 +95,6 @@ class Cell{
      * Method that displays all the layer information at a clicked Cell
      */
     displayCellInfo(){
-        //Debug print
-        console.log(`Output information of ${this.element.id} at position: ${this.position}`);
-        console.log(this);   
         //Format cell position to send to Python backend
         const data = {position: this.position};
         //Make the POST request
@@ -119,9 +114,9 @@ class Cell{
     }
 
     /**
-     * 
+     * Generates text given a list of creatures and specified class
      * @param {string} creatureClass name of type of creature 
-     * @param {*} creatures Creature along with its properties
+     * @param {object[]} creatures Creature along with its properties
      * @returns {string} formatted string that contains a creature's properties
      */
     generateCreatureText(creatureClass, creatures){
@@ -137,6 +132,7 @@ class Cell{
      * @param {int} numProducer Number of producers to set in Cell
      * @param {boolean} isWall set this cell as a Wall?
      * @param {int} temp Temperature to set at this Cell
+     * @param {int} lightLevel Light-level to set at this Cell
      * @property {int} Cell.numConsumers Total number of Consumers in this Cell
      * @property {int} Cell.numProducers Total number of Producers in this Cell
      * @property {int | float} Cell.temperature Temperature at this Cell
@@ -172,9 +168,6 @@ class Cell{
         this.infoDisplay.innerHTML = `Temperature: ${this.temperature}<br>Light-level ${this.lightLevel}` + '<br>' + `Consumers: ${this.numConsumers}` + 
             '<br>' + `Producers: ${this.numProducers} <br>Position: ${this.element.id}` +  
             '<p class="text-center" class="details-text">click for details</p>';
-        
-        //Update the overlay at this Cell
-        // this.updateCellOverlay(); 
     }
 
     /**
@@ -254,12 +247,13 @@ class Cell{
      */
     updateCellOverlay(mode){
         let color;
+        //Update lightmap
         if(mode == "lightmap" || mode == "/add_lightsource"){
-            color = `rgb(0,0,0, ${(100 - this.lightLevel) / 100})`; // WIP - magic numbers should be replaced later
+            color = `rgb(0,0,0, ${(100 - this.lightLevel) / 100})`;
             this.overlay.style.backgroundColor = color;
             return;
         }
-
+        //otherwise update heatmap
         if (this.temperature < 20) 
         {
             color = `rgb(0,0,255, 0.3)`;

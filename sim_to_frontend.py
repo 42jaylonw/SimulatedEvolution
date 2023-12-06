@@ -3,9 +3,9 @@ from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
 from sim import presets as preset
-import numpy as np
 from sim.emitter import LightSource, HeatSource
 from flask import jsonify
+from games.survival.survival import SurvivalSim
 
 def create_sim(num_producers=1, num_consumers=1, width=50):
     """
@@ -14,30 +14,24 @@ def create_sim(num_producers=1, num_consumers=1, width=50):
     Params:
         num_producers(int): number of produces present in SimSpace
 
-        num_consumers(int): numner of consumers present in SimSpace
+        num_consumers(int): number of consumers present in SimSpace
         
         width(int): width to create NxN SimSpace(default width is 50)
     Return:
         sim(SimSpace): NxN SimSpace with specified features from parameters
     """
     # Change TOML gridsize
-    with open("games/sprint_2_survival/config.toml", 'r') as f:
+    with open("games/survival/config.toml", 'r') as f:
         config = toml.load(f)
     config['SimSpace']['grid_size'] = [width, width]
-    with open('games/sprint_2_survival/config.toml', 'w') as f:
+    with open('games/survival/config.toml', 'w') as f:
         toml.dump(config, f)
     # Create SimSpace
-    sim = SimSpace(config)
+    #sim = SimSpace(config)
+    sim = SurvivalSim(config)
     # Instantiate Organisms
     producers = [Producer(sim) for _ in range(num_producers)]
     consumers = [Consumer(sim) for _ in range(num_consumers)]
-
-    # # Add Wall
-    # for i in range(sim.grid_size[0]):
-    #     sim.layer_system.wall_add([i, sim.grid_size[0] // 2])
-    # Instantiate emitters(sim, pos, e_range, e_val)
-    # emitters = [HeatSource(sim, [sim.grid_size[0] // 3, 1 * sim.grid_size[1] // 4], 25, 75),
-    #             LightSource(sim, [(sim.grid_size[0] // 3), (sim.grid_size[1] // 4)], 50, 100)] 
     
     # add all instantiated objects to SimSpace
     sim.reset(producers + consumers, emitters=[])
@@ -66,7 +60,7 @@ def get_sim_state(simulator, includeImageData=False, getRawState=False):
         return gridspacesInformation
     return jsonify(gridspacesInformation)
 
-def get_gridspace_state(simulator, position, has_emitter=False):
+def get_gridspace_state(simulator, position):
     return jsonify(simulator.layer_system.get_gridspace(position).get_properties(True))
 
 # Get the information of all creatures at specified location
@@ -126,9 +120,9 @@ def user_place_consumer(sim, position, presetID=None):
 # Place a Prodcuer in the simulation at the specified location.
 # If there is a wall there, no producer will be placed
 # Currently the genome is random
-def user_place_producer(sim, position):
+def user_place_producer(sim, position, presetID=None):
     if not sim.layer_system.has_wall(position):
-        new_creature = Producer(sim, spawn_pos=position)
+        Producer(sim, spawn_pos=position, genome=preset.load_producer_preset(presetID))
 
 
 # Erase EVERYTHING (Creatures, Wall, Emitters) at the specified location.

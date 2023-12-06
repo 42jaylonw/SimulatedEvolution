@@ -3,8 +3,8 @@ from . import Creature
 from sim import GridUtils
 from sim.pheremone import Pheremone
 
-PHEREMONE_EMIT_RANGE = 8 # WIP - arbitrary constant for now -
-PHEREMONE_EMIT_STRENGTH = 80 # WIP - arbitrary constant for now -
+PHEREMONE_EMIT_RANGE = 8
+PHEREMONE_EMIT_STRENGTH = 80
 
 MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 
@@ -12,8 +12,8 @@ MOVE_DICT = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 class Consumer(Creature):
     name = 'Consumer'
 
-    def __init__(self, sim, genome=None, spawn_pos=None):
-        super().__init__(sim, genome, spawn_pos)
+    def __init__(self, sim, genome=None, spawn_pos=None, species_id=None):
+        super().__init__(sim, genome, spawn_pos, species_id)
         self.speed = sim.cfg['Consumer']['init_speed']
         self.sensory_range = sim.cfg['Consumer']['sensory_range']
         self.curr_action = [0, 0]
@@ -50,7 +50,7 @@ class Consumer(Creature):
             self.reprod_countdown = self.reprod_countdown - 1
             return -1
         # if (self.energy_bar.current_energy >= reproduce_thresh and self.reprod_countdown == 0):
-        if (self.energy_bar.is_satiated() and self.reprod_cooldown == 0):
+        if (self.energy_bar.is_satiated() and self.reprod_countdown <= 0):
             # if another creature on current space that is compatible
             for creature in self.sim.layer_system.get_consumers(self.position):
                 if creature == self:
@@ -276,14 +276,14 @@ class Consumer(Creature):
 
         target_pos = self.position + (d_x, d_y)
         self.curr_action = [d_x, d_y]
-        
+
         self.move_cost = 0.0
 
         if self.layer_system.out_of_bounds(target_pos) or self.layer_system.has_wall(target_pos):
             # Space is blocked: no change in position can be made in this direction
             d_x, d_y = 0, 0
             target_pos = self.position
-        
+
         current_elevation = self.layer_system.get_elevation(self.position)
         target_elevation = self.layer_system.get_elevation(target_pos)
         self.move_cost = self.energy_bar.movement_cost(current_elevation, target_elevation, 1.0)
@@ -366,6 +366,10 @@ class Consumer(Creature):
         """
         Checks to see if a creature underneath is edible. (exists within edible tags)
         """
+        # position_edible = np.all(creature.position == self.position)
+        # class_edible = (creature.species_id in self.edible_producers and creature.name == 'Producer'
+        #                 or creature.species_id in self.edible_consumers and creature.name == 'Consumer')
+        # return position_edible and class_edible
         if isinstance(creature, Creature):
             if creature.species_id in self.edible_producers and creature.name == 'Producer':
                 return True
@@ -373,7 +377,7 @@ class Consumer(Creature):
                 return True
         else:
             return False
-    
+
     # NOTE: temporarily adding the "otherwise" param to do a regular action-move if a creature is not detected
     def action_hunt(self, otherwise):
         """
@@ -426,7 +430,7 @@ class Consumer(Creature):
         else:
             # if satiated, then simply move with accordance with the reproduction protocol passed in
             self.action_move(otherwise)
-        
+
     def get_strongest_immediate_pheromone(self, mode=0):
         """
         Gets the strongest immediate (within a 1-space cardinal direction) 
@@ -441,7 +445,7 @@ class Consumer(Creature):
         return: (strongest pheromone's direction, strongest pheromone's strength)
         """
         legal_positions = self._get_legal_neighbors(self.position)
-        
+
         if len(legal_positions) > 0:
             strongest_pheromone = None
             strongest_direction = None
@@ -452,7 +456,7 @@ class Consumer(Creature):
                     potential_strongest = self._get_max_same_pheromone(position)
                 else:
                     potential_strongest = self._get_max_edible_pheromone(position)
-                    
+
                 if potential_strongest is None:
                     continue
                 if strongest_pheromone is not None:
@@ -490,10 +494,10 @@ class Consumer(Creature):
         return direction
 
     def _get_legal_neighbors(self, position):
-        pos_up = (self.position[0], self.position[1]+1)
-        pos_right = (self.position[0]+1, self.position[1])
-        pos_down = (self.position[0], self.position[1]-1)
-        pos_left = (self.position[0]-1, self.position[1])
+        pos_up = (self.position[0], self.position[1] + 1)
+        pos_right = (self.position[0] + 1, self.position[1])
+        pos_down = (self.position[0], self.position[1] - 1)
+        pos_left = (self.position[0] - 1, self.position[1])
 
         possible_positions = [pos_up, pos_right, pos_down, pos_left]
         legal_positions = []
@@ -505,13 +509,15 @@ class Consumer(Creature):
 
     def _get_max_edible_pheromone(self, position):
         pheromone_list = self.layer_system.get_pheremones(position)
-        filtered_pheromones = [pheromone for pheromone in pheromone_list if pheromone.source.species_id in self.edible_consumers]
+        filtered_pheromones = [pheromone for pheromone in pheromone_list if
+                               pheromone.source.species_id in self.edible_consumers]
         strongest_pheromone = max(filtered_pheromones, key=lambda x: x.strength, default=None)
         return strongest_pheromone
 
     def _get_max_same_pheromone(self, position):
         pheromone_list = self.layer_system.get_pheromones(position)
-        filtered_pheromones = [pheromone for pheromone in pheromone_list if pheromone.source.species_id == self.species_id]
+        filtered_pheromones = [pheromone for pheromone in pheromone_list if
+                               pheromone.source.species_id == self.species_id]
         strongest_pheromone = max(filtered_pheromones, key=lambda x: x.strength, default=None)
         return strongest_pheromone
 
@@ -528,7 +534,7 @@ class Consumer(Creature):
                 # print('Y',end="")
                 choices_to_eat.append(creature)
             # else:
-                # print('N',end="")
+            # print('N',end="")
         if len(choices_to_eat) > 0:
             chosen_to_eat = np.random.choice(choices_to_eat)
 
@@ -537,11 +543,11 @@ class Consumer(Creature):
 
             # a bonus to energy gain from consumption based on the size of the prey creature and the eating creature
             # this value is never greater than the eating creature's size
-            energy_gain_sizeBonus = max((1.5 * chosen_to_eat.size), self.size)
+            energy_gain_sizeBonus = max((2.5 * chosen_to_eat.size), self.size)
             self.energy_bar.replenish_energy(energy_gain_base + energy_gain_sizeBonus)
+            assert np.all(chosen_to_eat.position == self.position)
             chosen_to_eat.die(f"eaten by a creature of {chosen_to_eat.species_id}, a {type(chosen_to_eat)}")
             self.times_eaten = self.times_eaten + 1
             # print(f"eaten {self.times_eaten} times")
         else:
             print(f"a creature of species (self.species_id) ate nothing")
-

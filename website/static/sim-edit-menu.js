@@ -9,16 +9,19 @@ document.addEventListener("DOMContentLoaded", function (){
             e.preventDefault();
             toggleOverlay("heatmap");
         }
+        //Press SHIFT + M to toggle lightmap
         if(e.shiftKey && e.code ==='KeyM'){
             toggleOverlay("lightmap");
         }
     });
-    function toggleOverlay(mode)
-    {
-    //Change state
-    heatMapdisplayed = !heatMapdisplayed;
-    simSpace.toggleOverlayDisplay(heatMapdisplayed, mode);
+    // Toggle the overlay of the simulation
+    function toggleOverlay(mode){
+        //Change state
+        heatMapdisplayed = !heatMapdisplayed;
+        simSpace.toggleOverlayDisplay(heatMapdisplayed, mode);
     }
+    
+    //HTML elements for pre-simulation
     var analysisContainer = document.querySelector('.analysis-container');
     var selectButton = document.getElementById('selectButton');
     selectButton.disabled = true;
@@ -29,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function (){
     var placeProducerButton = document.getElementById('addProducerButton');
     var eraserButton = document.getElementById('eraserButton');
 
+    //Listeners for pre-simulation HTML elements
     selectButton.addEventListener("click", function(){placeButtonClicked(selectButton.id)});
     placeWallButton.addEventListener("click", function(){placeButtonClicked(placeWallButton.id)});
     placeLightSourceButton.addEventListener("click", function(){placeButtonClicked(placeLightSourceButton.id)});
@@ -37,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function (){
     placeProducerButton.addEventListener("click", function(){placeButtonClicked(placeProducerButton.id)});
     eraserButton.addEventListener("click", function(){placeButtonClicked(eraserButton.id)});
 
-
+    //Store all HTML buttons in an array
     placementButtons.push(selectButton);
     placementButtons.push(placeWallButton);
     placementButtons.push(placeLightSourceButton);
@@ -46,6 +50,8 @@ document.addEventListener("DOMContentLoaded", function (){
     placementButtons.push(placeProducerButton);
     placementButtons.push(eraserButton);
 
+    //Store mode based on selected user button
+    //Store menu that is associated with the selected button
     let mode = selectButton.id;
     let curMenu;
 
@@ -57,7 +63,9 @@ document.addEventListener("DOMContentLoaded", function (){
         }
         // Change the default function to be called when pressing left click
         mode = buttonID;
+        //Display menu associated with selected button
         refreshParameterMenu(mode);
+        //Reset simspace overlay
         simSpace.toggleOverlayDisplay(false, "none");    
     }
 
@@ -95,7 +103,6 @@ document.addEventListener("DOMContentLoaded", function (){
     document.addEventListener('click', handleUserClick);
 
 
-    //Cell-row-col
     function addWall(element){
         performGridSpaceOperation(element, '/add_wall');
     }
@@ -110,13 +117,12 @@ document.addEventListener("DOMContentLoaded", function (){
 
     function placeConsumer(element){
         console.log("adding consumer");
-        // var creaturePreset = document.getElementById("preset-input");
         performGridSpaceOperation(element, '/add_creature_consumer', payload={headers: ["preset-id"], values: [document.getElementById("preset-input").value]});
     }
 
     function placeProducer(element){
         console.log("adding producer");
-        performGridSpaceOperation(element, '/add_creature_producer');
+        performGridSpaceOperation(element, '/add_creature_producer',  payload={headers: ["preset-id"], values: [document.getElementById("preset-input").value]});
     }
 
     function placeLightSource(element){
@@ -130,34 +136,45 @@ document.addEventListener("DOMContentLoaded", function (){
         simSpace.toggleOverlayDisplay(true, "heatmap");
     }
 
+    /**
+     * Perform an operation on the back-end simulation and update the front-end repreentation
+     * of it.
+     * @param {Element} element selected HTML element
+     * @param {string} route route to call in the Python back-end
+     * @param {object{}} payload additional information to send to Python back-end
+     */
     function performGridSpaceOperation(element, route, payload=null){
+        //Element should follow format "cell-<row>-<col>"
         cellInformation = element.split("-") 
-        console.log(cellInformation[1] + "," + cellInformation[2]);
-
+        
+        //Add any additional data to send to the back-end
         const dataToSend = constructDataToSend(payload);
         
+        //Make POST request
         fetch(route, {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(dataToSend)})
         .then((response) => response.json())
         .then((data) => {
+            //Response from back-end
+            //Update menu on the right side of the menu when using select button
             if(route == '/get_creatures_at_grid_space'){
                 var producers = data["producers"];
                 var consumers = data["consumers"];
                 var emitters = data["emitters"];
-                // var analysisContainer = document.querySelector('.analysis-container');
                 analysisContainer.innerHTML += `<br>` + generateEmitterText("EMITTERS", emitters);
                 analysisContainer.innerHTML =   `<h2 class="text-center" class="details-text">Information at ${cellInformation[1]}, ${cellInformation[2]}</h2> ` + 
                 generateCreatureText("CONSUMERS", consumers) + "<br>" + generateCreatureText("PRODUCERS", producers) + "<br>" + generateEmitterText("EMITTERS", emitters);
                 return;
             }
+            //Update simulation overlay when placing emitters
             if(route == '/add_heatsource' || route == '/add_lightsource')
             {
                 simSpace.visualUpdate(data, isBatch=true);
                 simSpace.toggleOverlayDisplay(true, route);
                 return;
             }
+            //Update simulation after erasing objects
             if(route == '/erase_space'){ 
-                    
-                if(data.length == 1){
+                if(data != undefined && data.length == undefined){
                     simSpace.visualUpdate(data);
                 }
                 else if(data.length > 1)
@@ -172,6 +189,11 @@ document.addEventListener("DOMContentLoaded", function (){
         });
     }
 
+    /**
+     * Create a data packet to send to the python back-end based on specified headers and values
+     * @param {object{}} additionalInfo data that should be send to Python back-end 
+     * @returns a list of headers and values associated with the specified additionalInfo 
+     */
     function constructDataToSend(additionalInfo=null){
         var dataToSend = {position: [parseInt(cellInformation[1]), parseInt(cellInformation[2])]};
 
@@ -188,11 +210,11 @@ document.addEventListener("DOMContentLoaded", function (){
     }
 
     /**
-         * 
-         * @param {string} creatureClass name of type of creature 
-         * @param {Element[]} creatures Creature along with its properties
-         * @returns {string} formatted string that contains a creature's properties
-         */
+     * Generates text given a list of creatures and specified class
+     * @param {string} creatureClass name of type of creature 
+     * @param {Element[]} creatures Creature along with its properties
+     * @returns {string} formatted string that contains a creature's properties
+     */
     function generateCreatureText(creatureClass, creatures){
         var creatureText = creatureClass;
         for(let creature of creatures){
@@ -200,7 +222,12 @@ document.addEventListener("DOMContentLoaded", function (){
         }
         return creatureText;
     }
-
+    /**
+     * Generates text given a list of emitters and specified class
+     * @param {string} emitterClass name of type of emitter 
+     * @param {Element[]} emitters Emitter along with its properties
+     * @returns formatted string that contains emitter's properties
+     */
     function generateEmitterText(emitterClass, emitters){
         var emitterText = emitterClass
         for(let emitter of emitters){
@@ -209,9 +236,15 @@ document.addEventListener("DOMContentLoaded", function (){
         return emitterText
     }
 
+    /**
+     * Change the menu to display based on the button pressed
+     * @param {string} buttonID ID button that was selected 
+     */
     function refreshParameterMenu(buttonID){
         var menuToAdd;
+        //Remove old menu that is currently displayed
         analysisContainer.innerHTML = '';
+        //Display new menu according to pressed button
         switch(buttonID){
             case placeHeatSourceButton.id:
                 menuToAdd = createEmitterMenu();
@@ -232,32 +265,46 @@ document.addEventListener("DOMContentLoaded", function (){
         if (menuToAdd != null){
             analysisContainer.append(menuToAdd);
         }
-        
+        //Mark the newly assigne menu as the current menu displayed    
         curMenu = menuToAdd;
     }
 
-
+    /**
+     * Create a HTML element that allows users to specify the range 
+     * and strength of placed emitters
+     * @returns HTML element to display
+     */
     function createEmitterMenu(){
         var emitterMenu = document.createElement("div");
 
         emitterMenu.classList.add("emitter-menu");
-        emitterMenu.innerHTML = `Emitter Menu<br>Range<br>` + generatePlaceValueSlider("emit_range", 1, 25);
-        //emitterMenu.innerHTML += `<br>Range = ` + `${document.getElementById("emit_range").value}`;
+        emitterMenu.innerHTML = `<h1>Emitter Menu</h1><br>Range<br>` + generatePlaceValueSlider("emit_range", 1, 25);
         emitterMenu.innerHTML += `<br>Strength<br>` + generatePlaceValueSlider("emit_strength", 1, 100);
-        //emitterMenu.innerHTML += `<br>``<br>Strength = ` + `${document.getElementById("emit_strength").value}`;
 
         return emitterMenu;
     }
 
+    /**
+     * Create HTML slider with specified id and min/max values
+     * @param {string} id id assigned to created slider
+     * @param {int} min minimum value for created slider
+     * @param {int} max maximum value for created slider
+     * @returns HTML slider with specified parameters
+     */
     function generatePlaceValueSlider(id, min, max){
         returnValueHTML = `<div class="slidecontainer"><input type="range" min="${min}" max="${max}" value="${max}" class="slider" id=${id}> </div>`;
         return returnValueHTML;
     }
 
+    /**
+     * Create a HTML element that allows users to load in Creatures
+     * with a preset genome
+     * @returns HTML element to display
+     */
     function createCreatureMenu(){
         var creatureMenu = document.createElement("div");
         creatureMenu.classList.add("creature-menu");
-        creatureMenu.innerHTML = `Consumer Menu`;
+        creatureMenu.innerHTML = `<h1>Creature Menu</h1> <br> Enter a Genome Preset: <br>`;
 
         //Add inputFields
         var presetInput = createInputField("presetID", "Enter Preset ID");
@@ -267,6 +314,12 @@ document.addEventListener("DOMContentLoaded", function (){
         return creatureMenu;
     }
 
+    /**
+     * Create an HTML input field with specified name and placeholder
+     * @param {string} name name for created HTML input field 
+     * @param {string} placeholder placeholder for created HTML input field
+     * @returns HTML input field
+     */
     function createInputField(name, placeholder="placeholder"){
         var newInputField = document.createElement("input");
         newInputField.setAttribute("type", "text");

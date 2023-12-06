@@ -26,12 +26,10 @@ class SimSpace:
         self.emitters = []
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
-        self.predation_table = self.generate_predation_table(0)
-
+        self.predation_table = self.generate_predation_table(2)
         self.layer_system = LayerSystem.LayerSystem(self.grid_size)
 
         self.max_steps = self._cfg['max_steps']
-        self.max_generations = self._cfg['max_generations']
 
     def reset(self, creatures, emitters=()):
         """Reset the simulation with new creatures and emitters.
@@ -47,7 +45,6 @@ class SimSpace:
         for creature in self.creatures:
             creature.reset()
 
-    # Directly add a creature to the simulation
     def add_creature(self, creature):
         """Add a creature to the simulation.
 
@@ -88,8 +85,6 @@ class SimSpace:
         emitters, and creatures' states.
         """
         assert self.creatures is not None, "Reset first!"
-        
-
         self.layer_system.step()
 
         for emitter in self.emitters:
@@ -100,7 +95,6 @@ class SimSpace:
             creature.step()
 
         self.time_steps += 1
-
         if self.time_steps >= self.max_steps:
             self.end_generation()
 
@@ -114,7 +108,7 @@ class SimSpace:
 
     def render(self):
         """Render the current state of the simulation and display it on the screen."""
-        render_img = np.copy(self.grid_rgb)
+        render_img = np.ones((*self.grid_size, 3))
         for creature in self.creatures:
             if not hasattr(creature, 'appearance'):
                 render_img[creature.grid_pos] = creature.rgb
@@ -124,6 +118,7 @@ class SimSpace:
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
         time.sleep(self._cfg['time_step'])
+        return render_img
 
     # return the starting position of all organism
     def get_creature_positions(self):
@@ -190,10 +185,15 @@ class SimSpace:
             for i in range(num_consumers):
                 producer_range = list(range(num_producers))
                 num_edible_producers = np.random.choice(producer_range, 1, replace=False)
+                num_edible_producers = max(1, num_edible_producers)
                 edible_producers = np.random.choice(producer_range, num_edible_producers, replace=False)
-                consumer_range = list(range(num_producers))
+                consumer_range = list(range(num_consumers))
+                if(len(consumer_range)) == 1:
+                    predation_table[i] = [[], edible_producers]
+                    continue
                 consumer_range.remove(i)
                 num_edible_consumers = np.random.choice(len(consumer_range), 1, replace=False)
+                num_edible_consumers = max(1, num_edible_consumers)
                 edible_consumers = np.random.choice(consumer_range, num_edible_consumers, replace=False)
                 predation_table[i] = [edible_consumers, edible_producers]
         return predation_table
@@ -215,7 +215,7 @@ class SimSpace:
             if hasattr(creature, 'appearance'):
                 top_half = int(scale / 2)
                 bot_half = scale - int(scale / 2)
-                x, y = creature.grid_pos
+                y,x = creature.grid_pos
                 scaled_x = x * scale + int(scale / 2)
                 scaled_y = y * scale + int(scale / 2)
                 grid_background = img[scaled_x - top_half:scaled_x + bot_half, scaled_y - top_half: scaled_y + bot_half]

@@ -21,16 +21,16 @@ class Creature:
     energy: float
     size: float
 
-    def __init__(self, sim, genome=None, spawn_pos=None):
+    def __init__(self, sim, genome=None, spawn_pos=None, species_id=None):
         self.cfg = sim.cfg
         self._cfg = sim.cfg[self.name]
         self.sim = sim
         self.layer_system = sim.layer_system  # EXPERIMENTAL
-        #self.position = None
+        # self.position = None
         self.position = spawn_pos
         if self.position is None:
             self.position = np.random.randint(self.sim.grid_size)
-        
+        self.species_id = species_id
         self.sim.add_creature(self)
         self.layer_system.creature_enter(self.position, self)
 
@@ -47,16 +47,14 @@ class Creature:
             self.genome = self.behavior_system.genome
         elif self.name == 'Producer':
             self.genome = self.generate_producer_genome()
-            self.mutation_rate=self._cfg['mutation_rate']
+            self.mutation_rate = self._cfg['mutation_rate']
         self._init_properties()
 
     def _init_properties(self):
         self.image_data = None
         self.ref_id = str(self)
-        if 'num_species' in self._cfg:
+        if self.species_id is None:
             self.species_id = np.random.randint(self._cfg['num_species'])
-        else:
-            self.species_id = 0
         self.rgb = rgb_mutation(self._cfg['rgb'], self.species_id, self._cfg['num_species'])
         if self.name == 'Consumer':
             self.appearance = InvaderCreator(img_size=5).get_an_invader(5)
@@ -76,9 +74,14 @@ class Creature:
         else:
             hash = self.generate_hash(self.genome)
         # Assign size and energy properties based on the hash
-        self.size = int(hash[:32], 16) % 101 + 0.1
-        self.energy = int(hash[32:], 16) % 51 + 51
-        self.energy_bar = EnergyBar(initial_energy=self.energy, max_energy=101.0, satiation_level=85.0, size=self.size, age_rate=0.02)
+        self.size = 5 + (int(hash[:32], 16) % 100) / 100 * 15  # 5-20
+        self.energy = 1 + (int(hash[:32], 16) % 100) / 100 * 100
+        self.energy_bar = EnergyBar(initial_energy=self.energy,
+                                    max_energy=100,
+                                    satiation_level=40.0,
+                                    size=self.size,
+                                    age_rate=0.02,
+                                    size_consumption_rate=self._cfg['size_consumption_rate'])
         # self.energy_bar = EnergyBar(initial_energy=10, max_energy=101.0, satiation_level=85.0, size=self.size)
 
     def reset(self):
@@ -105,8 +108,8 @@ class Creature:
         Handles death. A creature that dies should remove itself from sim.creatures
         and update the layer's grid position value.
         """
-        if len(deathMessage) > 0:
-            print(deathMessage)
+        # if len(deathMessage) > 0:
+        #     print(deathMessage)
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
@@ -121,7 +124,7 @@ class Creature:
         # Update the Layer System
         self.layer_system.creature_move(self.position, target_pos, self)
         # Update the creature's position to the target position
-        self.position = target_pos
+        self.position = np.array(target_pos)
 
     def generate_hash(self, to_hash):
         hasher = hashlib.sha256()
@@ -131,7 +134,7 @@ class Creature:
 
     @property
     def grid_pos(self):
-        assert np.all(0 <= self.position) and np.all(self.position < self.sim.grid_size)
+        assert np.all(0 <= np.array(self.position)) and np.all(np.array(self.position) < self.sim.grid_size)
         # return int(self.sim.grid_size[1] - self.position[1] - 1), int(self.position[0])
         return int(self.position[0]), int(self.position[1])
 
@@ -141,13 +144,13 @@ class Creature:
             return {"genome": self.genome,
                     "size": self.size,
                     "energy": self.energy_bar.current_energy,
-                    "refId" : str(self),
+                    "refId": str(self),
                     "image_data": self.image_data.tolist(),
-                    "species" : self.species_id}
+                    "species": self.species_id}
         return {"genome": self.genome,
                 "size": self.size,
                 "energy": self.energy_bar.current_energy,
-                "species" : self.species_id}
+                "species": self.species_id}
 
 
 class Corpse:

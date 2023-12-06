@@ -16,19 +16,18 @@ class Producer(Creature):
 
         self.ideal_temp = int(hash[:32], 16) % 25 + 15
         self.light_req = int(hash[32:], 16) % 20 + 20
-        self.reprod_cooldown = int(hash[32:], 16) % 30 + 10
-        self.reprod_countdown = (self.reprod_cooldown / 2)
+        self.reprod_cooldown = int(hash[32:], 16) % 5 + 1
+        self.reprod_countdown = 0  # (self.reprod_cooldown / 2)
 
         # growth rate determines how fast the creature grows
         # given ideal conditions
-        self.growth_rate = .05
+        self.growth_rate = .15
 
         # current_size is similar to a tracker for age
         # a creature grows to it's .size when current_size = 1.0
         self.current_size = 0.01
 
         self.fruit_bearer = False
-
 
     def generate_producer_genome(self):
         # get random genome
@@ -48,7 +47,6 @@ class Producer(Creature):
             to_mut = "".join(temp)
         return to_mut
 
-    
     # use when calculating light absorption
     # for raw light levels, use will's refactored function
     def get_light_level(self, pos):
@@ -80,7 +78,7 @@ class Producer(Creature):
 
         heat_diff = (curr_temp - self.ideal_temp)
         light_diff = (curr_light - self.light_req)
-        
+
         if (heat_diff > 0.0) and (light_diff > 0.0):
             return 1
 
@@ -130,7 +128,7 @@ class Producer(Creature):
         target_pos[0] += 1
         if self.expansion_possible(target_pos):
             exp_tile = [self.assess_tile(target_pos)]
-            possible_expansion += exp_tile     
+            possible_expansion += exp_tile
 
         target_pos = pos
         target_pos[1] -= 1
@@ -143,7 +141,7 @@ class Producer(Creature):
         if self.expansion_possible(target_pos):
             exp_tile = [self.assess_tile(target_pos)]
             possible_expansion += exp_tile
-                
+
         return possible_expansion
 
     def assess_tile(self, pos):
@@ -181,13 +179,6 @@ class Producer(Creature):
         self.reprod_countdown = self.reprod_cooldown
         return
 
-
-    def die(self, deathMessage=""):
-        if self in self.sim.creatures:
-            self.sim.creatures.remove(self)
-
-        self.sim.layer_system.creature_exit(self.position, self)
-
     # expansion_possible checks if the producer can expand into that tile
     def expansion_possible(self, pos):
         if (self.sim.layer_system.out_of_bounds(pos)):
@@ -197,7 +188,6 @@ class Producer(Creature):
             if producer.species_id == self.species_id or producer.genome == self.genome:
                 return 0
         return not self.sim.layer_system.has_wall(pos)
-
 
     def step(self):
         # check if light and temp are sufficient for growth
@@ -232,12 +222,8 @@ class Producer(Creature):
                     expansions = self.expansion_assess()
 
                     self.producer_expand(expansions)
-                    
-        
         self.producer_metabolize()
 
         # check if dead
         if self.energy_bar.is_empty():
-            self.die()
-
-                    
+            self.die("Die by starvation")

@@ -1,18 +1,20 @@
 class EnergyBar:
 
-    def __init__(self, initial_energy=50.0, max_energy=100.0, satiation_level=85.0, size=1.0, age_rate=0.02):
+    def __init__(self, initial_energy=50.0, max_energy=100.0, satiation_level=85.0, size=1.0, age_rate=0.02,
+                 size_consumption_rate=0.1):
         self.current_energy = initial_energy
         self.max_energy = max_energy
         self.size = size
         self.age_rate = age_rate
         self.satiation_level = satiation_level
+        self.size_consumption_rate = size_consumption_rate
 
     def consume_energy(self, additional_cost=0):
         """
         Called on a time step.
         Lowers energy level based on metabolism and an additional cost, such as movement cost or light level.
         """
-        energy_consumption = float(self.size * 0.01)
+        energy_consumption = float(self.size * self.size_consumption_rate)
         self.current_energy -= energy_consumption + additional_cost
         if self.current_energy < 0:
             self.current_energy = 0
@@ -86,4 +88,3 @@ class EnergyBar:
 
         energy_cost = 0.5 * difficulty * elevation_multiplier
         return energy_cost
-

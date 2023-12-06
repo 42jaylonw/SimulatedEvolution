@@ -1,5 +1,5 @@
 /**
- * @class
+ * @class SimulationGrid
  * @classdesc A square grid that displays a simulated environment
  */
 class SimulationGrid{
@@ -39,7 +39,6 @@ class SimulationGrid{
      *  @var {Array[(X,Y), Array[Layers]]} layers Array containing Layer information at all positions (X,Y)
      */
     setupGrid(){
-        console.log("SETTING GRIED");
         const data = {size: this.width};
         fetch('/new_setup_grid', {method: "POST", headers:{"Content-Type": "application/json"}, body: JSON.stringify(data)})
         .then((response) => response.json())
@@ -53,10 +52,6 @@ class SimulationGrid{
         .catch((error) =>{
             console.error('Error:', error);
         });
-    }
-
-    makeSimulation(){
-        fetch('/setup_data');
     }
 
     //Request state of simulation grid from server, then apply these changes on the frontend
@@ -74,6 +69,14 @@ class SimulationGrid{
         });
     }
 
+    
+    /**
+     * Update the visual representation of the simulator
+     * @param {object{} | object} data data used to update simulator 
+     * @param {boolean} isBatch specify whether the data represents a single Cell or the entire simulation
+     *  EX1: isBatch = false means that data = {X: [a,b], Y: [c,d]...}
+     *  EX2: isBath = true means that data = {{X: [a,b], Y: [c,d]...},{Z: [e,f], W: [g,h]...}}
+     */
     visualUpdate(data, isBatch=false){
         if(isBatch){
             for(let packet of data){
@@ -84,9 +87,9 @@ class SimulationGrid{
         }
        this.handleInitialData(data);
     }
+    
     //Visually clear the simulation grid
     clearSimulation(){   
-        console.log("clearing simulation");
         for(let i = 0; i < this.width * this.width; i++)
         {
             let curCell = this.cells[i];
@@ -101,7 +104,6 @@ class SimulationGrid{
     newSimulation(){
         //Clear any information of an old simulation
         this.clearSimulation();
-        console.log("Creating new Grid");
         //Create GET request for new simluation information
         fetch('/new_grid')
         .then((response) => response.json())
@@ -111,7 +113,6 @@ class SimulationGrid{
             for(let data of packet){
                 this.handleInitialData(data);
             }
-            console.log("Created new Grid!");
             
         })
         //Request FAILURE
@@ -221,7 +222,6 @@ class SimulationGrid{
 
     // Stop sending simulation grid data requests
     pauseSimulation(){
-        console.log("stopping calls..");
         clearInterval(this.simulationID);
     }
 
@@ -237,7 +237,6 @@ class SimulationGrid{
     }
     
     addCellListener(){
-        console.log("adding listeners");
         for(let cell of this.cells){
             cell.addDisplayCellInfo();
         }
