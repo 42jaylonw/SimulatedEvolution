@@ -15,12 +15,5 @@
 ![example](doc/survival_generation_5.gif)
 
 ## Documentation
-[Here](https://www.notion.so/Evolution-Simulation-e12f50a180fe490a842e340b1ee03c76?pvs=4) is the documentation.
+[Here](https://lumbar-haddock-2e2.notion.site/Evolution-Simulation-e12f50a180fe490a842e340b1ee03c76) is the documentation.
 
-## Todo
-
-sprint 1: observation
-
-   At `sim/creatures/comsumer.py`
-   
-   At line 19 the function `def get_observation(self):`
