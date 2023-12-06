@@ -2,15 +2,6 @@ import numpy as np
 import random
 from . import Creature
 
-class Food():
-    name = 'Food'
-
-    def __init__(self, sim, genome=None):
-        # TODO: hash from genome 
-        self.saturation = 0.5
-        self.seed_bearer = False
-        self.genome = genome
-
 
 class Producer(Creature):
     name = 'Producer'
@@ -72,10 +63,6 @@ class Producer(Creature):
         for producer in producer_list:
             size_total += producer.size
 
-        if size_total == 0:
-            print("help")
-            print(pos)
-            print(producer_list)
         # light level for the creature is (their size / size total) * light lvl
         ret = ((self.size) / size_total) * self.sim.layer_system.get_light_level(pos)
         return ret
@@ -103,11 +90,9 @@ class Producer(Creature):
     def producer_metabolize(self):
         pos = self.position
         light = self.light_req - self.get_light_level(pos)
-        # light = max(0, light)
 
         size_penalty = .1
         light_penalty = .02
-        # self.energy -= (self.current_size * size_penalty) + (light * light_penalty)
         energy_metab = 0 - ((self.current_size * size_penalty) + (light * light_penalty))
         self.energy_bar.replenish_energy(energy_metab)
         if (self.energy_bar.current_energy <= 0):
@@ -198,8 +183,6 @@ class Producer(Creature):
 
 
     def die(self, deathMessage=""):
-        if len(deathMessage) > 0:
-            print(deathMessage)
         if self in self.sim.creatures:
             self.sim.creatures.remove(self)
 
