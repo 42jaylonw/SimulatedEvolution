@@ -391,8 +391,12 @@ class GridSpace():
                 affected_pheremone = p
         
         if affected_pheremone is None:
+            # Add the Pheremone to the list of pheremones since there does not exist 
+            # one of its source in that space
             self.pheremones.append(pheremone)
         else:
+            # Add the strength of the Pheremone to the current pheremone's strength
+            # since there already exists one of the same source in that space
             affected_pheremone.strength += pheremone.strength
     
     def decay_pheremones(self):
