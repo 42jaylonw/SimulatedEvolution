@@ -44,7 +44,6 @@ class Consumer(Creature):
         if self.energy_bar.is_empty():
             self.die()
 
-    
     def reproduction_protocol(self):
         if (self.reprod_countdown > 0):
             self.reprod_countdown = self.reprod_countdown - 1
@@ -105,16 +104,6 @@ class Consumer(Creature):
                 min_dist = dist
 
         return min_dir
-
-
-    def die(self, deathMessage=""):
-        if len(deathMessage) > 0:
-            print(deathMessage)
-
-        if self in self.sim.creatures:
-            self.sim.creatures.remove(self)
-
-        self.layer_system.creature_exit(self.position, self)
 
     def get_observation(self):
         observation = np.zeros(self._cfg['num_observations'])
@@ -234,7 +223,6 @@ class Consumer(Creature):
                         potential_mates = potential_mates + [consumer]
         return potential_mates
 
-
     def senseWithinRange(self):
         positions_to_check = GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, self.sensory_range)
         edible_positions = []
@@ -290,13 +278,11 @@ class Consumer(Creature):
 
         self.set_position(target_pos)
 
-
     def emit_pheremones(self):
         pheremone = Pheremone(PHEREMONE_EMIT_STRENGTH, self)
         emit_positions = GridUtils.get_circle_coord_dist_pairs(self.layer_system, self.position, PHEREMONE_EMIT_RANGE)
         for emit_pos in emit_positions:
             self.layer_system.add_pheremone(emit_pos[0], pheremone)
-
 
     def blockedFwd(self):
         """
@@ -361,7 +347,7 @@ class Consumer(Creature):
                 return 0
         else:
             return 1
-    
+
     def is_edible(self, creature):
         """
         Checks to see if a creature underneath is edible. (exists within edible tags)
