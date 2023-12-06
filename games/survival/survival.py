@@ -6,6 +6,7 @@ from sim.creatures.producer import Producer
 from sim.emitter import LightSource, HeatSource
 from sim.visualization.recorder import create_gif
 
+
 def get_map(sim: SimSpace, getter_func):
     a_map = np.zeros(sim.grid_size)
     for x in range(sim.grid_size[0]):
@@ -31,13 +32,7 @@ class SurvivalSim(SimSpace):
                 break
             self.step()
 
-    def termination(self):
-        if self.curr_generation >= self.max_generations:
-            return True
-        return False
-
     def end_generation(self):
-        self.curr_generation += 1
         # log data
         if len(self.creatures) == 0:
             pass_rate = 0
@@ -48,10 +43,12 @@ class SurvivalSim(SimSpace):
         print(f"Generation: {self.curr_generation}: Survival Rate {pass_rate}")
         # reproduce and reset
         survivors = self.get_survivors()
+        for creature in self.creatures:
+            creature.remove()
         offsprings = self.generate_offsprings(survivors)
         producers = [Producer(self) for _ in range(self.population_producers)]
-        creatures = offsprings + producers
-        self.reset(creatures, self.emitters)
+        self.time_steps = 0
+        self.curr_generation += 1
 
     def get_survivors(self):
         survivors = []
