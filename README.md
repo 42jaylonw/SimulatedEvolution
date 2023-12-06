@@ -6,12 +6,13 @@
     ```commandline
     pip install -r requirements.txt
     ```
-3. run sim
+3. run example evolution training
    ```commandline
-   python -m games.sprint_0_random.random_moving
-   python -m games.sprint_1_prototype.go_right
+   python -m games.survival.survival
    ```
    press `q` to quit the simulation
+
+![example](doc/survival_generation_5.gif)
 
 ## Documentation
 [Here](https://www.notion.so/Evolution-Simulation-e12f50a180fe490a842e340b1ee03c76?pvs=4) is the documentation.

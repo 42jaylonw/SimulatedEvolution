@@ -4,7 +4,7 @@ from sim.sim_space import SimSpace
 from sim.creatures.comsumer import Consumer
 from sim.creatures.producer import Producer
 from sim.emitter import LightSource, HeatSource
-
+from sim.visualization.recorder import create_gif
 
 def get_map(sim: SimSpace, getter_func):
     a_map = np.zeros(sim.grid_size)
@@ -22,17 +22,6 @@ class SurvivalSim(SimSpace):
         self.population_consumers = self._cfg['population_consumers']
         self.population_producers = self._cfg['population_producers']
         self.min_survival_rate = self._cfg['min_survival_rate']
-        # consumers = [Consumer(self) for _ in range(self.population_consumers)]
-        # producers = [Producer(self) for _ in range(self.population_producers)]
-        # self.heat_source = HeatSource(self, np.array([0, 0]), 20, 100)
-        # self.light_source = LightSource(self, np.array([0, 0]), 20, 100)
-        # emitters = [self.light_source, self.heat_source]
-        # # self.layer_system.wall_add()
-        # self.reset(consumers + producers, emitters)
-        # self.step()
-        # show maps
-        light_map = get_map(self, self.layer_system.get_light_level)
-        heat_map = get_map(self, self.layer_system.get_temperature)
         self.curr_generation = 0
         self.pass_rate_list = []
 
@@ -53,20 +42,16 @@ class SurvivalSim(SimSpace):
         if len(self.creatures) == 0:
             pass_rate = 0
         else:
-            pass_rate = len(self.get_survivors()) / len(self.creatures)
+            pass_rate = len(self.get_survivors()) / self.population_consumers
         self.pass_rate_list.append(pass_rate)
 
         print(f"Generation: {self.curr_generation}: Survival Rate {pass_rate}")
-
         # reproduce and reset
         survivors = self.get_survivors()
         offsprings = self.generate_offsprings(survivors)
-        #
-        # producers = [Producer(self) for _ in range(self.population_producers)]
-        # self.heat_source = HeatSource(self, np.array([0, 0]), 20, 100)
-        # self.light_source = LightSource(self, np.array([0, 0]), 20, 100)
-        # emitters = [self.light_source, self.heat_source]
-        self.reset(self.creatures, self.emitters)
+        producers = [Producer(self) for _ in range(self.population_producers)]
+        creatures = offsprings + producers
+        self.reset(creatures, self.emitters)
 
     def get_survivors(self):
         survivors = []
@@ -108,19 +93,24 @@ class SurvivalSim(SimSpace):
         return offsprings
 
 
-def run_random_moving():
+def run_example_evolution_train(num_generation=5):
     # create simulation space
-    config = toml.load("games/sprint_2_survival/config.toml")
+    config = toml.load("games/survival/config.toml")
     sim = SurvivalSim(config)
-    is_render = True
-    sim.train(5)
-
+    consumers = [Consumer(sim) for _ in range(sim.population_consumers)]
+    producers = [Producer(sim) for _ in range(sim.population_producers)]
+    emitters = [HeatSource(sim, np.array([0, 0]), 20, 100),
+                LightSource(sim, np.array([0, 0]), 20, 100)]
+    sim.reset(consumers + producers, emitters)
+    sim.train(num_generation)
     # show result
-    for _ in range(1000):
-        # sim.render()
+    image_array = []
+    for _ in range(50):
         sim.step()
-        sim.render()
+        render_img = sim.render()
+        image_array.append(render_img)
+    create_gif(image_array, f"survival_generation_{num_generation}.gif", duration=5.)
 
 
 if __name__ == '__main__':
-    run_random_moving()
+    run_example_evolution_train()

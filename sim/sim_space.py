@@ -27,11 +27,9 @@ class SimSpace:
         self.grid_size = np.array(self._cfg['grid_size'])
         self.grid_rgb = np.ones((*self.grid_size, 3))
         self.predation_table = self.generate_predation_table(2)
-        #print(self.predation_table)
         self.layer_system = LayerSystem.LayerSystem(self.grid_size)
 
         self.max_steps = self._cfg['max_steps']
-        # self.max_generations = self._cfg['max_generations']
 
     def reset(self, creatures, emitters=()):
         """Reset the simulation with new creatures and emitters.
@@ -47,7 +45,6 @@ class SimSpace:
         for creature in self.creatures:
             creature.reset()
 
-    # Directly add a creature to the simulation
     def add_creature(self, creature):
         """Add a creature to the simulation.
 
@@ -88,8 +85,6 @@ class SimSpace:
         emitters, and creatures' states.
         """
         assert self.creatures is not None, "Reset first!"
-        
-
         self.layer_system.step()
 
         for emitter in self.emitters:
@@ -113,9 +108,6 @@ class SimSpace:
 
     def render(self):
         """Render the current state of the simulation and display it on the screen."""
-        # print(f'curr_step: {self.time_steps}')
-        # m = np.mean([c.energy_bar.current_energy for c in self.creatures])
-        # print(f"Avg Energy: {m}")
         render_img = np.ones((*self.grid_size, 3))
         for creature in self.creatures:
             if not hasattr(creature, 'appearance'):
@@ -126,6 +118,7 @@ class SimSpace:
         if cv2.waitKey(1) & 0xFF == ord('q'):
             exit()
         time.sleep(self._cfg['time_step'])
+        return render_img
 
     # return the starting position of all organism
     def get_creature_positions(self):

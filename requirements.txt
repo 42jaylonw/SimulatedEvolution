@@ -1,6 +1,6 @@
 toml
 numpy
 opencv-python
-nicegui
+imageio
 pillow
 flask==3.0.0
