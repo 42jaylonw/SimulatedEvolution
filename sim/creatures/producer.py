@@ -16,12 +16,12 @@ class Producer(Creature):
 
         self.ideal_temp = int(hash[:32], 16) % 25 + 15
         self.light_req = int(hash[32:], 16) % 20 + 20
-        self.reprod_cooldown = int(hash[32:], 16) % 5 + 1
+        self.reprod_cooldown = int(hash[32:], 16) % 3 + 1
         self.reprod_countdown = 0  # (self.reprod_cooldown / 2)
 
         # growth rate determines how fast the creature grows
         # given ideal conditions
-        self.growth_rate = .15
+        self.growth_rate = .2
 
         # current_size is similar to a tracker for age
         # a creature grows to it's .size when current_size = 1.0

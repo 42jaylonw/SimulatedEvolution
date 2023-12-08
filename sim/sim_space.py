@@ -52,7 +52,7 @@ class SimSpace:
             creature: The creature object to be added.
         """
         self.creatures.append(creature)
-    
+
     def remove_creature(self, creature):
         """Remove a creature from the simulation.
 
@@ -188,7 +188,7 @@ class SimSpace:
                 num_edible_producers = max(1, num_edible_producers)
                 edible_producers = np.random.choice(producer_range, num_edible_producers, replace=False)
                 consumer_range = list(range(num_consumers))
-                if(len(consumer_range)) == 1:
+                if (len(consumer_range)) == 1:
                     predation_table[i] = [[], edible_producers]
                     continue
                 consumer_range.remove(i)
@@ -207,15 +207,19 @@ class SimSpace:
         Returns:
             np.ndarray: The modified rendering image.
         """
+        # add walls
+        wall_map = self.get_map(self.layer_system.has_wall)
+        img[wall_map == 1] = np.zeros(3, dtype=np.float32)
         scale = int(self._cfg['visual_size'][0] / img.shape[0])
         img = np.uint8(cv2.resize(
             np.transpose(img, (1, 0, 2)), self._cfg['visual_size'], interpolation=cv2.INTER_NEAREST) * 255)
-
+        wall_img = np.uint8(cv2.resize(
+            np.transpose(wall_map.reshape(*self.grid_size, 1), (1, 0, 2)), self._cfg['visual_size'], interpolation=cv2.INTER_NEAREST))
         for creature in self.creatures:
             if hasattr(creature, 'appearance'):
                 top_half = int(scale / 2)
                 bot_half = scale - int(scale / 2)
-                y,x = creature.grid_pos
+                y, x = creature.grid_pos
                 scaled_x = x * scale + int(scale / 2)
                 scaled_y = y * scale + int(scale / 2)
                 grid_background = img[scaled_x - top_half:scaled_x + bot_half, scaled_y - top_half: scaled_y + bot_half]
@@ -227,5 +231,12 @@ class SimSpace:
                 appearance = np.uint8(255 * (creature.rgb + 0.05 * normalized_appearance))
                 img[scaled_x - top_half:scaled_x + bot_half,
                 scaled_y - top_half: scaled_y + bot_half] = mask * appearance + masked_grid_background
-
+        img = img * (1 - wall_img.reshape(*self._cfg['visual_size'], 1))
         return img
+
+    def get_map(self, getter_func):
+        a_map = np.zeros(self.grid_size)
+        for x in range(self.grid_size[0]):
+            for y in range(self.grid_size[1]):
+                a_map[x, y] = getter_func(np.array([x, y]))
+        return a_map
