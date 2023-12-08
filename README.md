@@ -20,7 +20,14 @@
    ```
    press `q` to quit the simulation
 
-![example](./doc/survival_generation_5.gif)
+<p align="center">
+  <img src="./docs/train_result/train_Gen0_SurvivalRate0.15.gif" alt="Generation 0" width="30%" />
+  <img src="./docs/train_result/train_Gen2_SurvivalRate0.25.gif" alt="Generation 2" width="30%" />
+  <img src="./docs/train_result/train_Gen5_SurvivalRate0.825.gif" alt="Generation 5" width="30%" />
+</p>
+<p align="center">
+  <em>Generation 0</em> | <em>Generation 1</em> | <em>Generation 5</em>
+</p>
 
 ### Running the application
 

@@ -272,7 +272,7 @@ def demo_train():
                 render_img = sim.render()
                 image_array.append(render_img)
             curr_survival_rate = sim.pass_rate_list[num_gen]
-            create_gif(image_array, f"train_result/train_Gen{num_gen}_SurvivalRate{curr_survival_rate}.gif", duration=3.)
+            create_gif(image_array, f"train_Gen{num_gen}_SurvivalRate{curr_survival_rate}.gif", duration=3.)
         else:
             for i in range(sim.max_steps):
                 sim.step()
